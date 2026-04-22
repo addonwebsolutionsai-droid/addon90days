@@ -179,7 +179,7 @@ When working on any product, read `products/<id>/.claude/CLAUDE.md` BEFORE writi
 
 - **Username:** addonwebsolutions-AI
 - **Email:** addonwebsolutions.ai@gmail.com
-- **Repo:** github.com/addonwebsolutions-AI/aws-90days
+- **Repo:** github.com/addonwebsolutions-AI/addon90days
 - All commits use this identity. No personal accounts.
 - Branch strategy: `main` (protected) · `dev` · `feature/<name>` · `product/<id>`
 - Never force-push to main. Never skip CI hooks.
