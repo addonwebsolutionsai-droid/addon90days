@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AddonWeb AI — Product Design Showcase</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:#000}
+:root{--transition:0.5s cubic-bezier(0.77,0,0.18,1)}
+
+/* TOP BAR */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:100;height:48px;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:8px}
+#tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+.tab{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid transparent;white-space:nowrap;transition:all 0.2s;color:rgba(255,255,255,0.5);letter-spacing:0.02em}
+.tab:hover{color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.15)}
+.tab.active{color:#fff;background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2)}
+#counter{font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);white-space:nowrap;min-width:40px;text-align:right}
+
+/* SLIDES WRAPPER */
+#slides-wrapper{position:fixed;top:48px;left:0;right:0;bottom:60px;overflow:hidden}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;transform:translateX(100%);transition:transform var(--transition);will-change:transform}
+.slide.active{transform:translateX(0)}
+.slide.exit-left{transform:translateX(-100%)}
+
+/* PANELS */
+.left-panel{width:40%;height:100%;padding:40px 32px;display:flex;flex-direction:column;gap:20px;overflow:hidden}
+.right-panel{width:60%;height:100%;padding:24px 32px 24px 16px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+/* BOTTOM NAV */
+#botnav{position:fixed;bottom:0;left:0;right:0;z-index:100;height:60px;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;gap:24px}
+.nav-btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.nav-btn:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4)}
+#slide-dots{display:flex;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.2s}
+.dot.active{background:#fff;width:20px;border-radius:3px}
+
+/* COMMON LEFT COMPONENTS */
+.product-badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;width:fit-content}
+.product-title{font-size:clamp(28px,3.5vw,48px);font-weight:900;line-height:1.1;letter-spacing:-0.02em}
+.product-url{font-size:12px;font-weight:500;opacity:0.5;margin-top:-12px}
+.product-tagline{font-size:clamp(13px,1.4vw,16px);font-weight:400;line-height:1.5;opacity:0.7}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatch{width:32px;height:32px;border-radius:8px;position:relative;cursor:default;border:1px solid rgba(255,255,255,0.1)}
+.swatch::after{content:attr(data-hex);position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:8px;font-family:'JetBrains Mono',monospace;white-space:nowrap;opacity:0.5}
+.swatches-row{margin-bottom:12px}
+.scores-section{}
+.score-label{font-size:11px;font-weight:600;letter-spacing:0.04em;display:flex;justify-content:space-between;margin-bottom:4px;opacity:0.8}
+.score-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.1);margin-bottom:10px;overflow:hidden}
+.score-bar{height:100%;border-radius:3px;width:0%;transition:width 1s ease-out}
+.design-notes{font-size:11px;line-height:1.6;opacity:0.55;border-left:2px solid rgba(255,255,255,0.15);padding-left:12px}
+.section-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.35;margin-bottom:8px}
+
+/* ANIMATIONS */
+@keyframes fillBar{from{width:0%}to{width:var(--target)}}
+@keyframes pulseBorder{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+@keyframes pulseAmber{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.4)}50%{box-shadow:0 0 0 6px rgba(245,158,11,0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.animate-in .score-bar{animation:fillBar 0.9s ease-out forwards}
+.animate-in .score-bar:nth-child(1){animation-delay:0.1s}
+
+/* PHONE FRAME */
+.phone-frame{width:200px;height:380px;border-radius:36px;border:3px solid rgba(255,255,255,0.2);background:#111;overflow:hidden;position:relative;flex-shrink:0;box-shadow:0 32px 64px rgba(0,0,0,0.5)}
+.phone-notch{height:24px;background:#000;display:flex;align-items:center;justify-content:center}
+.phone-notch::after{content:'';width:60px;height:8px;background:#222;border-radius:4px}
+.tablet-frame{width:360px;height:240px;border-radius:20px;border:3px solid rgba(255,255,255,0.2);background:#0d1117;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.5)}
+
+/* SLIDE 1 SPECIFIC */
+#s1{background:radial-gradient(ellipse at 30% 20%,rgba(99,102,241,0.3) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(6,182,212,0.2) 0%,transparent 50%),#060818}
+.monogram{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#fff;letter-spacing:-2px;box-shadow:0 16px 48px rgba(99,102,241,0.4)}
+.wordmark{font-size:22px;font-weight:800;background:linear-gradient(90deg,#a5b4fc,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px}
+.brand-voice-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1px solid rgba(99,102,241,0.4);background:rgba(99,102,241,0.1);font-size:11px;font-weight:600;color:#a5b4fc;width:fit-content}
+.typo-specimen{font-size:clamp(32px,4vw,56px);font-weight:900;background:linear-gradient(90deg,#6366f1,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+
+/* Component showcase card */
+.component-card{background:#0d1117;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:20px}
+.comp-section-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-primary{padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-outline{padding:8px 18px;border-radius:8px;border:1px solid rgba(99,102,241,0.5);background:transparent;color:#a5b4fc;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-ghost{padding:8px 18px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-danger{padding:8px 18px;border-radius:8px;border:none;background:rgba(239,68,68,0.15);color:#f87171;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(239,68,68,0.3);font-family:'Inter',sans-serif}
+.input-field{width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(99,102,241,0.5);background:rgba(99,102,241,0.06);color:#e2e8f0;font-size:13px;outline:none;font-family:'Inter',sans-serif;box-shadow:0 0 0 3px rgba(99,102,241,0.15)}
+.badges-row{display:flex;gap:8px;flex-wrap:wrap}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-success{background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3)}
+.badge-warn{background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3)}
+.badge-error{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+.badge-info{background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)}
+.badge-neutral{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.1)}
+.cards-row{display:flex;gap:10px}
+.mini-card{flex:1;padding:14px;border-radius:10px;font-size:12px;color:rgba(255,255,255,0.7)}
+.mini-card-default{background:#161b22;border:1px solid rgba(255,255,255,0.08)}
+.mini-card-glass{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(8px)}
+.mini-card-gradient{background:transparent;border:1px solid transparent;background-clip:padding-box;position:relative}
+.mini-card-gradient::before{content:'';position:absolute;inset:-1px;border-radius:11px;background:linear-gradient(135deg,#6366f1,#06b6d4);z-index:-1}
+.palette-strip{display:flex;height:12px;border-radius:6px;overflow:hidden}
+.palette-strip div{flex:1}
+
+/* SLIDE 2 */
+#s2{background:radial-gradient(ellipse at 50% 0%,rgba(99,102,241,0.35) 0%,transparent 55%),#09090b}
+.dev-dashboard{background:#0d0d12;border:1px solid rgba(255,255,255,0.08);border-radius:12px;width:100%;max-width:580px;height:100%;max-height:460px;overflow:hidden;display:flex;flex-direction:column;font-size:12px}
+.dash-nav{height:44px;background:#111118;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 16px;gap:16px}
+.dash-logo{font-size:14px;font-weight:800;background:linear-gradient(90deg,#6366f1,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-right:8px}
+.dash-nav-item{font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);cursor:pointer;padding:4px 8px;border-radius:6px}
+.dash-nav-item:hover,.dash-nav-item.active{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.06)}
+.dash-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#22d3ee);margin-left:auto;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center}
+.dash-body{display:flex;flex:1;overflow:hidden}
+.dash-sidebar{width:140px;background:#0a0a10;border-right:1px solid rgba(255,255,255,0.06);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.sidebar-item{padding:7px 10px;border-radius:7px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);cursor:pointer;display:flex;align-items:center;gap:7px}
+.sidebar-item.active{background:rgba(99,102,241,0.15);color:#a5b4fc}
+.sidebar-icon{width:14px;height:14px;border-radius:3px;opacity:0.6;flex-shrink:0}
+.dash-main{flex:1;padding:16px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.dash-section-title{font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:8px}
+.skill-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.skill-card{background:#111118;border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px;cursor:pointer;transition:border-color 0.2s}
+.skill-card:hover{border-color:rgba(99,102,241,0.4)}
+.skill-icon{width:28px;height:28px;border-radius:7px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.skill-name{font-size:10px;font-weight:700;color:rgba(255,255,255,0.85);margin-bottom:2px}
+.skill-price{font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:6px}
+.skill-btn{width:100%;padding:4px;border-radius:5px;border:none;background:linear-gradient(90deg,#6366f1,#818cf8);color:#fff;font-size:9px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+.dash-status-bar{height:28px;background:#070709;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;padding:0 14px;gap:16px;font-size:10px;color:rgba(255,255,255,0.35)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#22d3ee;display:inline-block;margin-right:4px}
+
+/* SLIDE 3 */
+#s3{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%)}
+#s3 .left-panel{color:#064e3b}
+.wa-phone{width:200px;height:360px;border-radius:36px;border:3px solid #25d366;background:#ece5dd;overflow:hidden;box-shadow:0 24px 48px rgba(37,211,102,0.2);flex-shrink:0}
+.wa-header{background:#128c7e;padding:10px 12px;display:flex;align-items:center;gap:8px}
+.wa-avatar{width:28px;height:28px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;flex-shrink:0}
+.wa-biz-name{font-size:11px;font-weight:700;color:#fff}
+.wa-status{font-size:9px;color:rgba(255,255,255,0.7)}
+.wa-messages{flex:1;padding:8px;display:flex;flex-direction:column;gap:5px;overflow:hidden;background:#ece5dd;height:240px}
+.wa-msg-in{background:#fff;border-radius:0 8px 8px 8px;padding:6px 8px;font-size:9px;color:#111;max-width:75%;box-shadow:0 1px 2px rgba(0,0,0,0.1);line-height:1.4}
+.wa-msg-out{background:#dcf8c6;border-radius:8px 0 8px 8px;padding:6px 8px;font-size:9px;color:#111;max-width:75%;align-self:flex-end;box-shadow:0 1px 2px rgba(0,0,0,0.1);line-height:1.4}
+.wa-msg-time{font-size:7px;color:rgba(0,0,0,0.35);text-align:right;margin-top:2px}
+.wa-input-bar{height:36px;background:#f0f0f0;display:flex;align-items:center;padding:0 8px;gap:6px;border-top:1px solid rgba(0,0,0,0.08)}
+.wa-input{flex:1;height:24px;border-radius:12px;background:#fff;border:none;font-size:9px;padding:0 8px;color:#555}
+.wa-send{width:24px;height:24px;border-radius:50%;background:#128c7e;border:none;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;cursor:pointer}
+.biz-dashboard{background:#fff;border-radius:14px;border:1px solid rgba(0,0,0,0.06);padding:16px;width:240px;height:360px;box-shadow:0 8px 32px rgba(0,0,0,0.06);display:flex;flex-direction:column;gap:10px}
+.biz-dash-title{font-size:13px;font-weight:700;color:#064e3b}
+.biz-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.biz-metric{background:#f0fdf4;border-radius:8px;padding:10px;border:1px solid rgba(37,211,102,0.15)}
+.biz-metric-val{font-size:18px;font-weight:800;color:#065f46;line-height:1}
+.biz-metric-label{font-size:9px;color:#6b7280;margin-top:2px}
+.biz-metric-sub{font-size:8px;color:#22c55e;margin-top:1px}
+.conv-list{display:flex;flex-direction:column;gap:6px}
+.conv-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;background:#f9fafb;border:1px solid rgba(0,0,0,0.04);cursor:pointer}
+.conv-avatar{width:28px;height:28px;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.conv-name{font-size:10px;font-weight:600;color:#111}
+.conv-preview{font-size:9px;color:#9ca3af}
+.conv-badge{background:#25d366;color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;margin-left:auto;flex-shrink:0}
+
+/* SLIDE 4 */
+#s4{background:linear-gradient(135deg,#eff6ff 0%,#f0f4ff 100%)}
+#s4 .left-panel{color:#1e3a8a}
+.invoice-card{background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(37,99,235,0.1);padding:20px;width:100%;max-width:560px;max-height:430px;overflow:hidden;display:flex;flex-direction:column;gap:12px;border:1px solid rgba(37,99,235,0.08)}
+.inv-header{display:flex;align-items:center;justify-content:space-between}
+.inv-title{font-size:15px;font-weight:800;color:#1e3a8a}
+.inv-badge-draft{background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid #fde68a}
+.inv-client{background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:11px}
+.inv-client-name{font-size:12px;font-weight:700;color:#1e3a8a}
+.inv-gstin{font-size:10px;color:#64748b;font-family:'JetBrains Mono',monospace}
+.inv-body{display:flex;gap:12px;flex:1}
+.inv-table-wrap{flex:1}
+.inv-table{width:100%;border-collapse:collapse;font-size:11px}
+.inv-table th{background:#f1f5f9;padding:6px 8px;text-align:left;font-weight:600;color:#475569;font-size:10px}
+.inv-table td{padding:6px 8px;border-bottom:1px solid #f1f5f9;color:#334155}
+.inv-total-row td{font-weight:800;color:#2563eb;border-top:2px solid #e2e8f0;background:#eff6ff}
+.inv-tax-row td{color:#64748b;font-size:10px}
+.inv-ai-panel{width:150px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border-radius:8px;border:1px solid rgba(99,102,241,0.2);padding:10px;font-size:10px}
+.inv-ai-title{font-size:10px;font-weight:700;color:#6366f1;margin-bottom:6px}
+.inv-ai-item{padding:4px 6px;background:rgba(99,102,241,0.08);border-radius:5px;color:#4f46e5;font-size:9px;margin-bottom:4px;line-height:1.4}
+.inv-actions{display:flex;gap:8px}
+.inv-btn-blue{padding:8px 14px;border-radius:7px;background:#2563eb;color:#fff;border:none;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.inv-btn-green{padding:8px 14px;border-radius:7px;background:#16a34a;color:#fff;border:none;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.inv-btn-outline{padding:8px 14px;border-radius:7px;background:transparent;color:#2563eb;border:1px solid #2563eb;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* SLIDE 5 */
+#s5{background:radial-gradient(ellipse at 80% 100%,rgba(234,88,12,0.25) 0%,transparent 50%),#1a0a00}
+.tableflow-wrap{width:100%;max-width:580px;display:flex;flex-direction:column;gap:12px}
+.tf-top-row{display:flex;gap:12px;align-items:flex-end}
+.kds-tablet{width:300px;height:200px;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:#0d1117;overflow:hidden;flex-shrink:0}
+.kds-header{background:#161b22;padding:8px 12px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center}
+.kds-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:8px}
+.kds-ticket{border-radius:7px;padding:8px;border:2px solid rgba(255,255,255,0.1);background:#111}
+.kds-ticket-title{font-size:9px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:4px}
+.kds-ticket-item{font-size:8px;color:rgba(255,255,255,0.5);margin-bottom:1px}
+.kds-ticket-time{font-size:8px;color:rgba(255,255,255,0.3);margin-top:4px}
+.kds-ticket.warn{border-color:#ef4444;animation:pulseBorder 1.5s infinite}
+.kds-ticket.ok{border-color:rgba(34,211,100,0.5)}
+.owner-strip{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:0}
+.owner-metric{flex:1;text-align:center;padding:0 12px;border-right:1px solid rgba(255,255,255,0.08)}
+.owner-metric:last-child{border-right:none}
+.owner-metric-val{font-size:18px;font-weight:800;color:#fff;line-height:1}
+.owner-metric-label{font-size:9px;color:rgba(255,255,255,0.4);margin-top:2px}
+.owner-metric-sub{font-size:9px;color:#22d3a5;margin-top:1px}
+
+/* SLIDE 6 */
+#s6{background:radial-gradient(ellipse at 90% 10%,rgba(6,182,212,0.2) 0%,transparent 50%),#020810}
+.iot-dashboard{background:#030d18;border:1px solid rgba(6,182,212,0.15);border-radius:12px;width:100%;max-width:580px;max-height:460px;overflow:hidden;display:flex;flex-direction:column;font-size:11px}
+.iot-header{background:#061020;border-bottom:1px solid rgba(6,182,212,0.12);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.iot-title{font-size:12px;font-weight:700;color:#22d3ee}
+.iot-sync{font-size:10px;color:rgba(34,211,238,0.5)}
+.iot-body{display:flex;flex:1;overflow:hidden}
+.iot-main{flex:1;padding:12px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.iot-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.iot-stat{border-radius:8px;padding:10px;background:#061020;border:1px solid rgba(6,182,212,0.12)}
+.iot-stat-val{font-size:16px;font-weight:800;line-height:1}
+.iot-stat-label{font-size:9px;color:rgba(255,255,255,0.4);margin-top:2px}
+.iot-device-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.device-card{background:#061020;border:1px solid rgba(255,255,255,0.06);border-radius:7px;padding:8px}
+.device-id{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:4px}
+.device-status{display:flex;align-items:center;gap:4px;font-size:9px;color:rgba(255,255,255,0.7);margin-bottom:4px}
+.status-dot-sm{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.device-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#22d3ee}
+.device-unit{font-size:8px;color:rgba(255,255,255,0.3)}
+.iot-chart{background:#061020;border-radius:7px;padding:8px;border:1px solid rgba(6,182,212,0.1)}
+.iot-chart-title{font-size:9px;color:rgba(255,255,255,0.4);margin-bottom:4px}
+.iot-alert-panel{width:150px;background:#030f1a;border-left:1px solid rgba(6,182,212,0.1);padding:10px;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.alert-title{font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:4px;letter-spacing:0.06em;text-transform:uppercase}
+.alert-item{border-radius:6px;padding:7px 8px;font-size:9px;line-height:1.4}
+.alert-warn{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);color:#fbbf24}
+.alert-off{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171}
+.alert-info{background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);color:#67e8f9}
+.iot-ai-bar{background:rgba(6,182,212,0.08);border-top:1px solid rgba(6,182,212,0.15);padding:7px 12px;font-size:10px;color:#22d3ee;font-weight:500}
+
+/* SLIDE 7 */
+#s7{background:radial-gradient(ellipse at 20% 90%,rgba(245,158,11,0.2) 0%,transparent 50%),#020308}
+.mg-dashboard{background:#070b10;border:1px solid rgba(245,158,11,0.15);border-radius:12px;width:100%;max-width:580px;max-height:460px;overflow:hidden;display:flex;flex-direction:column;font-size:11px}
+.mg-header{background:#0a0e18;border-bottom:1px solid rgba(245,158,11,0.12);padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.mg-title{font-size:12px;font-weight:700;color:#fbbf24}
+.mg-plant{font-size:10px;color:rgba(251,191,36,0.5)}
+.mg-body{display:flex;flex:1;overflow:hidden}
+.mg-main{flex:1;padding:12px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.machine-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.machine-card{background:#0a0e18;border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,0.07)}
+.machine-card.critical{border-color:#ef4444;animation:pulseBorder 1.2s infinite}
+.machine-card.amber{border-color:rgba(245,158,11,0.4)}
+.machine-name{font-size:10px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:6px}
+.machine-health-bar{height:5px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:4px}
+.machine-health-fill{height:100%;border-radius:3px}
+.machine-pct{font-size:10px;font-weight:700}
+.mg-right{width:160px;background:#050810;border-left:1px solid rgba(245,158,11,0.1);padding:10px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.mg-chart-box{background:#0a0e18;border-radius:7px;padding:8px;border:1px solid rgba(245,158,11,0.1)}
+.mg-chart-title{font-size:9px;color:rgba(255,255,255,0.4);margin-bottom:4px}
+.pred-table{width:100%}
+.pred-title{font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.pred-row{display:flex;align-items:center;gap:4px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.pred-machine{font-size:9px;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,0.7);flex:1}
+.pred-time{font-size:8px;color:rgba(255,255,255,0.4)}
+.pred-badge{font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px}
+.pred-urgent{background:rgba(239,68,68,0.2);color:#f87171}
+.pred-soon{background:rgba(245,158,11,0.2);color:#fbbf24}
+.pred-plan{background:rgba(34,211,165,0.2);color:#34d399}
+.mg-alert-bar{background:rgba(245,158,11,0.1);border-top:1px solid rgba(245,158,11,0.2);padding:8px 12px;font-size:10px;color:#fbbf24;font-weight:600;display:flex;align-items:center;gap:6px}
+
+/* SVG chart shared */
+.chart-svg{width:100%;height:40px}
+
+/* Live counter */
+.live-counter{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.08);font-size:11px;font-weight:600;color:#22d3ee;width:fit-content}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22d3ee;animation:blink 1.5s infinite}
+
+/* Hardware note */
+.hw-note{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:7px;padding:8px 10px;font-size:10px;color:rgba(245,158,11,0.8);font-family:'JetBrains Mono',monospace;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div id="tabs">
+    <div class="tab active" onclick="goTo(0)">AW Brand</div>
+    <div class="tab" onclick="goTo(1)">P01 · Claude Toolkit</div>
+    <div class="tab" onclick="goTo(2)">P02 · ChatBase</div>
+    <div class="tab" onclick="goTo(3)">P03 · TaxPilot</div>
+    <div class="tab" onclick="goTo(4)">P04 · TableFlow</div>
+    <div class="tab" onclick="goTo(5)">P05 · ConnectOne</div>
+    <div class="tab" onclick="goTo(6)">P06 · MachineGuard</div>
+  </div>
+  <div id="counter">1 / 7</div>
+</div>
+
+<!-- SLIDES -->
+<div id="slides-wrapper">
+
+<!-- SLIDE 1: AW Brand -->
+<div class="slide active" id="s1" data-index="0">
+  <div class="left-panel" style="color:#e2e8f0">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="monogram">AW</div>
+      <div>
+        <div class="wordmark">addonweb.ai</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">AI-Native Product Studio</div>
+      </div>
+    </div>
+    <div class="product-tagline">AI-Native Product Studio.<br>10 Years of Hardware.</div>
+    <div class="typo-specimen">Ship Fast.</div>
+    <div class="brand-voice-pill">Direct. Technical. No fluff.</div>
+    <div>
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Color System</div>
+      <div class="swatches swatches-row">
+        <div class="swatch" style="background:#6366f1" data-hex="#6366f1"></div>
+        <div class="swatch" style="background:#8b5cf6" data-hex="#8b5cf6"></div>
+        <div class="swatch" style="background:#06b6d4" data-hex="#06b6d4"></div>
+        <div class="swatch" style="background:#10b981" data-hex="#10b981"></div>
+        <div class="swatch" style="background:#f59e0b" data-hex="#f59e0b"></div>
+        <div class="swatch" style="background:#ef4444" data-hex="#ef4444"></div>
+      </div>
+    </div>
+    <div class="design-notes" style="color:rgba(255,255,255,0.5)">
+      Inter 900 for display · JetBrains Mono for code · Dark-first system · Gradient accents sparingly · Accessible contrast 4.5:1 min
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="component-card">
+      <div>
+        <div class="comp-section-title">Button Variants</div>
+        <div class="btn-row">
+          <button class="btn-primary">Primary</button>
+          <button class="btn-outline">Outline</button>
+          <button class="btn-ghost">Ghost</button>
+          <button class="btn-danger">Danger</button>
+        </div>
+      </div>
+      <div>
+        <div class="comp-section-title">Input with Focus Ring</div>
+        <input class="input-field" value="claude@addonweb.ai" readonly>
+      </div>
+      <div>
+        <div class="comp-section-title">Status Badges</div>
+        <div class="badges-row">
+          <span class="badge badge-success">Active</span>
+          <span class="badge badge-warn">Warning</span>
+          <span class="badge badge-error">Error</span>
+          <span class="badge badge-info">Beta</span>
+          <span class="badge badge-neutral">Archived</span>
+        </div>
+      </div>
+      <div>
+        <div class="comp-section-title">Card Variants</div>
+        <div class="cards-row">
+          <div class="mini-card mini-card-default">Default<br><span style="opacity:0.5;font-size:10px">surface</span></div>
+          <div class="mini-card mini-card-glass">Glass<br><span style="opacity:0.5;font-size:10px">backdrop</span></div>
+          <div class="mini-card mini-card-gradient" style="color:rgba(255,255,255,0.8)">Gradient<br><span style="opacity:0.5;font-size:10px">border</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="comp-section-title">Brand Palette Strip</div>
+        <div class="palette-strip">
+          <div style="background:#6366f1"></div>
+          <div style="background:#8b5cf6"></div>
+          <div style="background:#06b6d4"></div>
+          <div style="background:#10b981"></div>
+          <div style="background:#f59e0b"></div>
+          <div style="background:#ef4444"></div>
+          <div style="background:#0f172a"></div>
+          <div style="background:#1e293b"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: Claude Toolkit -->
+<div class="slide" id="s2" data-index="1">
+  <div class="left-panel" style="color:#e2e8f0">
+    <div class="product-badge" style="background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)">P01</div>
+    <div class="product-title" style="background:linear-gradient(90deg,#a5b4fc,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Claude Toolkit</div>
+    <div class="product-url" style="color:rgba(255,255,255,0.35)">toolkit.addonweb.ai</div>
+    <div class="product-tagline">The Claude ecosystem, productized.</div>
+    <div>
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Colors</div>
+      <div class="swatches swatches-row">
+        <div class="swatch" style="background:#09090b" data-hex="#09090b"></div>
+        <div class="swatch" style="background:#6366f1" data-hex="#6366f1"></div>
+        <div class="swatch" style="background:#818cf8" data-hex="#818cf8"></div>
+        <div class="swatch" style="background:#22d3ee" data-hex="#22d3ee"></div>
+      </div>
+    </div>
+    <div class="scores-section">
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Product Scores</div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Feasibility</span><span>95%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:95%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Viral Potential</span><span>75%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:75%;background:linear-gradient(90deg,#818cf8,#22d3ee)"></div></div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Market Size</span><span>65%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:65%;background:linear-gradient(90deg,#22d3ee,#67e8f9)"></div></div>
+    </div>
+    <div class="design-notes" style="color:rgba(255,255,255,0.45)">
+      Dark mode first · Inter + JetBrains Mono · Code snippet visible in 3 seconds · Dev-native UX patterns
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="dev-dashboard">
+      <div class="dash-nav">
+        <div class="dash-logo">toolkit</div>
+        <div class="dash-nav-item">My Installs</div>
+        <div class="dash-nav-item active">Marketplace</div>
+        <div class="dash-nav-item">API Keys</div>
+        <div class="dash-nav-item">Docs</div>
+        <div class="dash-avatar">JD</div>
+      </div>
+      <div class="dash-body">
+        <div class="dash-sidebar">
+          <div class="sidebar-item active">
+            <div class="sidebar-icon" style="background:#6366f1;opacity:1"></div>
+            Marketplace
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-icon" style="background:rgba(255,255,255,0.3)"></div>
+            Installed
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-icon" style="background:rgba(255,255,255,0.3)"></div>
+            API Keys
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-icon" style="background:rgba(255,255,255,0.3)"></div>
+            Analytics
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-icon" style="background:rgba(255,255,255,0.3)"></div>
+            Settings
+          </div>
+          <div style="margin-top:auto;padding:8px;background:rgba(99,102,241,0.1);border-radius:7px;border:1px solid rgba(99,102,241,0.2)">
+            <div style="font-size:9px;font-weight:700;color:#a5b4fc;margin-bottom:2px">Pro Plan</div>
+            <div style="font-size:8px;color:rgba(255,255,255,0.3)">Renews Jan 1</div>
+          </div>
+        </div>
+        <div class="dash-main">
+          <div class="dash-section-title">Skill Packs — Featured</div>
+          <div class="skill-grid">
+            <div class="skill-card">
+              <div class="skill-icon" style="background:linear-gradient(135deg,#ea580c,#f97316)">🔧</div>
+              <div class="skill-name">IoT Developer Pack</div>
+              <div class="skill-price">$29/mo</div>
+              <button class="skill-btn">Install</button>
+            </div>
+            <div class="skill-card" style="border-color:rgba(99,102,241,0.4);background:#141420">
+              <div class="skill-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">🇮🇳</div>
+              <div class="skill-name">Indian Business MCP</div>
+              <div class="skill-price" style="color:#818cf8">Installed ✓</div>
+              <button class="skill-btn" style="background:rgba(99,102,241,0.2);color:#a5b4fc">Active</button>
+            </div>
+            <div class="skill-card">
+              <div class="skill-icon" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">✍️</div>
+              <div class="skill-name">Content Pack</div>
+              <div class="skill-price">$19/mo</div>
+              <button class="skill-btn">Install</button>
+            </div>
+            <div class="skill-card">
+              <div class="skill-icon" style="background:linear-gradient(135deg,#16a34a,#22c55e)">🏢</div>
+              <div class="skill-name">SMB Ops Pack</div>
+              <div class="skill-price">$24/mo</div>
+              <button class="skill-btn">Install</button>
+            </div>
+            <div class="skill-card">
+              <div class="skill-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">🤖</div>
+              <div class="skill-name">AI Company Starter</div>
+              <div class="skill-price">$49/mo</div>
+              <button class="skill-btn">Install</button>
+            </div>
+            <div class="skill-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;border-style:dashed">
+              <div style="font-size:18px;margin-bottom:4px;opacity:0.4">+</div>
+              <div class="skill-name" style="text-align:center;opacity:0.5">Browse More</div>
+              <div class="skill-price">40+ packs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-status-bar">
+        <span><span class="status-dot"></span>3 tools active</span>
+        <span>247 API calls today</span>
+        <span>$2.40 spend</span>
+        <span style="margin-left:auto;color:rgba(99,102,241,0.6)">Claude Sonnet 4.6</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: ChatBase -->
+<div class="slide" id="s3" data-index="2">
+  <div class="left-panel" style="color:#064e3b">
+    <div class="product-badge" style="background:rgba(37,211,102,0.15);color:#065f46;border:1px solid rgba(37,211,102,0.4)">P02</div>
+    <div class="product-title" style="background:linear-gradient(90deg,#128c7e,#25d366);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ChatBase</div>
+    <div class="product-url" style="color:#6b7280">chatbase.addonweb.ai</div>
+    <div class="product-tagline" style="color:#374151">Your business never stops replying.</div>
+    <div>
+      <div class="section-label" style="color:#9ca3af">Colors</div>
+      <div class="swatches swatches-row">
+        <div class="swatch" style="background:#25d366;border-color:rgba(0,0,0,0.1)" data-hex="#25d366"></div>
+        <div class="swatch" style="background:#128c7e;border-color:rgba(0,0,0,0.1)" data-hex="#128c7e"></div>
+        <div class="swatch" style="background:#dcf8c6;border-color:rgba(0,0,0,0.15)" data-hex="#dcf8c6"></div>
+        <div class="swatch" style="background:#ece5dd;border-color:rgba(0,0,0,0.15)" data-hex="#ece5dd"></div>
+      </div>
+    </div>
+    <div class="scores-section">
+      <div class="section-label" style="color:#9ca3af">Product Scores</div>
+      <div class="score-label" style="color:#374151"><span>Market Size</span><span>92%</span></div>
+      <div class="score-track" style="background:rgba(0,0,0,0.08)"><div class="score-bar" style="--target:92%;background:linear-gradient(90deg,#25d366,#128c7e)"></div></div>
+      <div class="score-label" style="color:#374151"><span>Viral Potential</span><span>88%</span></div>
+      <div class="score-track" style="background:rgba(0,0,0,0.08)"><div class="score-bar" style="--target:88%;background:linear-gradient(90deg,#128c7e,#25d366)"></div></div>
+      <div class="score-label" style="color:#374151"><span>Revenue Potential</span><span>85%</span></div>
+      <div class="score-track" style="background:rgba(0,0,0,0.08)"><div class="score-bar" style="--target:85%;background:linear-gradient(90deg,#25d366,#16a34a)"></div></div>
+    </div>
+    <div class="design-notes" style="border-color:rgba(0,0,0,0.12);color:#6b7280">
+      Light mode first · WhatsApp-native feel · Hindi/Gujarati script support · ₹ currency default · Mobile-primary
+    </div>
+  </div>
+  <div class="right-panel" style="gap:16px;align-items:center;justify-content:center;flex-direction:row">
+    <!-- Phone mockup -->
+    <div class="wa-phone">
+      <div class="wa-header">
+        <div class="wa-avatar">S</div>
+        <div>
+          <div class="wa-biz-name">Spice Garden 🌶</div>
+          <div class="wa-status">● Online</div>
+        </div>
+      </div>
+      <div class="wa-messages">
+        <div class="wa-msg-in">Hi! What's on the menu today? <div class="wa-msg-time">2:14 PM</div></div>
+        <div class="wa-msg-out">Hey! Today's specials 🍛<br>• Dal Makhani ₹180<br>• Paneer Butter Masala ₹220<br>• Garlic Naan ₹40<div class="wa-msg-time">2:14 PM ✓✓</div></div>
+        <div class="wa-msg-in">Paneer + 2 naan please<div class="wa-msg-time">2:15 PM</div></div>
+        <div class="wa-msg-out">Order confirmed! 🎉<br>Paneer Butter Masala × 1<br>Garlic Naan × 2<br>Total: ₹300<br><br>Pay here 👇<br><span style="color:#128c7e;text-decoration:underline">pay.spicegarden.com/order123</span><div class="wa-msg-time">2:15 PM ✓✓</div></div>
+        <div class="wa-msg-in">Paid! Thanks 😊<div class="wa-msg-time">2:16 PM</div></div>
+      </div>
+      <div class="wa-input-bar">
+        <input class="wa-input" placeholder="Message" readonly>
+        <button class="wa-send">➤</button>
+      </div>
+    </div>
+    <!-- Biz Dashboard -->
+    <div class="biz-dashboard">
+      <div class="biz-dash-title">Spice Garden — Dashboard</div>
+      <div class="biz-metrics">
+        <div class="biz-metric">
+          <div class="biz-metric-val">234</div>
+          <div class="biz-metric-label">Messages Today</div>
+          <div class="biz-metric-sub">↑ 18% vs yesterday</div>
+        </div>
+        <div class="biz-metric">
+          <div class="biz-metric-val">12</div>
+          <div class="biz-metric-label">Orders</div>
+          <div class="biz-metric-sub">↑ 4 from AI bot</div>
+        </div>
+        <div class="biz-metric">
+          <div class="biz-metric-val" style="font-size:15px">₹18.4k</div>
+          <div class="biz-metric-label">Revenue</div>
+          <div class="biz-metric-sub">↑ 23% this week</div>
+        </div>
+        <div class="biz-metric" style="background:#f0fdf4">
+          <div class="biz-metric-val" style="color:#16a34a">94%</div>
+          <div class="biz-metric-label">AI Handled</div>
+          <div class="biz-metric-sub" style="color:#9ca3af">6% escalated</div>
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#064e3b">Recent Conversations</div>
+      <div class="conv-list">
+        <div class="conv-item">
+          <div class="conv-avatar" style="background:#25d366">R</div>
+          <div>
+            <div class="conv-name">Rahul M.</div>
+            <div class="conv-preview">Paid! Thanks 😊</div>
+          </div>
+          <div class="conv-badge">NEW</div>
+        </div>
+        <div class="conv-item">
+          <div class="conv-avatar" style="background:#128c7e">P</div>
+          <div>
+            <div class="conv-name">Priya S.</div>
+            <div class="conv-preview">What time do you close?</div>
+          </div>
+          <div class="conv-badge">2</div>
+        </div>
+        <div class="conv-item">
+          <div class="conv-avatar" style="background:#0891b2">A</div>
+          <div>
+            <div class="conv-name">Amit K.</div>
+            <div class="conv-preview">Order delivered ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: TaxPilot -->
+<div class="slide" id="s4" data-index="3">
+  <div class="left-panel" style="color:#1e3a8a">
+    <div class="product-badge" style="background:rgba(37,99,235,0.1);color:#1d4ed8;border:1px solid rgba(37,99,235,0.3)">P03</div>
+    <div class="product-title" style="background:linear-gradient(90deg,#2563eb,#1d4ed8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">TaxPilot ✈</div>
+    <div class="product-url" style="color:#6b7280">taxpilot.addonweb.ai</div>
+    <div class="product-tagline" style="color:#374151">File GST. Not stress.</div>
+    <div>
+      <div class="section-label" style="color:#9ca3af">Colors</div>
+      <div class="swatches swatches-row">
+        <div class="swatch" style="background:#2563eb;border-color:rgba(0,0,0,0.1)" data-hex="#2563eb"></div>
+        <div class="swatch" style="background:#1d4ed8;border-color:rgba(0,0,0,0.1)" data-hex="#1d4ed8"></div>
+        <div class="swatch" style="background:#16a34a;border-color:rgba(0,0,0,0.1)" data-hex="#16a34a"></div>
+        <div class="swatch" style="background:#f8fafc;border-color:rgba(0,0,0,0.15)" data-hex="#f8fafc"></div>
+      </div>
+    </div>
+    <div class="scores-section">
+      <div class="section-label" style="color:#9ca3af">Product Scores</div>
+      <div class="score-label" style="color:#374151"><span>Market Size</span><span>90%</span></div>
+      <div class="score-track" style="background:rgba(0,0,0,0.08)"><div class="score-bar" style="--target:90%;background:linear-gradient(90deg,#2563eb,#3b82f6)"></div></div>
+      <div class="score-label" style="color:#374151"><span>Revenue Potential</span><span>90%</span></div>
+      <div class="score-track" style="background:rgba(0,0,0,0.08)"><div class="score-bar" style="--target:90%;background:linear-gradient(90deg,#1d4ed8,#2563eb)"></div></div>
+      <div class="score-label" style="color:#374151"><span>Feasibility</span><span>88%</span></div>
+      <div class="score-track" style="background:rgba(0,0,0,0.08)"><div class="score-bar" style="--target:88%;background:linear-gradient(90deg,#16a34a,#22c55e)"></div></div>
+    </div>
+    <div class="design-notes" style="border-color:rgba(0,0,0,0.12);color:#6b7280">
+      Trust blue palette · Tabular numbers for financial data · Light mode · Noto Serif for PDF export · GSTIN auto-validation
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="invoice-card">
+      <div class="inv-header">
+        <div class="inv-title">New Invoice #INV-0248</div>
+        <span class="inv-badge-draft">Draft</span>
+      </div>
+      <div class="inv-client">
+        <div style="font-size:9px;color:#64748b;margin-bottom:2px">BILL TO</div>
+        <div class="inv-client-name">Mehta &amp; Sons Pvt Ltd</div>
+        <div class="inv-gstin">GSTIN: 24AABCM1234F1Z5 · Ahmedabad, GJ</div>
+      </div>
+      <div class="inv-body">
+        <div class="inv-table-wrap">
+          <table class="inv-table">
+            <thead>
+              <tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Web Design &amp; Development</td><td>1</td><td>₹25,000</td><td>₹25,000</td></tr>
+              <tr><td>Support &amp; Maintenance</td><td>1</td><td>₹15,000</td><td>₹15,000</td></tr>
+              <tr><td>Training Session (4hr)</td><td>1</td><td>₹8,000</td><td>₹8,000</td></tr>
+              <tr class="inv-tax-row"><td colspan="3">CGST @ 9%</td><td>₹4,320</td></tr>
+              <tr class="inv-tax-row"><td colspan="3">SGST @ 9%</td><td>₹4,320</td></tr>
+              <tr class="inv-total-row"><td colspan="3"><strong>Total</strong></td><td><strong>₹56,640</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="inv-ai-panel">
+          <div class="inv-ai-title">🤖 AI Assistant</div>
+          <div class="inv-ai-item">Service Invoice detected</div>
+          <div class="inv-ai-item">HSN: 998314 suggested</div>
+          <div class="inv-ai-item">3 items auto-categorized</div>
+          <div class="inv-ai-item" style="background:rgba(22,163,74,0.08);color:#16a34a;border-color:rgba(22,163,74,0.2)">GST compliant ✓</div>
+          <div style="margin-top:8px;font-size:9px;color:#94a3b8;line-height:1.5">Place of supply: Gujarat (24) · Intra-state transaction</div>
+        </div>
+      </div>
+      <div class="inv-actions">
+        <button class="inv-btn-blue">Generate PDF</button>
+        <button class="inv-btn-green">Send via WhatsApp</button>
+        <button class="inv-btn-outline">Schedule Reminder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: TableFlow -->
+<div class="slide" id="s5" data-index="4">
+  <div class="left-panel" style="color:#e2e8f0">
+    <div class="product-badge" style="background:rgba(234,88,12,0.15);color:#fb923c;border:1px solid rgba(234,88,12,0.3)">P04</div>
+    <div class="product-title" style="background:linear-gradient(90deg,#fb923c,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent">TableFlow</div>
+    <div class="product-url" style="color:rgba(255,255,255,0.35)">tableflow.addonweb.ai</div>
+    <div class="product-tagline">From order to paid. In seconds.</div>
+    <div>
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Colors</div>
+      <div class="swatches swatches-row">
+        <div class="swatch" style="background:#ea580c" data-hex="#ea580c"></div>
+        <div class="swatch" style="background:#c2410c" data-hex="#c2410c"></div>
+        <div class="swatch" style="background:#1c1917" data-hex="#1c1917"></div>
+        <div class="swatch" style="background:#22d3a5" data-hex="#22d3a5"></div>
+        <div class="swatch" style="background:#ef4444" data-hex="#ef4444"></div>
+      </div>
+    </div>
+    <div class="scores-section">
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Product Scores</div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Market Size</span><span>88%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:88%;background:linear-gradient(90deg,#ea580c,#f97316)"></div></div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Feasibility</span><span>85%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:85%;background:linear-gradient(90deg,#f97316,#fb923c)"></div></div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Revenue</span><span>82%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:82%;background:linear-gradient(90deg,#22d3a5,#10b981)"></div></div>
+    </div>
+    <div class="design-notes" style="color:rgba(255,255,255,0.45)">
+      3 separate UIs for diner/kitchen/owner · 64px kitchen tap targets · Playfair serif for menu display · High-contrast KDS
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="tableflow-wrap">
+      <div class="tf-top-row">
+        <!-- Phone: QR Menu -->
+        <div class="phone-frame" style="border-color:rgba(234,88,12,0.4);width:180px;height:320px">
+          <div class="phone-notch"></div>
+          <div style="padding:10px;background:#1c1917;height:100%;overflow:hidden">
+            <div style="text-align:center;margin-bottom:8px">
+              <div style="font-size:13px;font-weight:800;color:#fff;font-family:Georgia,serif">Spice Garden 🌶</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.4)">Table 4 · Scan to order</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="background:#292524;border-radius:8px;padding:8px;display:flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,0.06)">
+                <div style="width:40px;height:40px;border-radius:7px;background:linear-gradient(135deg,#ea580c,#f97316);flex-shrink:0"></div>
+                <div style="flex:1">
+                  <div style="font-size:10px;font-weight:700;color:#fff">Paneer Butter Masala</div>
+                  <div style="font-size:9px;color:rgba(255,255,255,0.4)">Rich tomato gravy</div>
+                  <div style="font-size:11px;font-weight:800;color:#fb923c;margin-top:2px">₹220</div>
+                </div>
+                <button style="background:#ea580c;border:none;color:#fff;width:24px;height:24px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">+</button>
+              </div>
+              <div style="background:#292524;border-radius:8px;padding:8px;display:flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,0.06)">
+                <div style="width:40px;height:40px;border-radius:7px;background:linear-gradient(135deg,#c2410c,#ea580c);flex-shrink:0"></div>
+                <div style="flex:1">
+                  <div style="font-size:10px;font-weight:700;color:#fff">Dal Makhani</div>
+                  <div style="font-size:9px;color:rgba(255,255,255,0.4)">Black lentil, cream</div>
+                  <div style="font-size:11px;font-weight:800;color:#fb923c;margin-top:2px">₹180</div>
+                </div>
+                <button style="background:#ea580c;border:none;color:#fff;width:24px;height:24px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">+</button>
+              </div>
+            </div>
+            <div style="position:absolute;bottom:32px;left:10px;right:10px;background:linear-gradient(90deg,#ea580c,#c2410c);border-radius:8px;padding:8px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:10px;font-weight:700;color:#fff">🛒 Cart (2)</span>
+              <span style="font-size:10px;font-weight:700;color:#fff">₹400 →</span>
+            </div>
+          </div>
+        </div>
+        <!-- KDS Tablet -->
+        <div class="kds-tablet">
+          <div class="kds-header">
+            <span>Kitchen Display</span>
+            <span style="color:#22d3a5;font-size:9px">● 3 Active</span>
+          </div>
+          <div class="kds-grid">
+            <div class="kds-ticket ok">
+              <div class="kds-ticket-title" style="color:#22d3a5">Table 4</div>
+              <div class="kds-ticket-item">Paneer Butter ×1</div>
+              <div class="kds-ticket-item">Dal Makhani ×1</div>
+              <div class="kds-ticket-item">Garlic Naan ×2</div>
+              <div class="kds-ticket-time">8 min ago</div>
+            </div>
+            <div class="kds-ticket warn">
+              <div class="kds-ticket-title" style="color:#ef4444">⚠ Table 7</div>
+              <div class="kds-ticket-item">Chicken Tikka ×2</div>
+              <div class="kds-ticket-item">Butter Naan ×4</div>
+              <div class="kds-ticket-item">Lassi ×2</div>
+              <div class="kds-ticket-time" style="color:#ef4444">18 min — LATE</div>
+            </div>
+            <div class="kds-ticket ok">
+              <div class="kds-ticket-title" style="color:rgba(255,255,255,0.6)">Takeaway</div>
+              <div class="kds-ticket-item">Veg Thali ×1</div>
+              <div class="kds-ticket-item">Raita ×1</div>
+              <div class="kds-ticket-time">3 min ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Owner Strip -->
+      <div class="owner-strip">
+        <div class="owner-metric">
+          <div class="owner-metric-val">₹24.5k</div>
+          <div class="owner-metric-label">Revenue Today</div>
+          <div class="owner-metric-sub">↑ 12%</div>
+        </div>
+        <div class="owner-metric">
+          <div class="owner-metric-val">87</div>
+          <div class="owner-metric-label">Orders</div>
+          <div class="owner-metric-sub">↑ 8%</div>
+        </div>
+        <div class="owner-metric">
+          <div class="owner-metric-val">₹281</div>
+          <div class="owner-metric-label">Avg Order</div>
+          <div class="owner-metric-sub">↑ ₹18</div>
+        </div>
+        <div class="owner-metric">
+          <div class="owner-metric-val">68%</div>
+          <div class="owner-metric-label">Table Turns</div>
+          <div class="owner-metric-sub" style="color:#f97316">Peak now</div>
+        </div>
+        <div style="flex:2;padding-left:16px">
+          <svg viewBox="0 0 120 30" style="width:100%;height:30px">
+            <polyline points="0,25 15,20 30,22 45,15 60,18 75,10 90,12 105,6 120,8" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,25 15,20 30,22 45,15 60,18 75,10 90,12 105,6 120,8" fill="rgba(234,88,12,0.15)" stroke="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: ConnectOne -->
+<div class="slide" id="s6" data-index="5">
+  <div class="left-panel" style="color:#e2e8f0">
+    <div class="product-badge" style="background:rgba(6,182,212,0.15);color:#22d3ee;border:1px solid rgba(6,182,212,0.3)">P05</div>
+    <div class="product-title" style="background:linear-gradient(90deg,#06b6d4,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ConnectOne</div>
+    <div class="product-url" style="color:rgba(255,255,255,0.35)">connectone.addonweb.ai</div>
+    <div class="product-tagline">From firmware to dashboard. One platform.</div>
+    <div class="live-counter">
+      <span class="live-dot"></span>
+      847,293 devices connected
+    </div>
+    <div>
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Colors</div>
+      <div class="swatches swatches-row">
+        <div class="swatch" style="background:#050d12" data-hex="#050d12"></div>
+        <div class="swatch" style="background:#06b6d4" data-hex="#06b6d4"></div>
+        <div class="swatch" style="background:#22d3ee" data-hex="#22d3ee"></div>
+        <div class="swatch" style="background:#22d3a5" data-hex="#22d3a5"></div>
+        <div class="swatch" style="background:#f59e0b" data-hex="#f59e0b"></div>
+        <div class="swatch" style="background:#ef4444" data-hex="#ef4444"></div>
+      </div>
+    </div>
+    <div class="scores-section">
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Product Scores</div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Market Size</span><span>90%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:90%;background:linear-gradient(90deg,#06b6d4,#22d3ee)"></div></div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Revenue</span><span>88%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:88%;background:linear-gradient(90deg,#22d3ee,#22d3a5)"></div></div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Feasibility</span><span>80%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:80%;background:linear-gradient(90deg,#22d3a5,#10b981)"></div></div>
+    </div>
+    <div class="design-notes" style="color:rgba(255,255,255,0.45)">
+      Engineering dark · JetBrains Mono for sensor values · Cyan on deep navy · Status = dot + text · MQTT real-time
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="iot-dashboard">
+      <div class="iot-header">
+        <div>
+          <div class="iot-title">Fleet Dashboard · Factory Alpha</div>
+          <div class="iot-sync">Last sync 2s ago · 291 devices registered</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <span style="padding:3px 10px;border-radius:12px;background:rgba(34,211,238,0.1);color:#22d3ee;font-size:10px;font-weight:600;border:1px solid rgba(34,211,238,0.2)">Live</span>
+        </div>
+      </div>
+      <div class="iot-body">
+        <div class="iot-main">
+          <div class="iot-stats">
+            <div class="iot-stat">
+              <div class="iot-stat-val" style="color:#22d3ee">284<span style="font-size:11px;color:rgba(255,255,255,0.3)">/291</span></div>
+              <div class="iot-stat-label">Online</div>
+            </div>
+            <div class="iot-stat">
+              <div class="iot-stat-val" style="color:#f59e0b">5</div>
+              <div class="iot-stat-label">Warnings</div>
+            </div>
+            <div class="iot-stat">
+              <div class="iot-stat-val" style="color:#ef4444">2</div>
+              <div class="iot-stat-label">Offline</div>
+            </div>
+          </div>
+          <div class="iot-device-grid">
+            <div class="device-card">
+              <div class="device-id">TMP-001</div>
+              <div class="device-status"><span class="status-dot-sm" style="background:#22d3ee"></span>Online</div>
+              <div class="device-val">72.4<span class="device-unit">°C</span></div>
+            </div>
+            <div class="device-card">
+              <div class="device-id">MTR-042</div>
+              <div class="device-status"><span class="status-dot-sm" style="background:#22d3ee"></span>Online</div>
+              <div class="device-val">1480<span class="device-unit">rpm</span></div>
+            </div>
+            <div class="device-card">
+              <div class="device-id">PMP-003</div>
+              <div class="device-status"><span class="status-dot-sm" style="background:#f59e0b"></span><span style="color:#f59e0b">Warn</span></div>
+              <div class="device-val" style="color:#f59e0b">8.7<span class="device-unit">bar</span></div>
+            </div>
+            <div class="device-card">
+              <div class="device-id">HUM-019</div>
+              <div class="device-status"><span class="status-dot-sm" style="background:#22d3ee"></span>Online</div>
+              <div class="device-val">64<span class="device-unit">%RH</span></div>
+            </div>
+            <div class="device-card">
+              <div class="device-id">CUR-007</div>
+              <div class="device-status"><span class="status-dot-sm" style="background:#22d3ee"></span>Online</div>
+              <div class="device-val">12.3<span class="device-unit">A</span></div>
+            </div>
+            <div class="device-card">
+              <div class="device-id">VIB-022</div>
+              <div class="device-status"><span class="status-dot-sm" style="background:#ef4444"></span><span style="color:#ef4444">Offline</span></div>
+              <div class="device-val" style="color:#4b5563">—</div>
+            </div>
+          </div>
+          <div class="iot-chart">
+            <div class="iot-chart-title">TMP-001 · Temperature 24h</div>
+            <svg viewBox="0 0 300 40" class="chart-svg">
+              <defs><linearGradient id="cg" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#22d3ee" stop-opacity="0.3"/><stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0,30 C20,28 40,32 60,25 C80,18 100,22 120,20 C140,18 160,15 180,12 C200,9 220,14 240,10 C260,6 280,8 300,5" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+              <path d="M0,30 C20,28 40,32 60,25 C80,18 100,22 120,20 C140,18 160,15 180,12 C200,9 220,14 240,10 C260,6 280,8 300,5 L300,40 L0,40Z" fill="url(#cg)"/>
+            </svg>
+          </div>
+        </div>
+        <div class="iot-alert-panel">
+          <div class="alert-title">Alerts</div>
+          <div class="alert-item alert-warn">
+            <div style="font-weight:700">WARNING</div>
+            PMP-003 pressure rising · 8.7 bar
+          </div>
+          <div class="alert-item alert-off">
+            <div style="font-weight:700">OFFLINE</div>
+            VIB-022 unreachable · 14m
+          </div>
+          <div class="alert-item alert-info">
+            <div style="font-weight:700">OTA INFO</div>
+            12 devices pending fw v2.4
+          </div>
+        </div>
+      </div>
+      <div class="iot-ai-bar">🤖 AI: PMP-003 shows 78% failure probability within 72h — schedule inspection</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: MachineGuard -->
+<div class="slide" id="s7" data-index="6">
+  <div class="left-panel" style="color:#e2e8f0">
+    <div class="product-badge" style="background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3)">P06</div>
+    <div class="product-title" style="background:linear-gradient(90deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent">MachineGuard</div>
+    <div class="product-url" style="color:rgba(255,255,255,0.35)">machineguard.addonweb.ai</div>
+    <div class="product-tagline">Know before it breaks.</div>
+    <div>
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Colors</div>
+      <div class="swatches swatches-row">
+        <div class="swatch" style="background:#0a0e14" data-hex="#0a0e14"></div>
+        <div class="swatch" style="background:#f59e0b" data-hex="#f59e0b"></div>
+        <div class="swatch" style="background:#fbbf24" data-hex="#fbbf24"></div>
+        <div class="swatch" style="background:#22d3a5" data-hex="#22d3a5"></div>
+        <div class="swatch" style="background:#ef4444" data-hex="#ef4444"></div>
+      </div>
+    </div>
+    <div class="scores-section">
+      <div class="section-label" style="color:rgba(255,255,255,0.35)">Product Scores</div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Revenue</span><span>90%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:90%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Market Size</span><span>85%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:85%;background:linear-gradient(90deg,#fbbf24,#f97316)"></div></div>
+      <div class="score-label" style="color:rgba(255,255,255,0.6)"><span>Feasibility</span><span>85%</span></div>
+      <div class="score-track"><div class="score-bar" style="--target:85%;background:linear-gradient(90deg,#22d3a5,#10b981)"></div></div>
+    </div>
+    <div class="hw-note">ESP32-S3 + ADXL345 + DS18B20<br>+ CT clamp · Installs in 30 min</div>
+    <div class="design-notes" style="color:rgba(255,255,255,0.45)">
+      Control room dark · IBM Plex Sans · Alert must show time-to-action · Pulsing critical borders · Predictive AI core feature
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="mg-dashboard">
+      <div class="mg-header">
+        <div>
+          <div class="mg-title">MachineGuard Control</div>
+          <div class="mg-plant">Plant: Surat Textile Unit 3 · 6 machines monitored</div>
+        </div>
+        <span style="padding:3px 10px;border-radius:12px;background:rgba(245,158,11,0.1);color:#fbbf24;font-size:10px;font-weight:600;border:1px solid rgba(245,158,11,0.2)">Live</span>
+      </div>
+      <div class="mg-body">
+        <div class="mg-main">
+          <div class="machine-grid">
+            <div class="machine-card">
+              <div class="machine-name">Motor A1</div>
+              <div class="machine-health-bar"><div class="machine-health-fill" style="width:94%;background:#22d3a5"></div></div>
+              <div class="machine-pct" style="color:#22d3a5">94% — Good</div>
+            </div>
+            <div class="machine-card amber">
+              <div class="machine-name">Pump B3</div>
+              <div class="machine-health-bar"><div class="machine-health-fill" style="width:67%;background:#f59e0b"></div></div>
+              <div class="machine-pct" style="color:#f59e0b">67% — Warn</div>
+            </div>
+            <div class="machine-card critical">
+              <div class="machine-name" style="color:#ef4444">Comp C1 ⚠</div>
+              <div class="machine-health-bar"><div class="machine-health-fill" style="width:31%;background:#ef4444"></div></div>
+              <div class="machine-pct" style="color:#ef4444">31% — CRITICAL</div>
+            </div>
+            <div class="machine-card">
+              <div class="machine-name">Conv D2</div>
+              <div class="machine-health-bar"><div class="machine-health-fill" style="width:88%;background:#22d3a5"></div></div>
+              <div class="machine-pct" style="color:#22d3a5">88% — Good</div>
+            </div>
+            <div class="machine-card">
+              <div class="machine-name">Fan E5</div>
+              <div class="machine-health-bar"><div class="machine-health-fill" style="width:91%;background:#22d3a5"></div></div>
+              <div class="machine-pct" style="color:#22d3a5">91% — Good</div>
+            </div>
+            <div class="machine-card amber">
+              <div class="machine-name">Dryer F1</div>
+              <div class="machine-health-bar"><div class="machine-health-fill" style="width:58%;background:#f59e0b"></div></div>
+              <div class="machine-pct" style="color:#f59e0b">58% — Warn</div>
+            </div>
+          </div>
+          <!-- Vibration Chart -->
+          <div style="background:#0a0e18;border-radius:8px;padding:10px;border:1px solid rgba(245,158,11,0.1)">
+            <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-bottom:4px">Comp C1 · Vibration Anomaly</div>
+            <svg viewBox="0 0 300 36" style="width:100%;height:36px">
+              <!-- threshold line -->
+              <line x1="0" y1="20" x2="300" y2="20" stroke="rgba(34,211,165,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+              <!-- normal signal -->
+              <path d="M0,20 C10,19 20,21 30,20 C40,19 50,21 60,20 C70,19 80,21 90,20 C100,19 110,21 120,20" fill="none" stroke="#22d3a5" stroke-width="1.2"/>
+              <!-- spike anomaly -->
+              <path d="M120,20 L130,18 L135,5 L140,32 L145,10 L150,22 L160,19 L170,21 L180,20" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+              <path d="M180,20 C190,19 200,21 210,20 C220,19 230,21 240,20 C250,21 260,19 280,20 L300,20" fill="none" stroke="#22d3a5" stroke-width="1.2"/>
+              <text x="132" y="4" fill="#ef4444" font-size="6" font-family="Inter">ANOMALY</text>
+            </svg>
+          </div>
+        </div>
+        <div class="mg-right">
+          <div>
+            <div class="pred-title">AI Predictions</div>
+            <div class="pred-row">
+              <span class="pred-machine">Comp C1</span>
+              <span class="pred-time">72h</span>
+              <span class="pred-badge pred-urgent">URGENT</span>
+            </div>
+            <div class="pred-row">
+              <span class="pred-machine">Pump B3</span>
+              <span class="pred-time">7d</span>
+              <span class="pred-badge pred-soon">SOON</span>
+            </div>
+            <div class="pred-row">
+              <span class="pred-machine">Dryer F1</span>
+              <span class="pred-time">14d</span>
+              <span class="pred-badge pred-plan">PLAN</span>
+            </div>
+          </div>
+          <div class="mg-chart-box">
+            <div class="mg-chart-title">24h Energy kWh</div>
+            <svg viewBox="0 0 120 30" style="width:100%;height:30px">
+              <polyline points="0,25 15,22 30,20 45,18 60,15 75,17 90,12 105,14 120,10" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.35);line-height:1.5">
+            Last maintenance:<br>Motor A1 — 12d ago<br>Pump B3 — 31d ago<br>Comp C1 — 67d ago
+          </div>
+        </div>
+      </div>
+      <div class="mg-alert-bar">
+        ⚠ Comp C1 — Schedule maintenance within 72 hours to prevent ₹4.2L downtime cost
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /slides-wrapper -->
+
+<!-- BOTTOM NAV -->
+<div id="botnav">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">←</button>
+  <div id="slide-dots">
+    <div class="dot active" onclick="goTo(0)"></div>
+    <div class="dot" onclick="goTo(1)"></div>
+    <div class="dot" onclick="goTo(2)"></div>
+    <div class="dot" onclick="goTo(3)"></div>
+    <div class="dot" onclick="goTo(4)"></div>
+    <div class="dot" onclick="goTo(5)"></div>
+    <div class="dot" onclick="goTo(6)"></div>
+  </div>
+  <button class="nav-btn" id="nextBtn" onclick="navigate(1)">→</button>
+</div>
+
+<script>
+let current = 0;
+const total = 7;
+const slides = document.querySelectorAll('.slide');
+const tabs = document.querySelectorAll('.tab');
+const dots = document.querySelectorAll('.dot');
+const counter = document.getElementById('counter');
+
+function updateUI() {
+  counter.textContent = (current + 1) + ' / ' + total;
+  tabs.forEach((t, i) => t.classList.toggle('active', i === current));
+  dots.forEach((d, i) => d.classList.toggle('active', i === current));
+}
+
+function goTo(index) {
+  if (index === current) return;
+  const dir = index > current ? 1 : -1;
+  const prev = current;
+  current = index;
+
+  slides[prev].classList.remove('active');
+  slides[prev].style.transform = dir > 0 ? 'translateX(-100%)' : 'translateX(100%)';
+
+  slides[current].style.transform = dir > 0 ? 'translateX(100%)' : 'translateX(-100%)';
+  slides[current].classList.add('active');
+
+  // Force reflow
+  slides[current].getBoundingClientRect();
+  slides[current].style.transform = 'translateX(0)';
+
+  // Cleanup prev after transition
+  setTimeout(() => {
+    slides[prev].style.transform = '';
+  }, 550);
+
+  // Animate score bars
+  triggerBars(slides[current]);
+  updateUI();
+}
+
+function triggerBars(slide) {
+  slide.classList.remove('animate-in');
+  void slide.offsetWidth;
+  slide.classList.add('animate-in');
+  const bars = slide.querySelectorAll('.score-bar');
+  bars.forEach((bar, i) => {
+    bar.style.width = '0%';
+    const target = bar.style.getPropertyValue('--target');
+    setTimeout(() => {
+      bar.style.transition = 'width 0.9s ease-out';
+      bar.style.width = target;
+    }, 100 + i * 120);
+  });
+}
+
+function navigate(dir) {
+  const next = (current + dir + total) % total;
+  goTo(next);
+}
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'ArrowLeft') navigate(-1);
+});
+
+// Touch swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', (e) => {
+  const dx = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(dx) > 50) navigate(dx > 0 ? 1 : -1);
+});
+
+// Init first slide bars
+triggerBars(slides[0]);
+
+// Slide style setup
+slides.forEach((s, i) => {
+  if (i !== 0) s.style.transform = 'translateX(100%)';
+  s.style.transition = 'transform 0.5s cubic-bezier(0.77,0,0.18,1)';
+});
+</script>
+</body>
+</html>

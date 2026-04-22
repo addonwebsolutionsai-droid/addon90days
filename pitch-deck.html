@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AddonWebSolutions — Investor Pitch Deck</title>
+<style>
+  @import url('data:text/css,');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #04040f;
+    --surface: #0a0a1a;
+    --surface2: #0f0f22;
+    --border: rgba(99,102,241,0.18);
+    --indigo: #6366f1;
+    --violet: #8b5cf6;
+    --text: #f0f0ff;
+    --muted: #8888aa;
+    --green: #22d3a5;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); }
+
+  /* ── Slide Engine ── */
+  .deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 60px 80px;
+    opacity: 0; transform: translateX(60px);
+    transition: opacity .55s cubic-bezier(.4,0,.2,1), transform .55s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+  .slide.exit    { opacity: 0; transform: translateX(-60px); }
+
+  /* ── Background noise / grid ── */
+  .slide::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,.12) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 40% at 90% 90%, rgba(139,92,246,.08) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  /* grid lines */
+  .slide::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(99,102,241,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,102,241,.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .slide-inner { position: relative; z-index: 1; width: 100%; max-width: 1200px; }
+
+  /* ── Typography ── */
+  .slide-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--indigo); margin-bottom: 14px;
+  }
+  h1.hero { font-size: clamp(2.4rem, 5vw, 4.2rem); font-weight: 800; line-height: 1.08; letter-spacing: -.03em; }
+  h2.title { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; line-height: 1.1; letter-spacing: -.025em; margin-bottom: 8px; }
+  .subtitle { font-size: 1.1rem; color: var(--muted); font-weight: 400; }
+  .body-lg { font-size: 1.1rem; line-height: 1.65; color: var(--muted); }
+  .body { font-size: .95rem; line-height: 1.6; color: var(--muted); }
+
+  /* gradient text */
+  .grad { background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .grad-green { background: linear-gradient(135deg, #22d3a5, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: rgba(99,102,241,.4); }
+  .card-title { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .card-body  { font-size: .82rem; color: var(--muted); line-height: 1.55; }
+
+  /* ── Grid helpers ── */
+  .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .cols-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+  .cols-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+
+  /* ── Stat box ── */
+  .stat-box { text-align: center; padding: 22px 16px; }
+  .stat-num { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 900; letter-spacing: -.04em; line-height: 1; }
+  .stat-label { font-size: .78rem; color: var(--muted); margin-top: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: .1em; }
+
+  /* ── Navigation ── */
+  #nav {
+    position: fixed; bottom: 32px; right: 40px; z-index: 100;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .nav-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(15,15,34,.85); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s, border-color .2s; backdrop-filter: blur(8px);
+  }
+  .nav-btn:hover { background: var(--indigo); border-color: var(--indigo); }
+  #counter { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 40px; text-align: center; }
+
+  /* ── Progress bar ── */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: linear-gradient(90deg, var(--indigo), var(--violet));
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+    z-index: 100;
+    box-shadow: 0 0 12px var(--indigo);
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 20px 0;
+  }
+
+  /* ── Tag pill ── */
+  .pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: .72rem; font-weight: 600; letter-spacing: .06em;
+    background: rgba(99,102,241,.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,.3);
+  }
+  .pill-green { background: rgba(34,211,165,.12); color: #6ee7b7; border-color: rgba(34,211,165,.25); }
+  .pill-amber { background: rgba(245,158,11,.12); color: #fcd34d; border-color: rgba(245,158,11,.25); }
+  .pill-violet { background: rgba(139,92,246,.15); color: #c4b5fd; border-color: rgba(139,92,246,.3); }
+  .pill-red   { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.25); }
+
+  /* ── Arrow ── */
+  .arrow-right {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: var(--indigo); font-weight: 900;
+  }
+
+  /* ─────────────────────────────── SLIDE-SPECIFIC ─────────────────────────────── */
+
+  /* SLIDE 1 — Cover */
+  #s1 { justify-content: center; align-items: center; text-align: center; }
+  #s1 .slide-inner { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  #s1 .logo-ring {
+    width: 72px; height: 72px; border-radius: 18px;
+    background: linear-gradient(135deg, var(--indigo), var(--violet));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; font-weight: 900; color: #fff; letter-spacing: -.05em;
+    box-shadow: 0 0 40px rgba(99,102,241,.45);
+    margin-bottom: 8px;
+  }
+  #s1 .company { font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 900; letter-spacing: -.04em; }
+  #s1 .tagline { font-size: clamp(1rem, 2vw, 1.35rem); color: var(--muted); max-width: 640px; line-height: 1.5; }
+  #s1 .date-badge {
+    margin-top: 8px; padding: 6px 18px; border-radius: 999px;
+    border: 1px solid var(--border); font-size: .82rem; color: var(--muted);
+    background: var(--surface2);
+  }
+  #s1 .glow-line {
+    width: 240px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--indigo), var(--violet), transparent);
+    box-shadow: 0 0 18px var(--indigo);
+  }
+
+  /* SLIDE 2 — Problem */
+  #s2 .problem-col { padding: 28px 24px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface2); text-align: center; }
+  #s2 .problem-icon { font-size: 2.2rem; margin-bottom: 12px; }
+  #s2 .problem-head { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+  #s2 .bottom-banner {
+    margin-top: 24px; padding: 16px 28px; border-radius: 10px;
+    background: linear-gradient(90deg, rgba(99,102,241,.12), rgba(139,92,246,.12));
+    border: 1px solid var(--border);
+    text-align: center; font-size: 1rem; font-weight: 600;
+    color: #c4b5fd;
+  }
+
+  /* SLIDE 3 — Solution */
+  #s3 .from-to {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center;
+    margin-bottom: 28px;
+  }
+  #s3 .from-box, #s3 .to-box {
+    padding: 22px; border-radius: 12px; border: 1px solid var(--border);
+  }
+  #s3 .from-box { background: rgba(239,68,68,.06); border-color: rgba(239,68,68,.2); }
+  #s3 .to-box   { background: rgba(99,102,241,.06); border-color: rgba(99,102,241,.3); }
+  #s3 .pillar-pct { font-size: 1.5rem; font-weight: 900; }
+
+  /* SLIDE 4 — Moat */
+  #s4 .moat-hero { text-align: center; margin-bottom: 28px; }
+  #s4 .moat-num { font-size: clamp(4rem, 8vw, 7rem); font-weight: 900; letter-spacing: -.05em; line-height: 1; }
+
+  /* SLIDE 5 — 6 Products */
+  #s5 .prod-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 22px; }
+  #s5 .prod-card {
+    border-radius: 10px; padding: 14px 12px; border: 1px solid var(--border);
+    background: var(--surface2); font-size: .78rem;
+  }
+  #s5 .prod-name { font-weight: 700; font-size: .85rem; margin-bottom: 4px; }
+  #s5 .prod-tag  { font-size: .7rem; color: var(--muted); margin-bottom: 6px; }
+  #s5 .prod-price{ font-size: .72rem; font-weight: 600; color: #a5b4fc; }
+
+  /* SLIDE 6 (flagship ConnectOne) */
+  #s6 .pricing-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 20px; }
+  #s6 .tier {
+    border-radius: 10px; padding: 18px 16px; border: 1px solid var(--border);
+    background: var(--surface2); text-align: center;
+  }
+  #s6 .tier.highlight { border-color: var(--indigo); background: rgba(99,102,241,.1); }
+  #s6 .tier-name  { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; }
+  #s6 .tier-price { font-size: 1.5rem; font-weight: 900; }
+  #s6 .tier-sub   { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+
+  /* SLIDE 7 — Agents */
+  #s7 .org { display: flex; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+  #s7 .pod {
+    flex: 1; min-width: 160px; border-radius: 10px; padding: 16px;
+    border: 1px solid var(--border); background: var(--surface2);
+  }
+  #s7 .pod-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 10px; }
+  #s7 .agent-chip {
+    display: inline-block; background: rgba(99,102,241,.12);
+    border: 1px solid rgba(99,102,241,.22); border-radius: 6px;
+    padding: 3px 8px; font-size: .72rem; margin: 3px 2px; color: #c4b5fd;
+  }
+  #s7 .agent-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+  /* SLIDE 8 — Roadmap */
+  #s8 .timeline { position: relative; margin: 24px 0; }
+  #s8 .tl-bar {
+    height: 6px; border-radius: 3px;
+    background: linear-gradient(90deg, #22d3a5, #6366f1, #8b5cf6);
+    margin-bottom: 0; box-shadow: 0 0 20px rgba(99,102,241,.4);
+  }
+  #s8 .phases { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 14px; }
+  #s8 .phase {
+    border-radius: 10px; padding: 18px; border: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  #s8 .phase-head { font-size: .85rem; font-weight: 700; margin-bottom: 6px; }
+  #s8 .phase-sub  { font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
+  #s8 .milestone  { font-size: .75rem; padding: 5px 0; border-top: 1px solid rgba(255,255,255,.05); color: var(--muted); }
+  #s8 .kill-note  {
+    margin-top: 18px; padding: 12px 20px; border-radius: 8px;
+    background: rgba(239,68,68,.07); border: 1px solid rgba(239,68,68,.2);
+    font-size: .82rem; color: #fca5a5; text-align: center;
+  }
+
+  /* SLIDE 9 — Revenue */
+  #s9 .chart-wrap { display: flex; align-items: flex-end; gap: 22px; height: 160px; margin: 22px 0; }
+  #s9 .bar-group { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+  #s9 .bar-outer { width: 100%; border-radius: 6px 6px 0 0; display: flex; flex-direction: column; justify-content: flex-end; transition: height .8s; }
+  #s9 .bar-inner { width: 100%; border-radius: 6px 6px 0 0; }
+  #s9 .bar-label { font-size: .75rem; color: var(--muted); text-align: center; }
+  #s9 .bar-val   { font-size: .82rem; font-weight: 700; text-align: center; color: var(--text); }
+  #s9 .rev-table { width: 100%; border-collapse: collapse; font-size: .83rem; margin-top: 10px; }
+  #s9 .rev-table th { padding: 8px 14px; text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); border-bottom: 1px solid var(--border); }
+  #s9 .rev-table td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.04); }
+  #s9 .rev-table tr:last-child td { border-bottom: none; color: #a5b4fc; font-weight: 600; }
+
+  /* SLIDE 10 — TAM */
+  #s10 .tam-card { text-align: center; padding: 26px 18px; }
+  #s10 .tam-market { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; color: var(--muted); }
+  #s10 .tam-num { font-size: 2rem; font-weight: 900; line-height: 1; }
+
+  /* SLIDE 11 — Unit Econ */
+  #s11 .econ-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+  #s11 .econ-box { border-radius: 12px; padding: 26px 18px; text-align: center; border: 1px solid var(--border); background: var(--surface2); }
+  #s11 .econ-num { font-size: clamp(1.6rem, 3vw, 2.6rem); font-weight: 900; letter-spacing: -.03em; }
+  #s11 .econ-label { font-size: .75rem; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .1em; }
+  #s11 .enterprise-note {
+    padding: 14px 20px; border-radius: 8px;
+    background: rgba(34,211,165,.07); border: 1px solid rgba(34,211,165,.2);
+    font-size: .85rem; color: #6ee7b7; text-align: center;
+  }
+
+  /* SLIDE 12 — Traction */
+  #s12 .traction-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  #s12 .traction-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  #s12 .traction-list li { display: flex; align-items: flex-start; gap: 10px; font-size: .88rem; }
+  #s12 .check { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  #s12 .check-done { background: rgba(34,211,165,.15); color: #22d3a5; border: 1px solid rgba(34,211,165,.3); }
+  #s12 .check-soon { background: rgba(99,102,241,.15); color: #818cf8; border: 1px solid rgba(99,102,241,.3); }
+
+  /* SLIDE 13 — Why Now */
+  #s13 .why-item {
+    display: flex; gap: 20px; align-items: flex-start;
+    padding: 22px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface2); margin-bottom: 14px;
+  }
+  #s13 .why-num { font-size: 3rem; font-weight: 900; line-height: 1; opacity: .15; flex-shrink: 0; width: 50px; }
+  #s13 .why-text { font-size: .95rem; line-height: 1.6; color: var(--text); }
+  #s13 .why-note {
+    padding: 14px 22px; border-radius: 8px; text-align: center;
+    background: linear-gradient(90deg, rgba(99,102,241,.1), rgba(139,92,246,.1));
+    border: 1px solid var(--border); font-size: .9rem; color: #c4b5fd; font-style: italic;
+  }
+
+  /* SLIDE 14 — Ask */
+  #s14 .ask-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  #s14 .ask-card { padding: 22px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface2); }
+  #s14 .ask-num  { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; }
+  #s14 .cta-box  {
+    padding: 22px 28px; border-radius: 14px;
+    background: linear-gradient(135deg, rgba(99,102,241,.18), rgba(139,92,246,.18));
+    border: 1px solid rgba(99,102,241,.4); text-align: center;
+  }
+  #s14 .cta-email { font-size: 1.1rem; font-weight: 700; color: #a5b4fc; margin: 8px 0; }
+  #s14 .cta-tagline { font-size: .85rem; color: var(--muted); font-style: italic; }
+
+  /* bottom banner shared */
+  .bottom-banner {
+    margin-top: 24px; padding: 16px 28px; border-radius: 10px;
+    background: linear-gradient(90deg, rgba(99,102,241,.12), rgba(139,92,246,.12));
+    border: 1px solid var(--border);
+    text-align: center; font-size: 1rem; font-weight: 600;
+    color: #c4b5fd;
+  }
+
+  /* responsive shrink for small viewports */
+  @media (max-height: 700px) {
+    .slide { padding: 32px 60px; }
+    h2.title { font-size: 1.8rem; }
+  }
+  @media (max-width: 900px) {
+    .slide { padding: 32px 28px; }
+    .cols-3, .cols-4 { grid-template-columns: 1fr 1fr; }
+    #s5 .prod-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ── SLIDE 1: COVER ── -->
+  <div class="slide active" id="s1">
+    <div class="slide-inner">
+      <div class="logo-ring">AW</div>
+      <h1 class="hero company grad">AddonWebSolutions</h1>
+      <div class="glow-line"></div>
+      <p class="tagline">AI-Native Product Studio. 10 Years of Hardware. 13 Claude Agents.</p>
+      <p style="font-size:.95rem;color:var(--muted);max-width:520px;text-align:center;line-height:1.55;">90-Day Company Transformation — Investor Briefing</p>
+      <div class="date-badge">April 2026</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2: PROBLEM ── -->
+  <div class="slide" id="s2">
+    <div class="slide-inner">
+      <div class="slide-label">The Problem</div>
+      <h2 class="title">Traditional Dev Shops Are <span class="grad">Dying</span></h2>
+      <p class="subtitle" style="margin-bottom:28px;">The business model that built this company no longer works.</p>
+      <div class="cols-3">
+        <div class="problem-col card">
+          <div class="problem-icon">&#x26A1;</div>
+          <div class="problem-head">AI Competition</div>
+          <p class="card-body">AI enables competitors to undercut hourly dev rates by <strong style="color:var(--red)">80%</strong>. What took 3 developers now takes one AI and a prompt engineer.</p>
+        </div>
+        <div class="problem-col card">
+          <div class="problem-icon">&#x1F4C9;</div>
+          <div class="problem-head">Margin Compression</div>
+          <p class="card-body">Custom work margins collapse as AI commoditizes code. Clients compare your quote to AI-assisted boutiques charging a third of your rate.</p>
+        </div>
+        <div class="problem-col card">
+          <div class="problem-icon">&#x1F512;</div>
+          <div class="problem-head">No IP, No Moat</div>
+          <p class="card-body">Project-based revenue builds zero compounding asset. Every engagement starts from zero. No recurring revenue, no defensibility.</p>
+        </div>
+      </div>
+      <div class="bottom-banner">We saw it coming. We're not waiting.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 3: SOLUTION ── -->
+  <div class="slide" id="s3">
+    <div class="slide-inner">
+      <div class="slide-label">The Pivot</div>
+      <h2 class="title">The AI-Native <span class="grad">Solution</span></h2>
+      <div class="from-to">
+        <div class="from-box">
+          <span class="pill pill-red" style="margin-bottom:10px;display:inline-block">Before</span>
+          <div style="font-weight:700;font-size:1rem;margin-bottom:8px;">Custom Dev Shop</div>
+          <ul style="list-style:none;font-size:.82rem;color:var(--muted);line-height:2;">
+            <li>&#x2715; &nbsp;Hourly billing</li>
+            <li>&#x2715; &nbsp;Zero IP ownership</li>
+            <li>&#x2715; &nbsp;Founder-dependent</li>
+            <li>&#x2715; &nbsp;No recurring revenue</li>
+            <li>&#x2715; &nbsp;Project treadmill</li>
+          </ul>
+        </div>
+        <div class="arrow-right">&#x2192;</div>
+        <div class="to-box">
+          <span class="pill" style="margin-bottom:10px;display:inline-block">After</span>
+          <div style="font-weight:700;font-size:1rem;margin-bottom:8px;">AI-Native Product Company</div>
+          <ul style="list-style:none;font-size:.82rem;color:var(--muted);line-height:2;">
+            <li style="color:#a5b4fc">&#x2713; &nbsp;Subscription revenue</li>
+            <li style="color:#a5b4fc">&#x2713; &nbsp;6 focused products</li>
+            <li style="color:#a5b4fc">&#x2713; &nbsp;13 AI agents running ops</li>
+            <li style="color:#a5b4fc">&#x2713; &nbsp;Enterprise IoT contracts</li>
+            <li style="color:#a5b4fc">&#x2713; &nbsp;Compounding IP</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cols-4">
+        <div class="card" style="text-align:center;padding:16px 12px;">
+          <div class="pillar-pct grad">35%</div>
+          <div style="font-size:.75rem;font-weight:700;margin-top:6px;">SaaS Micro-Products</div>
+        </div>
+        <div class="card" style="text-align:center;padding:16px 12px;">
+          <div class="pillar-pct" style="background:linear-gradient(135deg,#a78bfa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">20%</div>
+          <div style="font-size:.75rem;font-weight:700;margin-top:6px;">Claude Ecosystem</div>
+        </div>
+        <div class="card" style="text-align:center;padding:16px 12px;">
+          <div class="pillar-pct grad-green">30%</div>
+          <div style="font-size:.75rem;font-weight:700;margin-top:6px;">IoT × AI Enterprise</div>
+        </div>
+        <div class="card" style="text-align:center;padding:16px 12px;">
+          <div class="pillar-pct" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">15%</div>
+          <div style="font-size:.75rem;font-weight:700;margin-top:6px;">Productized Services</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4: MOAT ── -->
+  <div class="slide" id="s4">
+    <div class="slide-inner">
+      <div class="slide-label">Competitive Advantage</div>
+      <h2 class="title">The Moat No One Can <span class="grad">Copy Fast</span></h2>
+      <div class="moat-hero">
+        <div class="moat-num grad">10 Years</div>
+        <div style="font-size:1.1rem;color:var(--muted);margin-top:4px;">of IoT Hardware + Firmware Engineering Experience</div>
+      </div>
+      <div class="cols-3" style="margin-bottom:18px;">
+        <div class="card" style="border-color:rgba(99,102,241,.3)">
+          <div style="font-size:1.4rem;margin-bottom:10px;">&#x1F9EC;</div>
+          <div class="card-title">Hardware DNA</div>
+          <p class="card-body">ESP32 / STM32 / nRF52 firmware. MQTT at scale with EMQX. Certificate-based device identity. OTA update pipelines. Real hardware, real deployments.</p>
+        </div>
+        <div class="card" style="border-color:rgba(139,92,246,.3)">
+          <div style="font-size:1.4rem;margin-bottom:10px;">&#x1F916;</div>
+          <div class="card-title">AI-First Architecture</div>
+          <p class="card-body">Claude agents running daily operations. AI embedded in every product layer. Natural-language interfaces to device fleets. MCP servers per tenant.</p>
+        </div>
+        <div class="card" style="border-color:rgba(34,211,165,.3)">
+          <div style="font-size:1.4rem;margin-bottom:10px;">&#x1F5A5;</div>
+          <div class="card-title">Full Stack</div>
+          <p class="card-body">From chip firmware to SaaS dashboard to enterprise contract — one team. Clients don't stitch vendors together. We own the entire value chain.</p>
+        </div>
+      </div>
+      <div class="bottom-banner" style="background:linear-gradient(90deg,rgba(34,211,165,.08),rgba(99,102,241,.08));border-color:rgba(34,211,165,.2);color:#6ee7b7;">
+        Pure-software AI companies can't touch hardware. We start there.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: 6 PRODUCTS ── -->
+  <div class="slide" id="s5">
+    <div class="slide-inner">
+      <div class="slide-label">Product Portfolio</div>
+      <h2 class="title">6 Products. 4 Revenue Streams. <span class="grad">One Platform.</span></h2>
+      <div class="prod-grid">
+        <div class="prod-card" style="border-color:rgba(34,211,165,.35)">
+          <span class="pill pill-green" style="font-size:.65rem;margin-bottom:6px;display:inline-block">IoT</span>
+          <div class="prod-name">ConnectOne</div>
+          <div class="prod-tag">IoT Platform</div>
+          <div class="prod-price">$99–$999/mo + Enterprise</div>
+        </div>
+        <div class="prod-card" style="border-color:rgba(99,102,241,.35)">
+          <span class="pill pill-violet" style="font-size:.65rem;margin-bottom:6px;display:inline-block">Claude</span>
+          <div class="prod-name">AddonWeb Toolkit</div>
+          <div class="prod-tag">Claude Reseller</div>
+          <div class="prod-price">$29–$129 + $19–$79/mo</div>
+        </div>
+        <div class="prod-card" style="border-color:rgba(37,211,102,.35)">
+          <span class="pill" style="font-size:.65rem;margin-bottom:6px;display:inline-block;background:rgba(37,211,102,.12);color:#86efac;border-color:rgba(37,211,102,.3)">SaaS</span>
+          <div class="prod-name">ChatBase</div>
+          <div class="prod-tag">WhatsApp AI Suite</div>
+          <div class="prod-price">$49–$299/mo</div>
+        </div>
+        <div class="prod-card" style="border-color:rgba(249,115,22,.35)">
+          <span class="pill pill-amber" style="font-size:.65rem;margin-bottom:6px;display:inline-block">SaaS</span>
+          <div class="prod-name">TableFlow</div>
+          <div class="prod-tag">Restaurant OS</div>
+          <div class="prod-price">&#x20B9;1,999–9,999/mo</div>
+        </div>
+        <div class="prod-card" style="border-color:rgba(59,130,246,.35)">
+          <span class="pill" style="font-size:.65rem;margin-bottom:6px;display:inline-block;background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.3)">SaaS</span>
+          <div class="prod-name">TaxPilot</div>
+          <div class="prod-tag">GST &amp; Invoicing AI</div>
+          <div class="prod-price">&#x20B9;499–3,999/mo</div>
+        </div>
+        <div class="prod-card" style="border-color:rgba(34,211,165,.35)">
+          <span class="pill pill-green" style="font-size:.65rem;margin-bottom:6px;display:inline-block">IoT</span>
+          <div class="prod-name">MachineGuard</div>
+          <div class="prod-tag">Predictive Maintenance</div>
+          <div class="prod-price">$299–$999/mo + Enterprise</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6 (sC kept): ConnectOne Validation ── -->
+  <div class="slide" id="sC">
+    <div class="slide-inner" style="overflow-y:auto;max-height:calc(100vh - 120px);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <span style="display:inline-block;padding:4px 14px;border-radius:999px;background:rgba(34,211,165,.12);color:#6ee7b7;border:1px solid rgba(34,211,165,.3);font-size:.75rem;font-weight:700;letter-spacing:.08em;">P1 — ConnectOne</span>
+        <span style="font-size:.75rem;color:var(--muted);">Validation Deep-Dive</span>
+      </div>
+      <h2 class="title" style="margin-bottom:18px;">The IoT Platform Built by People Who <span class="grad-green">Actually Write Firmware</span></h2>
+      <div class="cols-2" style="margin-bottom:16px;">
+        <div class="card" style="border-color:rgba(34,211,165,.2);">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#6ee7b7;margin-bottom:8px;">The Real Problem</div>
+          <p class="card-body">Building an IoT backend from scratch takes 6–18 months. AWS IoT Core is over-engineered for most use cases. ThingsBoard requires heavy customisation. Hardware startups and enterprises are stuck reinventing the same MQTT + OTA + dashboard stack every single project.</p>
+        </div>
+        <div class="card" style="border-color:rgba(34,211,165,.35);text-align:center;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#6ee7b7;margin-bottom:8px;">Feasibility Score</div>
+          <div style="font-size:3.2rem;font-weight:900;line-height:1;background:linear-gradient(135deg,#22d3a5,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">80<span style="font-size:1.4rem">/100</span></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;">Most complex build but team has done it in client projects. EMQX, OTA pipeline, white-label apps — all proven tech. 14-day prototype is realistic. Full V1 is 12 weeks.</div>
+        </div>
+      </div>
+      <div class="cols-3" style="margin-bottom:16px;">
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6ee7b7;margin-bottom:8px;">Market Viability</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:90%;height:100%;background:linear-gradient(90deg,#22d3a5,#34d399);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#6ee7b7;margin-bottom:4px;">90%</div>
+          <p class="card-body" style="font-size:.76rem;">100,000+ hardware companies need this. Enterprise: $50K–$500K per deal. SaaS: self-serve from $99/mo. Competitors exist but none with AI-native + firmware-depth combo.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6ee7b7;margin-bottom:8px;">Viral Potential</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:45%;height:100%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#a5b4fc;margin-bottom:4px;">45%</div>
+          <p class="card-body" style="font-size:.76rem;">Developer-driven. GitHub stars, HN launches, hardware tutorials = organic growth. Strong developer community virality possible with open-source components.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6ee7b7;margin-bottom:8px;">Revenue Machine Rating</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:88%;height:100%;background:linear-gradient(90deg,#22d3a5,#34d399);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#6ee7b7;margin-bottom:4px;">88%</div>
+          <p class="card-body" style="font-size:.76rem;">10 enterprise deals at $50K–$500K = $500K–$5M in contracts. SaaS self-serve can hit $100K MRR at scale. 12–18 month horizon — but this is the real money machine.</p>
+        </div>
+      </div>
+      <div style="padding:16px 20px;border-radius:10px;background:rgba(34,211,165,.07);border:1px solid rgba(34,211,165,.2);">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#6ee7b7;margin-bottom:6px;">Honest Verdict</div>
+        <p style="font-size:.84rem;line-height:1.6;color:var(--text);">Your strongest moat and best long-term bet. Not a 90-day revenue story but the asset that wins enterprise conversations. Use it as your flagship product in all investor and enterprise pitches. Every other product should reference this as the backbone.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7 (sG kept): AddonWeb Toolkit Validation ── -->
+  <div class="slide" id="sG">
+    <div class="slide-inner" style="overflow-y:auto;max-height:calc(100vh - 120px);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <span style="display:inline-block;padding:4px 14px;border-radius:999px;background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.35);font-size:.75rem;font-weight:700;letter-spacing:.08em;">P2 — AddonWeb Toolkit</span>
+        <span style="font-size:.75rem;color:var(--muted);">Validation Deep-Dive</span>
+      </div>
+      <h2 class="title" style="margin-bottom:18px;">Claude Skills + MCP Servers + Agent Packs — <span class="grad">Ship This First, Ship It Fast</span></h2>
+      <div class="cols-2" style="margin-bottom:16px;">
+        <div class="card" style="border-color:rgba(99,102,241,.25);">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#a5b4fc;margin-bottom:8px;">The Real Problem</div>
+          <p class="card-body">Claude is powerful but the ecosystem of quality skills, MCP servers, and pre-built agent teams is almost empty. Developers waste hours building boilerplate integrations. The Indian Business Stack MCP (GSTIN, PAN, MCA data) doesn't exist anywhere — that alone is a unique product.</p>
+        </div>
+        <div class="card" style="border-color:rgba(99,102,241,.4);text-align:center;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#a5b4fc;margin-bottom:8px;">Feasibility Score</div>
+          <div style="font-size:3.2rem;font-weight:900;line-height:1;background:linear-gradient(135deg,#6366f1,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">95<span style="font-size:1.4rem">/100</span></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;">Fastest to ship. No complex mobile app, no two-sided marketplace, no regulatory compliance. Each skill pack or MCP server is 3–5 days of work. Day 15 launch is realistic.</div>
+        </div>
+      </div>
+      <div class="cols-3" style="margin-bottom:16px;">
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a5b4fc;margin-bottom:8px;">Market Viability</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:65%;height:100%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#a5b4fc;margin-bottom:4px;">65%</div>
+          <p class="card-body" style="font-size:.76rem;">Claude user base expanding fast. Developers pay for quality tools. GitHub + HN + Dev.to distribution is free. BUT: market size today is still small. Grows as Claude grows.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a5b4fc;margin-bottom:8px;">Viral Potential</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:75%;height:100%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#a5b4fc;margin-bottom:4px;">75%</div>
+          <p class="card-body" style="font-size:.76rem;">Developers share tools on HN and Twitter. One good HN launch = 500–1,000 signups in 48 hours. The IoT Developer Pack and Indian Business Stack MCP are genuinely novel — they will get coverage.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a5b4fc;margin-bottom:8px;">Revenue Machine Rating</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:55%;height:100%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#a5b4fc;margin-bottom:4px;">55%</div>
+          <p class="card-body" style="font-size:.76rem;">Best 90-day cash product. $29–$79 price points need hundreds of customers for meaningful MRR. Target: $5K–$15K MRR by Day 90. Not $75K — but real cash, fast.</p>
+        </div>
+      </div>
+      <div style="padding:16px 20px;border-radius:10px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.3);">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#a5b4fc;margin-bottom:6px;">Honest Verdict</div>
+        <p style="font-size:.84rem;line-height:1.6;color:var(--text);">Build this first. Day 15 launch is your proof of concept that the agent factory works. Revenue is real but modest — treat it as market validation and brand-building among developers, not your primary revenue engine. The Indian Business Stack MCP is your most unique offering — lead with that.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 8 (NEW): ChatBase Validation ── -->
+  <div class="slide" id="sChatBase">
+    <div class="slide-inner" style="overflow-y:auto;max-height:calc(100vh - 120px);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <span style="display:inline-block;padding:4px 14px;border-radius:999px;background:rgba(37,211,102,.12);color:#86efac;border:1px solid rgba(37,211,102,.3);font-size:.75rem;font-weight:700;letter-spacing:.08em;">P3 — ChatBase</span>
+        <span style="font-size:.75rem;color:var(--muted);">Validation Deep-Dive</span>
+      </div>
+      <h2 class="title" style="margin-bottom:18px;">60 Million WhatsApp Business Users. Zero Automation. <span style="background:linear-gradient(135deg,#25D366,#86efac);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">We Fix That.</span></h2>
+      <div class="cols-2" style="margin-bottom:16px;">
+        <div class="card" style="border-color:rgba(37,211,102,.25);">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#86efac;margin-bottom:8px;">The Real Problem</div>
+          <p class="card-body">60M WhatsApp Business users handle 200+ daily messages manually. Every missed message = lost sale. No no-code automation platform exists for WhatsApp Business API. Businesses lose leads, botch follow-ups, and hire extra staff just to answer chats.</p>
+        </div>
+        <div class="card" style="border-color:rgba(37,211,102,.4);text-align:center;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#86efac;margin-bottom:8px;">Feasibility Score</div>
+          <div style="font-size:3.2rem;font-weight:900;line-height:1;background:linear-gradient(135deg,#25D366,#86efac);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">82<span style="font-size:1.4rem">/100</span></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;">WhatsApp Business API is stable. Claude AI integration is proven. No-code builder frontend is 6–8 weeks. Human handoff logic is straightforward. Doable by Month 2.</div>
+        </div>
+      </div>
+      <div class="cols-3" style="margin-bottom:16px;">
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#86efac;margin-bottom:8px;">Market Viability</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:92%;height:100%;background:linear-gradient(90deg,#25D366,#86efac);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#86efac;margin-bottom:4px;">92%</div>
+          <p class="card-body" style="font-size:.76rem;">60M WhatsApp Business users globally. 15M+ in India. SE Asia + LATAM equally strong. $49–$299/mo pricing lands perfectly for SMBs. TAM unmatched in the portfolio.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#86efac;margin-bottom:8px;">Viral Potential</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:88%;height:100%;background:linear-gradient(90deg,#25D366,#86efac);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#86efac;margin-bottom:4px;">88%</div>
+          <p class="card-body" style="font-size:.76rem;">Every customer message shows "Powered by ChatBase." Business owners ask each other "how did you set this up?" at trade associations and WhatsApp groups of business owners.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#86efac;margin-bottom:8px;">Revenue Machine Rating</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:85%;height:100%;background:linear-gradient(90deg,#25D366,#86efac);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#86efac;margin-bottom:4px;">85%</div>
+          <p class="card-body" style="font-size:.76rem;">Natural word-of-mouth + viral loop. Low churn — businesses that automate WhatsApp don't go back to manual. $49–$299/mo price is justifiable on day one: one extra sale/day pays for the subscription.</p>
+        </div>
+      </div>
+      <div style="padding:16px 20px;border-radius:10px;background:rgba(37,211,102,.07);border:1px solid rgba(37,211,102,.25);">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#86efac;margin-bottom:6px;">Honest Verdict</div>
+        <p style="font-size:.84rem;line-height:1.6;color:var(--text);">Best 90-day revenue opportunity in the new portfolio. WhatsApp penetration in India + SE Asia + LATAM is unmatched. Natural word-of-mouth built into the product architecture. Build immediately after AddonWeb Toolkit. This is the 30-day revenue spike we need.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 9 (NEW): TableFlow Validation ── -->
+  <div class="slide" id="sTableFlow">
+    <div class="slide-inner" style="overflow-y:auto;max-height:calc(100vh - 120px);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <span style="display:inline-block;padding:4px 14px;border-radius:999px;background:rgba(249,115,22,.15);color:#fdba74;border:1px solid rgba(249,115,22,.35);font-size:.75rem;font-weight:700;letter-spacing:.08em;">P4 — TableFlow</span>
+        <span style="font-size:.75rem;color:var(--muted);">Validation Deep-Dive</span>
+      </div>
+      <h2 class="title" style="margin-bottom:18px;">7.5 Million Indian Restaurants. Still on Paper KOTs. <span style="background:linear-gradient(135deg,#f97316,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Not Anymore.</span></h2>
+      <div class="cols-2" style="margin-bottom:16px;">
+        <div class="card" style="border-color:rgba(249,115,22,.25);">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#fdba74;margin-bottom:8px;">The Real Problem</div>
+          <p class="card-body">Restaurants use paper order tickets, manual billing, WhatsApp for takeaway. Wrong orders, payment disputes, zero inventory data. Existing POS systems (Petpooja, Posist) are bloated at &#x20B9;15,000–25,000/yr and require training. Pain is daily, measurable, and expensive.</p>
+        </div>
+        <div class="card" style="border-color:rgba(249,115,22,.4);text-align:center;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#fdba74;margin-bottom:8px;">Feasibility Score</div>
+          <div style="font-size:3.2rem;font-weight:900;line-height:1;background:linear-gradient(135deg,#f97316,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">85<span style="font-size:1.4rem">/100</span></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;">QR menu + kitchen display + GST billing is a 10-week build. WhatsApp takeaway bot reuses ChatBase infrastructure. No novel tech needed — just elegant execution.</div>
+        </div>
+      </div>
+      <div class="cols-3" style="margin-bottom:16px;">
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#fdba74;margin-bottom:8px;">Market Viability</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:88%;height:100%;background:linear-gradient(90deg,#f97316,#fb923c);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#fdba74;margin-bottom:4px;">88%</div>
+          <p class="card-body" style="font-size:.76rem;">7.5 million restaurants in India. 0.1% = 7,500 customers at &#x20B9;3,000/mo = &#x20B9;2.25 crore MRR. QR ordering + WhatsApp integration is genuinely novel vs Petpooja/Posist at this price point.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#fdba74;margin-bottom:8px;">Viral Potential</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:78%;height:100%;background:linear-gradient(90deg,#f97316,#fb923c);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#fdba74;margin-bottom:4px;">78%</div>
+          <p class="card-body" style="font-size:.76rem;">Customers scan QR menu, see "Powered by TableFlow." Restaurant owners refer each other at trade associations. Every diner becomes a product demo — natural B2B2C loop.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#fdba74;margin-bottom:8px;">Revenue Machine Rating</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:82%;height:100%;background:linear-gradient(90deg,#f97316,#fb923c);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#fdba74;margin-bottom:4px;">82%</div>
+          <p class="card-body" style="font-size:.76rem;">High stickiness — restaurants don't switch POS systems once operational. GST filing integration creates compliance lock-in. &#x20B9;1,999–9,999/mo price is lower than any competitor at this feature set.</p>
+        </div>
+      </div>
+      <div style="padding:16px 20px;border-radius:10px;background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.25);">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#fdba74;margin-bottom:6px;">Honest Verdict</div>
+        <p style="font-size:.84rem;line-height:1.6;color:var(--text);">Strong product-market fit. QR ordering + WhatsApp integration is genuinely novel in the Indian market. 10-week build. High stickiness — restaurants don't switch POS systems once operational. The WhatsApp bot component can be directly repurposed from ChatBase infrastructure, cutting build time significantly.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 10 (NEW): TaxPilot Validation ── -->
+  <div class="slide" id="sTaxPilot">
+    <div class="slide-inner" style="overflow-y:auto;max-height:calc(100vh - 120px);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <span style="display:inline-block;padding:4px 14px;border-radius:999px;background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.35);font-size:.75rem;font-weight:700;letter-spacing:.08em;">P5 — TaxPilot</span>
+        <span style="font-size:.75rem;color:var(--muted);">Validation Deep-Dive</span>
+      </div>
+      <h2 class="title" style="margin-bottom:18px;">14 Million GST-Registered Businesses. Monthly Filing Pain. <span style="background:linear-gradient(135deg,#3b82f6,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">One AI Fix.</span></h2>
+      <div class="cols-2" style="margin-bottom:16px;">
+        <div class="card" style="border-color:rgba(59,130,246,.25);">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#93c5fd;margin-bottom:8px;">The Real Problem</div>
+          <p class="card-body">14M GST businesses must file GSTR-1 + GSTR-3B monthly or face penalties. Most pay a CA &#x20B9;2,000–5,000/month just for filing. Manual process = errors = notices from GSTN. No AI-native tool exists — only legacy desktop software built before Claude Vision existed.</p>
+        </div>
+        <div class="card" style="border-color:rgba(59,130,246,.4);text-align:center;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#93c5fd;margin-bottom:8px;">Feasibility Score</div>
+          <div style="font-size:3.2rem;font-weight:900;line-height:1;background:linear-gradient(135deg,#3b82f6,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">88<span style="font-size:1.4rem">/100</span></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;">GST portal APIs are well-documented. Claude Vision for invoice scanning is proven. Auto-HSN classification is AI-native. 10–12 week full build. Core MVP in 6 weeks.</div>
+        </div>
+      </div>
+      <div class="cols-3" style="margin-bottom:16px;">
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#93c5fd;margin-bottom:8px;">Market Viability</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:90%;height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#93c5fd;margin-bottom:4px;">90%</div>
+          <p class="card-body" style="font-size:.76rem;">14M GST businesses. 0.1% at &#x20B9;1,000/mo avg = &#x20B9;1.4 crore MRR ($170K). 1% = $1.7M MRR. Mandatory compliance = near-zero churn. Government can't remove the filing requirement.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#93c5fd;margin-bottom:8px;">Viral Potential</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:72%;height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#93c5fd;margin-bottom:4px;">72%</div>
+          <p class="card-body" style="font-size:.76rem;">CA referral flywheel: one CA uses TaxPilot for 50 clients, recommends to all. CA referral program = one CA brings 20–50 paying customers. CAs talk to each other at ICAI events monthly.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#93c5fd;margin-bottom:8px;">Revenue Machine Rating</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:90%;height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#93c5fd;margin-bottom:4px;">90%</div>
+          <p class="card-body" style="font-size:.76rem;">Highest revenue machine rating of all new products. Mandatory recurring compliance = near-zero churn. Monthly filing cycle = monthly billing cycle. Customer has no reason to ever leave.</p>
+        </div>
+      </div>
+      <div style="padding:16px 20px;border-radius:10px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.25);">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#93c5fd;margin-bottom:6px;">Honest Verdict</div>
+        <p style="font-size:.84rem;line-height:1.6;color:var(--text);">Highest revenue machine rating of all new products. Mandatory recurring compliance = near-zero churn. CA referral program is the growth flywheel — one CA brings 20–50 paying customers. Build by Month 2. This is the product with the best LTV:CAC ratio in the portfolio.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 11 (NEW): MachineGuard Validation ── -->
+  <div class="slide" id="sMachineGuard">
+    <div class="slide-inner" style="overflow-y:auto;max-height:calc(100vh - 120px);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <span style="display:inline-block;padding:4px 14px;border-radius:999px;background:rgba(34,211,165,.12);color:#6ee7b7;border:1px solid rgba(34,211,165,.3);font-size:.75rem;font-weight:700;letter-spacing:.08em;">P6 — MachineGuard</span>
+        <span style="font-size:.75rem;color:var(--muted);">Validation Deep-Dive</span>
+      </div>
+      <h2 class="title" style="margin-bottom:18px;">Factories Lose $500K/Year to Downtime. <span class="grad-green">A $30 Sensor Prevents It.</span></h2>
+      <div class="cols-2" style="margin-bottom:16px;">
+        <div class="card" style="border-color:rgba(34,211,165,.2);">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#6ee7b7;margin-bottom:8px;">The Real Problem</div>
+          <p class="card-body">Manufacturing SMEs lose $50K–$500K/year to unplanned machine downtime. IBM Maximo / Siemens MindSphere cost $200K+ with 12-month implementations. Nothing affordable exists for factories with 10–200 machines. The gap between "pen and paper" and "enterprise CMMS" is enormous.</p>
+        </div>
+        <div class="card" style="border-color:rgba(34,211,165,.35);text-align:center;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#6ee7b7;margin-bottom:8px;">Feasibility Score</div>
+          <div style="font-size:3.2rem;font-weight:900;line-height:1;background:linear-gradient(135deg,#22d3a5,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">85<span style="font-size:1.4rem">/100</span></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.5;">ESP32 sensor kit (vibration + temp + current) installs in 30 min — no rewiring. ConnectOne provides MQTT + cloud backbone. Anomaly detection via Claude AI. Built on existing hardware moat.</div>
+        </div>
+      </div>
+      <div class="cols-3" style="margin-bottom:16px;">
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6ee7b7;margin-bottom:8px;">Market Viability</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:85%;height:100%;background:linear-gradient(90deg,#22d3a5,#34d399);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#6ee7b7;margin-bottom:4px;">85%</div>
+          <p class="card-body" style="font-size:.76rem;">200,000+ manufacturing SMEs in India. 1,000 customers at $500/mo = $500K MRR. Enterprise: 10 deals at $10K/mo = $100K MRR additional. Existing large players leave this segment completely unserved.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6ee7b7;margin-bottom:8px;">Viral Potential</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:65%;height:100%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#a5b4fc;margin-bottom:4px;">65%</div>
+          <p class="card-body" style="font-size:.76rem;">Factory owners refer each other at MSME clusters and industry associations. "We saved &#x20B9;15 lakh in downtime last year" is a powerful word-of-mouth story at GIDC trade events in Gujarat.</p>
+        </div>
+        <div class="card">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6ee7b7;margin-bottom:8px;">Revenue Machine Rating</div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;height:8px;margin-bottom:8px;overflow:hidden;"><div style="width:90%;height:100%;background:linear-gradient(90deg,#22d3a5,#34d399);border-radius:4px;"></div></div>
+          <div style="font-size:.7rem;font-weight:700;color:#6ee7b7;margin-bottom:4px;">90%</div>
+          <p class="card-body" style="font-size:.76rem;">Hardware sensor kit = physical barrier to competitor entry. SaaS + hardware upsell = high LTV. Enterprise deals at $5K–$25K/mo with multi-year contracts. Pairs with ConnectOne in every enterprise pitch.</p>
+        </div>
+      </div>
+      <div style="padding:16px 20px;border-radius:10px;background:rgba(34,211,165,.07);border:1px solid rgba(34,211,165,.2);">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#6ee7b7;margin-bottom:6px;">Honest Verdict</div>
+        <p style="font-size:.84rem;line-height:1.6;color:var(--text);">The product that proves our IoT moat to enterprise buyers. Built on ConnectOne — shared MQTT, shared device provisioning, zero infra duplication. Hardware sensor kit creates a physical barrier to competitor entry. Slower to close but highest contract values. Pairs with ConnectOne in every enterprise pitch — one platform, two powerful use cases.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 12: FLAGSHIP CONNECTONE ── -->
+  <div class="slide" id="s6">
+    <div class="slide-inner">
+      <div class="slide-label">Flagship Product</div>
+      <h2 class="title">ConnectOne — <span class="grad">Our Moat Product</span></h2>
+      <p class="subtitle" style="margin-bottom:18px;">The only IoT platform built by a team with actual firmware experience.</p>
+      <div class="cols-2" style="margin-bottom:16px;">
+        <div class="card" style="border-color:rgba(239,68,68,.2)">
+          <span class="pill pill-red" style="display:inline-block;margin-bottom:8px;font-size:.7rem">The Problem</span>
+          <p class="card-body">Building an IoT backend takes 6–18 months. AWS IoT Core is massively over-engineered. ThingsBoard is generic and requires deep config. Nobody ships fast.</p>
+        </div>
+        <div class="card" style="border-color:rgba(34,211,165,.2)">
+          <span class="pill pill-green" style="display:inline-block;margin-bottom:8px;font-size:.7rem">Our Solution</span>
+          <p class="card-body">EMQX MQTT at scale. OTA firmware updates. White-label mobile apps. <strong style="color:#a5b4fc">AI natural-language queries over device data.</strong> MCP server per tenant. Ship in days not months.</p>
+        </div>
+      </div>
+      <div class="pricing-row">
+        <div class="tier">
+          <div class="tier-name">Dev</div>
+          <div class="tier-price">Free</div>
+          <div class="tier-sub">Up to 10 devices</div>
+        </div>
+        <div class="tier">
+          <div class="tier-name">Starter</div>
+          <div class="tier-price grad">$99<span style="font-size:.9rem">/mo</span></div>
+          <div class="tier-sub">Up to 500 devices</div>
+        </div>
+        <div class="tier highlight">
+          <div class="tier-name" style="color:#a5b4fc">Growth</div>
+          <div class="tier-price grad">$499<span style="font-size:.9rem">/mo</span></div>
+          <div class="tier-sub">Unlimited + white-label</div>
+        </div>
+        <div class="tier" style="border-color:rgba(34,211,165,.3)">
+          <div class="tier-name" style="color:#6ee7b7">Enterprise</div>
+          <div class="tier-price grad-green" style="font-size:1.1rem">$50K–$500K</div>
+          <div class="tier-sub">Contract + $5K–$25K/mo</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:14px;font-size:.85rem;color:var(--muted)">TAM: <strong style="color:#a5b4fc">100,000+ hardware companies</strong> globally need this infrastructure</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 13: AGENTS ── -->
+  <div class="slide" id="s7">
+    <div class="slide-inner">
+      <div class="slide-label">Operations</div>
+      <h2 class="title">We Don't Have Employees. <span class="grad">We Have Agents.</span></h2>
+      <div class="org">
+        <div class="pod" style="border-color:rgba(99,102,241,.3)">
+          <div class="pod-label" style="color:#818cf8">Product Pod</div>
+          <span class="agent-chip">@cto</span>
+          <span class="agent-chip">@frontend-architect</span>
+          <span class="agent-chip">@ui-builder</span>
+          <span class="agent-chip">@api-engineer</span>
+          <span class="agent-chip">@infra-engineer</span>
+          <span class="agent-chip">@design-systems</span>
+          <span class="agent-chip">@product-designer</span>
+        </div>
+        <div class="pod" style="border-color:rgba(139,92,246,.3)">
+          <div class="pod-label" style="color:#c4b5fd">Growth Pod</div>
+          <span class="agent-chip" style="background:rgba(139,92,246,.12);color:#c4b5fd;border-color:rgba(139,92,246,.3)">@cmo</span>
+          <span class="agent-chip" style="background:rgba(139,92,246,.12);color:#c4b5fd;border-color:rgba(139,92,246,.3)">@content-marketer</span>
+          <span class="agent-chip" style="background:rgba(139,92,246,.12);color:#c4b5fd;border-color:rgba(139,92,246,.3)">@paid-ops-marketer</span>
+        </div>
+        <div class="pod" style="border-color:rgba(34,211,165,.25)">
+          <div class="pod-label" style="color:#6ee7b7">Revenue Pod</div>
+          <span class="agent-chip" style="background:rgba(34,211,165,.1);color:#6ee7b7;border-color:rgba(34,211,165,.25)">@inbound-sales</span>
+          <span class="agent-chip" style="background:rgba(34,211,165,.1);color:#6ee7b7;border-color:rgba(34,211,165,.25)">@outbound-sales</span>
+        </div>
+        <div class="pod" style="border-color:rgba(245,158,11,.25)">
+          <div class="pod-label" style="color:#fcd34d">Coordination</div>
+          <span class="agent-chip" style="background:rgba(245,158,11,.1);color:#fcd34d;border-color:rgba(245,158,11,.25)">@orchestrator</span>
+        </div>
+      </div>
+      <div class="agent-stats">
+        <div class="card stat-box">
+          <div class="stat-num grad">13</div>
+          <div class="stat-label">Claude Agents in parallel</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-num" style="color:#22d3a5">1</div>
+          <div class="stat-label">Human founder — approver + enterprise closer</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-num grad-green">90</div>
+          <div class="stat-label">Min/day founder time commitment</div>
+        </div>
+      </div>
+      <div class="bottom-banner" style="margin-top:14px;font-style:italic">"This is the product. The company IS the demo."</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 14: ROADMAP ── -->
+  <div class="slide" id="s8">
+    <div class="slide-inner">
+      <div class="slide-label">Execution Plan</div>
+      <h2 class="title">90 Days. Three Phases. <span class="grad">First Revenue by Day 15.</span></h2>
+      <div class="timeline">
+        <div class="tl-bar"></div>
+      </div>
+      <div class="phases">
+        <div class="phase" style="border-color:rgba(34,211,165,.3)">
+          <span class="pill pill-green" style="font-size:.7rem;margin-bottom:8px;display:inline-block">Days 1–30</span>
+          <div class="phase-head">Phase 1: Foundation</div>
+          <div class="phase-sub">First paying customers, website live, agents operational</div>
+          <div class="milestone">Day 15 — IoT Skills Pack (first revenue)</div>
+          <div class="milestone">Day 26 — New website live</div>
+          <div class="milestone">Day 30 — ChatBase public launch</div>
+        </div>
+        <div class="phase" style="border-color:rgba(99,102,241,.35)">
+          <span class="pill" style="font-size:.7rem;margin-bottom:8px;display:inline-block">Days 31–60</span>
+          <div class="phase-head">Phase 2: Launch</div>
+          <div class="phase-sub">Content engine, enterprise conversations, $10K MRR target</div>
+          <div class="milestone">Week 7 — First enterprise discovery calls</div>
+          <div class="milestone">Week 8 — First proposal sent</div>
+          <div class="milestone">Day 56 — Kill/keep review</div>
+        </div>
+        <div class="phase" style="border-color:rgba(139,92,246,.35)">
+          <span class="pill pill-violet" style="font-size:.7rem;margin-bottom:8px;display:inline-block">Days 61–90</span>
+          <div class="phase-head">Phase 3: Scale</div>
+          <div class="phase-sub">Kill losers, scale winners, close enterprise</div>
+          <div class="milestone">Week 10 — First enterprise contract signed</div>
+          <div class="milestone">Day 84 — Public case study</div>
+          <div class="milestone">Day 90 — Phase review + Series A prep</div>
+        </div>
+      </div>
+      <div class="kill-note">Kill-switch discipline: Day 28, Day 56, Day 90 — underperformers get cut immediately. No attachment.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 15: REVENUE ── -->
+  <div class="slide" id="s9">
+    <div class="slide-inner">
+      <div class="slide-label">Financial Projections</div>
+      <h2 class="title">Revenue Trajectory — <span class="grad">90-Day View</span></h2>
+      <div class="chart-wrap">
+        <div class="bar-group">
+          <div class="bar-val">$2K</div>
+          <div style="width:100%;height:28px;background:linear-gradient(180deg,#22d3a5,#059669);border-radius:6px 6px 0 0;"></div>
+          <div class="bar-label">Day 30</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-val">$10K</div>
+          <div style="width:100%;height:55px;background:linear-gradient(180deg,#6366f1,#4f46e5);border-radius:6px 6px 0 0;"></div>
+          <div class="bar-label">Day 60</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-val">$75K</div>
+          <div style="width:100%;height:120px;background:linear-gradient(180deg,#818cf8,#6366f1);border-radius:6px 6px 0 0;"></div>
+          <div class="bar-label">Day 90 Realistic</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-val" style="color:#c084fc">$150K+</div>
+          <div style="width:100%;height:158px;background:linear-gradient(180deg,#c084fc,#8b5cf6);border-radius:6px 6px 0 0;opacity:.7;border:1px dashed rgba(192,132,252,.5);"></div>
+          <div class="bar-label">Day 90 Stretch</div>
+        </div>
+      </div>
+      <table class="rev-table">
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>MRR</th>
+            <th>Customers</th>
+            <th>Pipeline Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Day 30</td>
+            <td>$500 – $2K</td>
+            <td>3 – 10</td>
+            <td>$20K</td>
+          </tr>
+          <tr>
+            <td>Day 60</td>
+            <td>$3K – $10K</td>
+            <td>25 – 75</td>
+            <td>$50K – $200K</td>
+          </tr>
+          <tr>
+            <td><strong>Day 90</strong></td>
+            <td><strong>$25K – $75K</strong></td>
+            <td><strong>100+</strong></td>
+            <td><strong>$200K – $500K+</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 16: TAM — UPDATED ── -->
+  <div class="slide" id="s10">
+    <div class="slide-inner">
+      <div class="slide-label">Market Opportunity</div>
+      <h2 class="title">TAM Across <span class="grad">6 Verticals</span></h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;">
+        <div class="card tam-card" style="border-color:rgba(34,211,165,.3)">
+          <div class="tam-market">IoT Platform</div>
+          <div class="tam-num grad-green">$10M</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:8px;line-height:1.5">Initial contract value<br>10–20 enterprise deals at $500K–$10M each</div>
+        </div>
+        <div class="card tam-card" style="border-color:rgba(99,102,241,.3)">
+          <div class="tam-market">Claude Ecosystem</div>
+          <div class="tam-num grad">&gt;80%</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:8px;line-height:1.5">Gross margin<br>Developer-first, organic growth, viral distribution</div>
+        </div>
+        <div class="card tam-card" style="border-color:rgba(37,211,102,.3)">
+          <div class="tam-market">WhatsApp AI (ChatBase)</div>
+          <div class="tam-num" style="background:linear-gradient(135deg,#25D366,#86efac);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">60M</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:8px;line-height:1.5">WhatsApp Business users<br>15M+ in India alone. $49–$299/mo</div>
+        </div>
+        <div class="card tam-card" style="border-color:rgba(249,115,22,.3)">
+          <div class="tam-market">Restaurant OS (TableFlow)</div>
+          <div class="tam-num" style="background:linear-gradient(135deg,#f97316,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">&#x20B9;2.25Cr</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:8px;line-height:1.5">MRR at 0.1% capture<br>7.5M restaurants @ &#x20B9;3K/mo avg</div>
+        </div>
+        <div class="card tam-card" style="border-color:rgba(59,130,246,.3)">
+          <div class="tam-market">GST Filing (TaxPilot)</div>
+          <div class="tam-num" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">$1.7M</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:8px;line-height:1.5">MRR at 1% of 14M GST businesses<br>Near-zero churn — mandatory compliance</div>
+        </div>
+        <div class="card tam-card" style="border-color:rgba(34,211,165,.3)">
+          <div class="tam-market">Predictive Maint. (MachineGuard)</div>
+          <div class="tam-num grad-green">$500K</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:8px;line-height:1.5">MRR at 1,000 SMEs<br>200K+ factories in India, zero good solutions</div>
+        </div>
+      </div>
+      <div class="bottom-banner" style="margin-top:18px;">We don't need to win the whole market. A sliver makes us profitable.</div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 17: UNIT ECONOMICS ── -->
+  <div class="slide" id="s11">
+    <div class="slide-inner">
+      <div class="slide-label">Unit Economics</div>
+      <h2 class="title">The Numbers <span class="grad">That Matter</span></h2>
+      <div class="econ-grid" style="margin-top:18px;">
+        <div class="econ-box">
+          <div class="econ-num" style="color:#f87171">&lt;$200</div>
+          <div class="econ-label">Blended CAC</div>
+        </div>
+        <div class="econ-box">
+          <div class="econ-num grad">&gt;$1,000</div>
+          <div class="econ-label">Avg LTV</div>
+        </div>
+        <div class="econ-box" style="border-color:rgba(34,211,165,.3)">
+          <div class="econ-num grad-green">&gt;5:1</div>
+          <div class="econ-label">LTV : CAC Ratio</div>
+        </div>
+        <div class="econ-box">
+          <div class="econ-num" style="color:#fbbf24">&lt;6 mo</div>
+          <div class="econ-label">Payback Period</div>
+        </div>
+        <div class="econ-box" style="border-color:rgba(99,102,241,.3)">
+          <div class="econ-num grad">&gt;70%</div>
+          <div class="econ-label">Gross Margin</div>
+        </div>
+        <div class="econ-box">
+          <div class="econ-num" style="color:#a3a3a3">$6.5K</div>
+          <div class="econ-label">Monthly Burn (max)</div>
+        </div>
+      </div>
+      <div class="enterprise-note">
+        Enterprise deals (IoT, MachineGuard) blow these numbers out — <strong>$30K–$180K LTV per customer</strong>. A single enterprise win covers 5+ months of burn.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 18: TRACTION ── -->
+  <div class="slide" id="s12">
+    <div class="slide-inner">
+      <div class="slide-label">Traction &amp; Validation</div>
+      <h2 class="title">What We've <span class="grad">Already Built</span></h2>
+      <div class="traction-cols" style="margin-top:22px;">
+        <div>
+          <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#22d3a5;margin-bottom:14px;">Built &amp; Operational</div>
+          <ul class="traction-list">
+            <li><span class="check check-done">&#x2713;</span><span>13-agent AI company fully operational</span></li>
+            <li><span class="check check-done">&#x2713;</span><span>6 focused product PRDs complete with full technical specs</span></li>
+            <li><span class="check check-done">&#x2713;</span><span>90-day execution roadmap live and running</span></li>
+            <li><span class="check check-done">&#x2713;</span><span>Tech stack defined, coding standards set, monorepo scaffolded</span></li>
+            <li><span class="check check-done">&#x2713;</span><span>Agent playbooks written across all 13 agents</span></li>
+            <li><span class="check check-done">&#x2713;</span><span>Brand, design system, and voice defined</span></li>
+            <li><span class="check check-done">&#x2713;</span><span>10 years of client relationships (USA, Canada, Ireland, China, Dubai)</span></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#818cf8;margin-bottom:14px;">Incoming — Locked Dates</div>
+          <ul class="traction-list">
+            <li><span class="check check-soon">&#x25B6;</span><span><strong>Day 15</strong> — First product live (IoT Skills Pack)</span></li>
+            <li><span class="check check-soon">&#x25B6;</span><span><strong>Day 26</strong> — New website + rebrand live</span></li>
+            <li><span class="check check-soon">&#x25B6;</span><span><strong>Day 30</strong> — ChatBase public launch</span></li>
+            <li><span class="check check-soon">&#x25B6;</span><span><strong>Day 60</strong> — Enterprise pipeline formally active</span></li>
+            <li><span class="check check-soon">&#x25B6;</span><span><strong>Day 84</strong> — First public case study published</span></li>
+            <li><span class="check check-soon">&#x25B6;</span><span><strong>Day 90</strong> — Revenue target review + public announcement</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 19: WHY NOW ── -->
+  <div class="slide" id="s13">
+    <div class="slide-inner">
+      <div class="slide-label">Timing</div>
+      <h2 class="title">The Window Is Open. <span class="grad">Briefly.</span></h2>
+      <div style="margin-top:18px;">
+        <div class="why-item">
+          <div class="why-num grad">1</div>
+          <div class="why-text"><strong style="color:#a5b4fc">Claude 4 makes agents production-ready</strong> — 6 months ago this wasn't possible at this quality or reliability. The tooling just crossed the threshold. We're building when the cost curve hits inflection.</div>
+        </div>
+        <div class="why-item">
+          <div class="why-num grad">2</div>
+          <div class="why-text"><strong style="color:#a5b4fc">IoT + AI convergence is hitting enterprise budgets right now</strong> — not in 2 years. CIOs are actively buying in 2026. We have the credentials and the product to capture this wave at exactly the right moment.</div>
+        </div>
+        <div class="why-item">
+          <div class="why-num grad">3</div>
+          <div class="why-text"><strong style="color:#a5b4fc">The custom dev shop model is collapsing</strong> — companies that don't pivot in 2026 won't make it to 2027. We're not reacting. We started moving 6 months ago. Most of our former competition hasn't.</div>
+        </div>
+      </div>
+      <div class="why-note">
+        "We're not trend-chasing. We're the ones who saw the collapse coming and built the alternative."
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 20: THE ASK ── -->
+  <div class="slide" id="s14">
+    <div class="slide-inner">
+      <div class="slide-label">The Ask</div>
+      <h2 class="title">What We're Building <span class="grad">Toward</span></h2>
+      <div class="ask-grid" style="margin-top:16px;">
+        <div class="ask-card" style="border-color:rgba(99,102,241,.35)">
+          <div class="ask-num grad">$25K–$75K</div>
+          <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">MRR by Day 90 (Realistic)</div>
+          <div style="font-size:.78rem;color:var(--muted)">$150K+ on stretch scenario. Multiple revenue streams de-risk concentration.</div>
+        </div>
+        <div class="ask-card" style="border-color:rgba(34,211,165,.3)">
+          <div class="ask-num grad-green">2–4</div>
+          <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">Products with Real Paying Customers</div>
+          <div style="font-size:.78rem;color:var(--muted)">Not waitlists. Not beta users. Paying customers on recurring plans.</div>
+        </div>
+        <div class="ask-card" style="border-color:rgba(139,92,246,.35)">
+          <div class="ask-num" style="background:linear-gradient(135deg,#a78bfa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">1–3</div>
+          <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">Enterprise IoT × AI Contracts</div>
+          <div style="font-size:.78rem;color:var(--muted)">Signed or in late-stage negotiation. Each worth $50K–$500K+ contract value.</div>
+        </div>
+        <div class="ask-card" style="border-color:rgba(245,158,11,.25)">
+          <div class="ask-num" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">90 min</div>
+          <div style="font-size:.82rem;font-weight:700;margin-bottom:4px;">Founder Time Per Day</div>
+          <div style="font-size:.78rem;color:var(--muted)">Full system running autonomously. Founder approves, closes enterprise, sets strategy.</div>
+        </div>
+      </div>
+      <div class="cta-box">
+        <div style="font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Strategic Partners Welcome</div>
+        <div style="font-size:.95rem;color:var(--text);margin-bottom:6px;">We're looking for partners who understand AI-native businesses and IoT.</div>
+        <div class="cta-email">addonwebsolutions.ai@gmail.com</div>
+        <div class="cta-tagline">"The 13-agent factory is the product. Join us before it's a case study everyone's copying."</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Nav controls ── -->
+<div id="nav">
+  <button class="nav-btn" id="prevBtn" aria-label="Previous slide" title="Previous">&#x2190;</button>
+  <span id="counter">1 / 20</span>
+  <button class="nav-btn" id="nextBtn" aria-label="Next slide" title="Next">&#x2192;</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+  let animating = false;
+
+  const progress = document.getElementById('progress');
+  const counter  = document.getElementById('counter');
+
+  function goTo(index, direction) {
+    if (animating || index === current || index < 0 || index >= total) return;
+    animating = true;
+
+    const prev = slides[current];
+    const next = slides[index];
+
+    // set entry position based on direction
+    const sign = direction === 'forward' ? 1 : -1;
+    next.style.transform = `translateX(${sign * 60}px)`;
+    next.style.opacity = '0';
+    next.classList.remove('exit');
+    next.style.pointerEvents = 'none';
+
+    // force reflow
+    next.offsetHeight;
+
+    // exit current
+    prev.style.transform = `translateX(${-sign * 60}px)`;
+    prev.style.opacity = '0';
+    prev.classList.remove('active');
+    prev.style.pointerEvents = 'none';
+
+    // enter next
+    next.style.transform = 'translateX(0)';
+    next.style.opacity = '1';
+    next.classList.add('active');
+    next.style.pointerEvents = 'all';
+
+    current = index;
+    updateUI();
+
+    setTimeout(() => {
+      prev.style.transform = '';
+      prev.style.opacity  = '';
+      animating = false;
+    }, 560);
+  }
+
+  function updateUI() {
+    counter.textContent = `${current + 1} / ${total}`;
+    const pct = ((current + 1) / total) * 100;
+    progress.style.width = pct + '%';
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1, 'forward'));
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1, 'back'));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1, 'forward');
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1, 'back');
+  });
+
+  // touch swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1, 'forward') : goTo(current - 1, 'back');
+  });
+
+  // init
+  updateUI();
+
+  // Override transitions for inline style approach (clean reset)
+  slides.forEach((s, i) => {
+    if (i !== 0) {
+      s.style.opacity = '0';
+      s.style.transform = 'translateX(60px)';
+    }
+  });
+</script>
+</body>
+</html>

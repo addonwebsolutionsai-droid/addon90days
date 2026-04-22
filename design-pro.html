@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AddonWeb — Pro Design System v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────── */
+:root {
+  --bg:#07070a; --s1:#0f0f12; --s2:#161619; --s3:#1e1e22; --s4:#2a2a2f;
+  --b1:#2d2d33; --b2:#3d3d45; --b3:#52525e;
+  --t1:#f4f4f6; --t2:#a0a0b0; --t3:#65657a; --t4:#42424f;
+  --violet:#8b5cf6; --violet2:#6d28d9; --violet3:rgba(139,92,246,.12);
+  --green:#22c55e; --green2:#16a34a; --green3:rgba(34,197,94,.12);
+  --blue:#3b82f6; --blue2:#1d4ed8; --blue3:rgba(59,130,246,.12);
+  --amber:#f59e0b; --amber2:#d97706; --amber3:rgba(245,158,11,.12);
+  --cyan:#06b6d4; --cyan2:#0891b2; --cyan3:rgba(6,182,212,.12);
+  --red:#ef4444; --red2:#b91c1c; --red3:rgba(239,68,68,.12);
+  --pink:#ec4899; --orange:#f97316;
+  --font:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --r4:4px; --r8:8px; --r12:12px; --r16:16px; --r20:20px; --r999:999px;
+  --sw:260px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
+
+/* ── NOISE OVERLAY ───────────────────────────────── */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4}
+
+/* ── ANIMATIONS ──────────────────────────────────── */
+@keyframes aurora{0%,100%{transform:translate(-20%,-20%) scale(1)}33%{transform:translate(10%,-30%) scale(1.1)}66%{transform:translate(-10%,20%) scale(.95)}}
+@keyframes aurora2{0%,100%{transform:translate(20%,20%) scale(1)}33%{transform:translate(-15%,10%) scale(1.05)}66%{transform:translate(20%,-20%) scale(1.1)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 currentColor}50%{box-shadow:0 0 0 6px transparent}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes gradient-shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes slide-in-right{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes count-up{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes ping{0%{transform:scale(1);opacity:1}75%,100%{transform:scale(2);opacity:0}}
+
+/* ── SIDEBAR ─────────────────────────────────────── */
+#sidebar{position:fixed;top:0;left:0;width:var(--sw);height:100vh;background:var(--s1);border-right:1px solid var(--b1);overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+#sidebar::-webkit-scrollbar{width:3px}
+#sidebar::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px}
+.sb-logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--violet),var(--pink));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sb-logo-text{font-size:14px;font-weight:800;letter-spacing:-.3px}
+.sb-logo-text span{color:var(--violet)}
+.sb-version{margin-left:auto;font-size:9px;background:var(--violet3);color:var(--violet);padding:2px 6px;border-radius:var(--r999);font-weight:700}
+.sb-section{padding:14px 12px 4px;font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--t4);text-transform:uppercase}
+.sb-link{display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 6px;border-radius:var(--r8);color:var(--t3);text-decoration:none;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;position:relative}
+.sb-link:hover{background:var(--s2);color:var(--t2)}
+.sb-link.active{background:var(--violet3);color:var(--violet)}
+.sb-link.active::before{content:'';position:absolute;left:0;top:25%;height:50%;width:3px;background:var(--violet);border-radius:0 2px 2px 0}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:9px;background:var(--s3);color:var(--t3);padding:1px 6px;border-radius:var(--r999);font-weight:700}
+.sb-badge.hot{background:var(--red3);color:var(--red)}
+.sb-kbd{margin-left:auto;font-size:9px;background:var(--s3);border:1px solid var(--b1);color:var(--t4);padding:1px 5px;border-radius:4px;font-family:var(--mono)}
+
+/* ── MAIN ────────────────────────────────────────── */
+#main{margin-left:var(--sw);flex:1;min-width:0}
+
+/* ── SECTION BASE ────────────────────────────────── */
+.sec{padding:72px 60px;border-bottom:1px solid var(--b1);position:relative;overflow:hidden}
+.sec:last-child{border-bottom:none}
+.sec-tag{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--violet);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-tag::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--violet3),transparent)}
+.sec-h{font-size:40px;font-weight:900;letter-spacing:-1.5px;line-height:1.05;margin-bottom:14px}
+.sec-sub{font-size:16px;color:var(--t2);max-width:620px;line-height:1.75;margin-bottom:48px}
+.aurora-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.aurora-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15}
+.sec>*:not(.aurora-bg){position:relative;z-index:1}
+
+/* ── BENTO GRID ──────────────────────────────────── */
+.bento{display:grid;gap:12px}
+.bento-2{grid-template-columns:1fr 1fr}
+.bento-3{grid-template-columns:1fr 1fr 1fr}
+.bento-12{grid-template-columns:1fr 2fr}
+.bento-21{grid-template-columns:2fr 1fr}
+.bento-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r16);padding:24px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.bento-card:hover{border-color:var(--b2);transform:translateY(-2px)}
+.bento-card.span-2{grid-column:span 2}
+.bento-card.span-3{grid-column:span 3}
+.bento-card.tall{grid-row:span 2}
+/* Gradient border card */
+.gb-card{background:var(--s1);border-radius:var(--r16);padding:1.5px;background:linear-gradient(135deg,var(--violet),var(--pink),var(--cyan));position:relative}
+.gb-card-inner{background:var(--s1);border-radius:calc(var(--r16) - 1.5px);padding:24px;height:100%}
+/* Glass card */
+.glass{background:rgba(255,255,255,.03);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:var(--r16);padding:24px}
+
+/* ── PILLS / TAGS ────────────────────────────────── */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--r999);font-size:11px;font-weight:700}
+.pill-violet{background:var(--violet3);color:var(--violet);border:1px solid rgba(139,92,246,.25)}
+.pill-green{background:var(--green3);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.pill-red{background:var(--red3);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.pill-amber{background:var(--amber3);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+.pill-blue{background:var(--blue3);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.pill-cyan{background:var(--cyan3);color:var(--cyan);border:1px solid rgba(6,182,212,.25)}
+
+/* ── BUTTONS ─────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r8);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--violet);color:#fff}
+.btn-primary:hover{background:var(--violet2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:1px solid var(--b2);color:var(--t2)}
+.btn-ghost:hover{border-color:var(--b3);color:var(--t1);background:var(--s2)}
+.btn-danger{background:var(--red3);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.btn-lg{padding:12px 24px;font-size:15px;border-radius:var(--r12)}
+.btn-sm{padding:5px 12px;font-size:11px;border-radius:var(--r8)}
+.btn-icon{width:32px;height:32px;padding:0;justify-content:center;border-radius:var(--r8)}
+/* Gradient button */
+.btn-gradient{background:linear-gradient(135deg,var(--violet),var(--pink));color:#fff;border:none}
+.btn-gradient:hover{opacity:.9;transform:translateY(-1px)}
+
+/* ── TYPOGRAPHY UTIL ─────────────────────────────── */
+.gradient-text{background:linear-gradient(135deg,var(--violet),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gradient-text-2{background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.animated-gradient{background:linear-gradient(270deg,var(--violet),var(--pink),var(--cyan),var(--violet));background-size:300% 300%;animation:gradient-shift 4s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.mono{font-family:var(--mono)}
+.label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)}
+
+/* ── KPI CARD ────────────────────────────────────── */
+.kpi{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:16px 18px;transition:border-color .2s}
+.kpi:hover{border-color:var(--b2)}
+.kpi-label{font-size:11px;color:var(--t3);margin-bottom:6px;font-weight:500}
+.kpi-val{font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1;margin-bottom:5px}
+.kpi-sub{font-size:11px;display:flex;align-items:center;gap:4px}
+.kpi-up{color:var(--green)}
+.kpi-down{color:var(--red)}
+.kpi-neutral{color:var(--t3)}
+.kpi-bar{height:3px;background:var(--s3);border-radius:2px;margin-top:10px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+
+/* ── DASHBOARD SHELL ─────────────────────────────── */
+.db{display:flex;border:1px solid var(--b1);border-radius:var(--r16);overflow:hidden;background:var(--s1)}
+.db-side{width:200px;background:var(--bg);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0}
+.db-side-logo{padding:14px 14px 10px;font-size:13px;font-weight:800;border-bottom:1px solid var(--b1)}
+.db-nav-g{padding:10px 6px 0}
+.db-nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--t4);padding:0 8px;margin-bottom:3px;text-transform:uppercase}
+.db-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:var(--r8);font-size:11px;color:var(--t3);margin-bottom:1px;cursor:pointer;transition:all .1s}
+.db-item:hover{background:var(--s2);color:var(--t2)}
+.db-item.active{background:rgba(139,92,246,.12);color:var(--violet)}
+.db-item-icon{width:18px;height:18px;border-radius:5px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.db-item-badge{margin-left:auto;font-size:9px;background:var(--red3);color:var(--red);padding:1px 5px;border-radius:var(--r999)}
+.db-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.db-top{height:48px;border-bottom:1px solid var(--b1);padding:0 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--s1)}
+.db-top-title{font-size:13px;font-weight:700}
+.db-top-actions{display:flex;gap:6px;align-items:center}
+.db-content{flex:1;padding:16px;overflow-y:auto;background:var(--bg)}
+.db-content::-webkit-scrollbar{width:3px}
+.db-content::-webkit-scrollbar-thumb{background:var(--b1)}
+
+/* ── TABLE ───────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--b1);background:var(--s2)}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--b1);color:var(--t2)}
+.tbl tr:hover td{background:var(--s2);color:var(--t1)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden}
+
+/* ── PROGRESS BAR ────────────────────────────────── */
+.progress{height:4px;background:var(--s3);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px}
+
+/* ── AVATAR STACK ────────────────────────────────── */
+.avatar-stack{display:flex}
+.avatar{width:24px;height:24px;border-radius:50%;border:2px solid var(--s1);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:-6px;flex-shrink:0}
+.avatar:first-child{margin-left:0}
+.avatar-overflow{background:var(--s3);color:var(--t3);font-size:9px}
+
+/* ── CMD PALETTE ─────────────────────────────────── */
+.cmd-palette{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r16);overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,.6)}
+.cmd-input{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--b1)}
+.cmd-input input{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:var(--t1);font-family:var(--font)}
+.cmd-input input::placeholder{color:var(--t3)}
+.cmd-results{padding:6px}
+.cmd-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r8);cursor:pointer;transition:background .1s}
+.cmd-item:hover,.cmd-item.selected{background:var(--violet3)}
+.cmd-item-icon{width:28px;height:28px;border-radius:8px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.cmd-item-text{flex:1}
+.cmd-item-title{font-size:13px;font-weight:500}
+.cmd-item-sub{font-size:11px;color:var(--t3)}
+.cmd-item-kbd{font-size:10px;background:var(--s3);border:1px solid var(--b1);color:var(--t3);padding:2px 6px;border-radius:4px;font-family:var(--mono)}
+
+/* ── NOTIFICATION ────────────────────────────────── */
+.notif-panel{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r16);overflow:hidden;width:340px}
+.notif-header{padding:12px 16px;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;align-items:center}
+.notif-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .1s}
+.notif-item:hover{background:var(--s2)}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+
+/* ── LANDING PAGE COMPONENTS ─────────────────────── */
+.lp{background:var(--bg);border:1px solid var(--b1);border-radius:var(--r16);overflow:hidden}
+.lp-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--b1);background:rgba(7,7,10,.8);backdrop-filter:blur(16px)}
+.lp-hero{padding:64px 28px 56px;text-align:center;position:relative;overflow:hidden}
+.lp-hero-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--r999);font-size:11px;font-weight:700;margin-bottom:20px}
+.lp-hero h1{font-size:44px;font-weight:900;letter-spacing:-2px;line-height:1.05;margin-bottom:16px}
+.lp-hero p{font-size:15px;color:var(--t2);max-width:480px;margin:0 auto 28px;line-height:1.75}
+.lp-hero-btns{display:flex;gap:10px;justify-content:center;margin-bottom:40px}
+.lp-features-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 28px;border-top:1px solid var(--b1)}
+.lp-feat{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:18px;transition:border-color .2s}
+.lp-feat:hover{border-color:var(--b2)}
+.lp-feat-icon{font-size:22px;margin-bottom:10px}
+.lp-feat h4{font-size:13px;font-weight:700;margin-bottom:5px}
+.lp-feat p{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* ── CHARTS (pure SVG/CSS) ───────────────────────── */
+.chart-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:14px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.chart-title{font-size:12px;font-weight:600;color:var(--t2)}
+.period-tabs{display:flex;gap:2px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);padding:2px}
+.period-tab{padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;color:var(--t3);cursor:pointer;transition:all .1s}
+.period-tab.active{background:var(--s4);color:var(--t1)}
+
+/* ── ANNOTATION ──────────────────────────────────── */
+.ann{background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.18);border-radius:var(--r12);padding:14px 18px;margin-top:14px}
+.ann-title{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--violet);margin-bottom:6px;font-family:var(--mono)}
+.ann p,.ann li{font-size:12px;color:var(--t2);line-height:1.7}
+.ann ul{padding-left:14px}
+.ann-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.ann-box{background:rgba(139,92,246,.05);border:1px solid rgba(139,92,246,.12);border-radius:var(--r8);padding:10px 14px}
+.ann-box .label{margin-bottom:6px;display:block}
+
+/* ── RULE CARD ───────────────────────────────────── */
+.rule-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:18px}
+.rule-card h4{font-size:13px;font-weight:700;margin-bottom:6px}
+.rule-card p{font-size:12px;color:var(--t2);line-height:1.6}
+.rule-card.do{border-top:2px solid var(--green)}
+.rule-card.dont{border-top:2px solid var(--red)}
+
+/* ── COLS ────────────────────────────────────────── */
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.col3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.col4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* ── PRODUCT SECTION ─────────────────────────────── */
+.prod-sec{padding:64px 60px;border-bottom:1px solid var(--b1);position:relative;overflow:hidden}
+.prod-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:40px}
+.prod-icon-box{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.prod-meta h2{font-size:26px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
+.prod-meta p{font-size:13px;color:var(--t2)}
+.prod-badges{margin-left:auto;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.prod-tabs-wrap{display:flex;gap:0;margin-bottom:24px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden;width:fit-content}
+.prod-tab{padding:8px 18px;font-size:12px;font-weight:700;color:var(--t3);cursor:pointer;border:none;background:transparent;transition:all .15s}
+.prod-tab.active{background:var(--s3);color:var(--t1)}
+
+/* Super admin */
+.sa-shell{display:flex;height:600px;border:1px solid var(--b1);border-radius:var(--r16);overflow:hidden}
+.sa-side{width:220px;background:#050507;border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0}
+.sa-main{flex:1;display:flex;flex-direction:column;background:var(--bg)}
+
+/* Scroll-driven fade-up for sections */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Stagger children */
+.stagger>*{opacity:0;transform:translateY(16px);transition:opacity .4s ease,transform .4s ease}
+.stagger.visible>*:nth-child(1){opacity:1;transform:none;transition-delay:.05s}
+.stagger.visible>*:nth-child(2){opacity:1;transform:none;transition-delay:.1s}
+.stagger.visible>*:nth-child(3){opacity:1;transform:none;transition-delay:.15s}
+.stagger.visible>*:nth-child(4){opacity:1;transform:none;transition-delay:.2s}
+.stagger.visible>*:nth-child(5){opacity:1;transform:none;transition-delay:.25s}
+.stagger.visible>*:nth-child(6){opacity:1;transform:none;transition-delay:.3s}
+
+/* Shimmer skeleton */
+.skeleton{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--r8)}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<nav id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">⚡</div>
+    <div class="sb-logo-text">Addon<span>Web</span></div>
+    <div class="sb-version">v2.0</div>
+  </div>
+
+  <div class="sb-section">Philosophy</div>
+  <a class="sb-link active" href="#philosophy"><span class="sb-dot" style="background:var(--violet)"></span>Design Principles<span class="sb-kbd">01</span></a>
+  <a class="sb-link" href="#lessclicks"><span class="sb-dot" style="background:var(--violet)"></span>Zero-Click UX<span class="sb-badge hot">NEW</span></a>
+
+  <div class="sb-section">Foundations</div>
+  <a class="sb-link" href="#grid"><span class="sb-dot" style="background:var(--cyan)"></span>Grid & Bento</a>
+  <a class="sb-link" href="#typography"><span class="sb-dot" style="background:var(--cyan)"></span>Typography</a>
+  <a class="sb-link" href="#colors"><span class="sb-dot" style="background:var(--cyan)"></span>Color System</a>
+  <a class="sb-link" href="#motion"><span class="sb-dot" style="background:var(--cyan)"></span>Motion & Animation</a>
+
+  <div class="sb-section">Anatomy</div>
+  <a class="sb-link" href="#landing"><span class="sb-dot" style="background:var(--green)"></span>Landing Pages</a>
+  <a class="sb-link" href="#dashboard"><span class="sb-dot" style="background:var(--green)"></span>Dashboards</a>
+  <a class="sb-link" href="#components"><span class="sb-dot" style="background:var(--green)"></span>Components</a>
+  <a class="sb-link" href="#superadmin"><span class="sb-dot" style="background:var(--amber)"></span>Super Admin<span class="sb-badge">NEW</span></a>
+
+  <div class="sb-section">Products</div>
+  <a class="sb-link" href="#p01"><span class="sb-dot" style="background:var(--violet)"></span>P01 · Claude Toolkit</a>
+  <a class="sb-link" href="#p02"><span class="sb-dot" style="background:var(--green)"></span>P02 · ChatBase</a>
+  <a class="sb-link" href="#p03"><span class="sb-dot" style="background:var(--blue)"></span>P03 · TaxPilot</a>
+  <a class="sb-link" href="#p04"><span class="sb-dot" style="background:var(--amber)"></span>P04 · TableFlow</a>
+  <a class="sb-link" href="#p05"><span class="sb-dot" style="background:var(--cyan)"></span>P05 · ConnectOne</a>
+  <a class="sb-link" href="#p06"><span class="sb-dot" style="background:var(--red)"></span>P06 · MachineGuard</a>
+</nav>
+
+<!-- ══════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════ -->
+<main id="main">
+
+<!-- ════════════════════════════════════════════════════════
+     §01  DESIGN PRINCIPLES
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="philosophy">
+  <div class="aurora-bg">
+    <div class="aurora-blob" style="width:500px;height:500px;background:var(--violet);top:-200px;left:-100px;animation:aurora 12s ease infinite"></div>
+    <div class="aurora-blob" style="width:400px;height:400px;background:var(--pink);top:-150px;right:-150px;animation:aurora2 15s ease infinite"></div>
+  </div>
+  <div class="sec-tag">Section 01 — Philosophy</div>
+  <h1 class="sec-h">The AddonWeb<br><span class="animated-gradient">Design Standard</span></h1>
+  <p class="sec-sub">Groundbreaking doesn't mean complex. It means the right information, at the right time, requiring the fewest possible decisions from the user. Every pixel earns its place.</p>
+
+  <!-- Bento grid of principles -->
+  <div class="bento bento-3 stagger" style="margin-bottom:32px;">
+    <div class="gb-card" style="background:linear-gradient(135deg,var(--violet),var(--pink));border-radius:var(--r16)">
+      <div class="gb-card-inner">
+        <div style="font-size:28px;margin-bottom:12px">⚡</div>
+        <h3 style="font-size:16px;font-weight:800;margin-bottom:8px">Speed Over Beauty</h3>
+        <p style="font-size:12px;color:var(--t2);line-height:1.6">A fast interaction users don't notice beats a beautiful one they admire but wait for. Render in &lt;100ms or pre-load.</p>
+      </div>
+    </div>
+    <div class="bento-card">
+      <div style="font-size:28px;margin-bottom:12px">🎯</div>
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:8px">One Job Per Screen</h3>
+      <p style="font-size:12px;color:var(--t2);line-height:1.6">Each view has exactly one primary action. Everything else is secondary. Users never wonder "what do I do here?"</p>
+    </div>
+    <div class="bento-card">
+      <div style="font-size:28px;margin-bottom:12px">🔁</div>
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:8px">Contextual Defaults</h3>
+      <p style="font-size:12px;color:var(--t2);line-height:1.6">Smart defaults mean 80% of users never change a setting. Pre-fill, auto-detect, remember preferences.</p>
+    </div>
+    <div class="bento-card span-2">
+      <div style="display:flex;align-items:flex-start;gap:24px">
+        <div style="flex:1">
+          <div style="font-size:28px;margin-bottom:12px">🧠</div>
+          <h3 style="font-size:16px;font-weight:800;margin-bottom:8px">Progressive Disclosure</h3>
+          <p style="font-size:12px;color:var(--t2);line-height:1.6">Show only what the user needs right now. Advanced options live one click deeper — available but not in the way. 90% of power in 10% of screen.</p>
+        </div>
+        <div style="flex:1;background:var(--s2);border-radius:var(--r12);padding:14px;font-size:11px;color:var(--t2)">
+          <div style="margin-bottom:6px;font-weight:700;color:var(--t1)">Progressive Disclosure Example</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="background:var(--violet3);border:1px solid rgba(139,92,246,.25);border-radius:var(--r8);padding:8px 10px;color:var(--violet)">Level 1: One-click "Create Invoice" button</div>
+            <div style="background:var(--s3);border:1px solid var(--b1);border-radius:var(--r8);padding:8px 10px">Level 2: Invoice form (pre-filled from last order)</div>
+            <div style="background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);padding:8px 10px;color:var(--t3)">Level 3: Advanced → HSN override, multi-tax, custom terms</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bento-card">
+      <div style="font-size:28px;margin-bottom:12px">🌊</div>
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:8px">Flow State Design</h3>
+      <p style="font-size:12px;color:var(--t2);line-height:1.6">Never interrupt a user mid-task with confirmation dialogs, upsells, or unrelated alerts. Protect their focus.</p>
+    </div>
+  </div>
+
+  <!-- Godly.website trend matrix -->
+  <h3 style="font-size:18px;font-weight:800;margin-bottom:20px;">2025 Trends Applied — Godly.website Analysis</h3>
+  <div class="col3" style="margin-bottom:24px;">
+    <div class="bento-card">
+      <div class="label" style="margin-bottom:10px;color:var(--cyan)">Trend 01 · Bento Grid</div>
+      <p style="font-size:12px;color:var(--t2);line-height:1.7">Asymmetric card grids replacing uniform layouts. Cards have different sizes (1×1, 2×1, 1×2) creating visual rhythm. Used on landing pages to showcase multiple features simultaneously without linear hierarchy.</p>
+      <div class="pill pill-cyan" style="margin-top:10px;font-size:10px;">Applied to: All 6 product landing pages</div>
+    </div>
+    <div class="bento-card">
+      <div class="label" style="margin-bottom:10px;color:var(--violet)">Trend 02 · Aurora Backgrounds</div>
+      <p style="font-size:12px;color:var(--t2);line-height:1.7">Animated gradient blobs behind hero sections. Blurred radial gradients with slow motion create depth. Colors are brand-specific, opacity kept at 10–20% so content remains readable.</p>
+      <div class="pill pill-violet" style="margin-top:10px;font-size:10px;">Applied to: Hero sections + dashboard topbars</div>
+    </div>
+    <div class="bento-card">
+      <div class="label" style="margin-bottom:10px;color:var(--green)">Trend 03 · Noise Texture</div>
+      <p style="font-size:12px;color:var(--t2);line-height:1.7">Subtle grain/noise overlay on dark backgrounds. Makes pure black feel organic and premium rather than flat. Applied via SVG feTurbulence filter at 3–5% opacity.</p>
+      <div class="pill pill-green" style="margin-top:10px;font-size:10px;">Applied to: All dark backgrounds globally</div>
+    </div>
+    <div class="bento-card">
+      <div class="label" style="margin-bottom:10px;color:var(--amber)">Trend 04 · Gradient Borders</div>
+      <p style="font-size:12px;color:var(--t2);line-height:1.7">Cards with gradient borders using CSS padding trick: background: linear-gradient → inner div covers it. More dynamic than solid borders. Used for highlighted/featured cards only — not everything.</p>
+      <div class="pill pill-amber" style="margin-top:10px;font-size:10px;">Applied to: Hero stats, featured pricing tier</div>
+    </div>
+    <div class="bento-card">
+      <div class="label" style="margin-bottom:10px;color:var(--blue)">Trend 05 · Kinetic Typography</div>
+      <p style="font-size:12px;color:var(--t2);line-height:1.7">Animated gradient text on key headlines. CSS background-clip:text with gradient-shift animation. Used sparingly — hero H1 only. Rest of text is static for readability.</p>
+      <div class="pill pill-blue" style="margin-top:10px;font-size:10px;">Applied to: Hero H1 of each product</div>
+    </div>
+    <div class="bento-card">
+      <div class="label" style="margin-bottom:10px;color:var(--red)">Trend 06 · Glassmorphism</div>
+      <p style="font-size:12px;color:var(--t2);line-height:1.7">backdrop-filter:blur(20px) with rgba background on nav bars and floating elements. Creates depth hierarchy without heavy drop shadows. Requires non-flat background behind to show effect.</p>
+      <div class="pill pill-red" style="margin-top:10px;font-size:10px;">Applied to: Sticky navbars, command palette</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     §02  ZERO-CLICK UX
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="lessclicks">
+  <div class="sec-tag">Section 02 — Zero-Click UX</div>
+  <h1 class="sec-h">Work Done in<br><span class="gradient-text">Fewest Clicks</span></h1>
+  <p class="sec-sub">Every AddonWeb product is designed around the principle that the fastest user is a happy user. Count the clicks before you ship the feature.</p>
+
+  <div class="col2" style="margin-bottom:32px;">
+    <div>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Click Budget — Max Allowed</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);">
+          <span style="font-size:12px;color:var(--t2)">Create + send an invoice</span>
+          <span class="pill pill-green">≤ 3 clicks</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);">
+          <span style="font-size:12px;color:var(--t2)">Add a WhatsApp auto-reply</span>
+          <span class="pill pill-green">≤ 2 clicks</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);">
+          <span style="font-size:12px;color:var(--t2)">See why a machine alert fired</span>
+          <span class="pill pill-green">0 clicks (visible on load)</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);">
+          <span style="font-size:12px;color:var(--t2)">Connect a new IoT device</span>
+          <span class="pill pill-green">≤ 4 clicks</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);">
+          <span style="font-size:12px;color:var(--t2)">Install a Claude Skill</span>
+          <span class="pill pill-green">1 click</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);">
+          <span style="font-size:12px;color:var(--t2)">File a GST return</span>
+          <span class="pill pill-green">≤ 5 clicks</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">7 Zero-Click Techniques</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="bento-card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">1. Command Palette (⌘K)</div>
+          <div style="font-size:11px;color:var(--t2)">Jump anywhere in the app, trigger any action, search any record — without navigating. Required on every dashboard.</div>
+        </div>
+        <div class="bento-card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">2. Inline Editing</div>
+          <div style="font-size:11px;color:var(--t2)">Click any text field in a table or card to edit in place. No "edit mode" toggle. Auto-saves on blur.</div>
+        </div>
+        <div class="bento-card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">3. Smart Pre-fill</div>
+          <div style="font-size:11px;color:var(--t2)">Forms pre-fill from last session, GSTIN lookups, contact history. User confirms, not enters.</div>
+        </div>
+        <div class="bento-card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">4. Floating Action Button (FAB)</div>
+          <div style="font-size:11px;color:var(--t2)">One persistent button for the primary action on every page. Always reachable without scrolling.</div>
+        </div>
+        <div class="bento-card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">5. Bulk Actions on Select</div>
+          <div style="font-size:11px;color:var(--t2)">Selecting table rows reveals bulk action bar. Archive 50 invoices in one click, not fifty.</div>
+        </div>
+        <div class="bento-card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">6. Keyboard Shortcuts</div>
+          <div style="font-size:11px;color:var(--t2)">N = new, E = edit, D = delete, / = search, Esc = back. Power users work 3× faster.</div>
+        </div>
+        <div class="bento-card" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:3px;">7. Contextual Quick Actions</div>
+          <div style="font-size:11px;color:var(--t2)">Hover a table row → action buttons appear inline. No separate "open record, scroll to action" flow.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command palette demo -->
+  <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Command Palette — The Most Important UI Element</h3>
+  <div style="max-width:580px;">
+    <div class="cmd-palette">
+      <div class="cmd-input">
+        <span style="font-size:16px;color:var(--t3)">⌘</span>
+        <input placeholder="Type a command or search..." value="invoice" readonly>
+        <span style="font-size:11px;color:var(--t3);background:var(--s2);border:1px solid var(--b1);padding:2px 6px;border-radius:4px;font-family:var(--mono)">ESC</span>
+      </div>
+      <div class="cmd-results">
+        <div style="padding:6px 10px 4px;font-size:9px;font-weight:800;letter-spacing:1px;color:var(--t4);text-transform:uppercase;">Actions</div>
+        <div class="cmd-item selected">
+          <div class="cmd-item-icon">📄</div>
+          <div class="cmd-item-text"><div class="cmd-item-title">Create New Invoice</div><div class="cmd-item-sub">Pre-fill from last customer</div></div>
+          <div class="cmd-item-kbd">N</div>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-item-icon">📤</div>
+          <div class="cmd-item-text"><div class="cmd-item-title">Send Invoice #INV-2094</div><div class="cmd-item-sub">WhatsApp + Email to Rajesh Traders</div></div>
+          <div class="cmd-item-kbd">↵</div>
+        </div>
+        <div style="padding:6px 10px 4px;font-size:9px;font-weight:800;letter-spacing:1px;color:var(--t4);text-transform:uppercase;margin-top:4px;">Navigate</div>
+        <div class="cmd-item">
+          <div class="cmd-item-icon">📋</div>
+          <div class="cmd-item-text"><div class="cmd-item-title">All Invoices</div><div class="cmd-item-sub">234 invoices this month</div></div>
+          <div class="cmd-item-kbd">G I</div>
+        </div>
+        <div class="cmd-item">
+          <div class="cmd-item-icon">📊</div>
+          <div class="cmd-item-text"><div class="cmd-item-title">GST Returns Dashboard</div><div class="cmd-item-sub">April 2026 period active</div></div>
+          <div class="cmd-item-kbd">G G</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ann" style="max-width:580px;margin-top:12px;">
+    <div class="ann-title">Implementation Rule</div>
+    <p>⌘K must be accessible from EVERY page, EVERY context — no exceptions. It is the escape hatch when users are lost, the power tool when users are expert. Implement it on Day 1, not Day 90.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     §03  GRID & BENTO
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="grid">
+  <div class="sec-tag">Section 03 — Foundations</div>
+  <h1 class="sec-h">Grid & Bento System</h1>
+  <p class="sec-sub">12-column macro grid for page layout. 8px micro grid for all spacing. Bento cards for feature showcases — asymmetric sizing creates rhythm without chaos.</p>
+
+  <h3 style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:12px;">12-Column Grid</h3>
+  <div style="display:flex;gap:6px;margin-bottom:24px;">
+    <div style="flex:1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--violet);font-weight:700" v-for="n in 12">1</div>
+    <!-- render 12 cols manually -->
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin-bottom:8px;">
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">1</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">2</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">3</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">4</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">5</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">6</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">7</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">8</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">9</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">10</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">11</div>
+    <div style="grid-column:span 1;height:32px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--violet);font-weight:700">12</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin-bottom:4px;">
+    <div style="grid-column:span 3;height:28px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--cyan)">3 col sidebar</div>
+    <div style="grid-column:span 9;height:28px;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--cyan)">9 col content</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin-bottom:32px;">
+    <div style="grid-column:span 4;height:28px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--green)">4 col</div>
+    <div style="grid-column:span 4;height:28px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--green)">4 col</div>
+    <div style="grid-column:span 4;height:28px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--green)">4 col</div>
+  </div>
+
+  <h3 style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:12px;">8px Spacing Scale</h3>
+  <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:32px;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:4px;width:48px;background:rgba(139,92,246,.3);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">4px</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:8px;width:48px;background:rgba(139,92,246,.35);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">8px</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:12px;width:48px;background:rgba(139,92,246,.4);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">12px</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:16px;width:48px;background:rgba(139,92,246,.45);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">16px</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:24px;width:48px;background:rgba(139,92,246,.5);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">24px</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:32px;width:48px;background:rgba(139,92,246,.55);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">32px</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:48px;width:48px;background:rgba(139,92,246,.6);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">48px</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:64px;width:48px;background:rgba(139,92,246,.65);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">64px</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="height:80px;width:48px;background:rgba(139,92,246,.7);border-radius:2px;"></div><div style="font-size:9px;color:var(--t3);font-family:var(--mono)">80px</div></div>
+  </div>
+
+  <h3 style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:12px;">Bento Grid Layouts — Live Examples</h3>
+  <div class="bento stagger" style="grid-template-columns:2fr 1fr 1fr;grid-template-rows:160px 160px;gap:12px;margin-bottom:12px;">
+    <div class="bento-card" style="grid-row:span 2;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(135deg,#0f0f12,#1a1040);">
+      <div style="font-size:32px;font-weight:900;letter-spacing:-1px;margin-bottom:8px;line-height:1;">Feature <span class="gradient-text">Hero</span><br>Card 2×1</div>
+      <div style="font-size:12px;color:var(--t2)">Large feature or hero visual. Spans 2 rows. Contains main value prop.</div>
+    </div>
+    <div class="bento-card" style="background:var(--violet3);border-color:rgba(139,92,246,.2);">
+      <div style="font-size:22px;margin-bottom:8px">📊</div>
+      <div style="font-size:13px;font-weight:700">Stat Card</div>
+      <div style="font-size:24px;font-weight:900;margin-top:4px;color:var(--violet)">84k</div>
+    </div>
+    <div class="bento-card">
+      <div style="font-size:22px;margin-bottom:8px">🤖</div>
+      <div style="font-size:13px;font-weight:700">Feature</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:4px">One clear benefit statement.</div>
+    </div>
+    <div class="bento-card" style="background:var(--green3);border-color:rgba(34,197,94,.2);">
+      <div style="font-size:22px;margin-bottom:8px">⚡</div>
+      <div style="font-size:13px;font-weight:700">Speed</div>
+      <div style="font-size:24px;font-weight:900;margin-top:4px;color:var(--green)">&lt;100ms</div>
+    </div>
+    <div class="bento-card">
+      <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px">Integration strip</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="pill pill-blue">WhatsApp</span>
+        <span class="pill pill-violet">Claude</span>
+        <span class="pill pill-green">Stripe</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     §04  TYPOGRAPHY
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="typography">
+  <div class="sec-tag">Section 04 — Foundations</div>
+  <h1 class="sec-h">Typography System</h1>
+  <p class="sec-sub">Inter for everything. JetBrains Mono for code/tokens/values. Weight 900 for headlines — never use 700 where 900 works. Tight letter-spacing on large text.</p>
+  <div style="display:flex;flex-direction:column;gap:0;">
+    <div style="display:flex;align-items:baseline;gap:24px;padding:14px 0;border-bottom:1px solid var(--b1);">
+      <div style="width:180px;flex-shrink:0;font-size:10px;font-family:var(--mono);color:var(--t3)">Display / 64px / 900<br>letter: -2.5px</div>
+      <div style="font-size:52px;font-weight:900;letter-spacing:-2.5px;line-height:1">Ship AI.</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:24px;padding:14px 0;border-bottom:1px solid var(--b1);">
+      <div style="width:180px;flex-shrink:0;font-size:10px;font-family:var(--mono);color:var(--t3)">H1 / 40px / 900<br>letter: -1.5px</div>
+      <div style="font-size:40px;font-weight:900;letter-spacing:-1.5px;line-height:1.05">The AI-Native Platform</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:24px;padding:14px 0;border-bottom:1px solid var(--b1);">
+      <div style="width:180px;flex-shrink:0;font-size:10px;font-family:var(--mono);color:var(--t3)">H2 / 28px / 800<br>letter: -1px</div>
+      <div style="font-size:28px;font-weight:800;letter-spacing:-1px">Built for Scale</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:24px;padding:14px 0;border-bottom:1px solid var(--b1);">
+      <div style="width:180px;flex-shrink:0;font-size:10px;font-family:var(--mono);color:var(--t3)">H3 / 20px / 700<br>letter: -0.5px</div>
+      <div style="font-size:20px;font-weight:700;letter-spacing:-.5px">Feature Rich, Zero Bloat</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:24px;padding:14px 0;border-bottom:1px solid var(--b1);">
+      <div style="width:180px;flex-shrink:0;font-size:10px;font-family:var(--mono);color:var(--t3)">Body / 16px / 400<br>line: 1.75</div>
+      <div style="font-size:16px;color:var(--t2);line-height:1.75;max-width:500px">Our platform helps businesses integrate AI agents into existing workflows without rebuilding infrastructure from scratch.</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:24px;padding:14px 0;border-bottom:1px solid var(--b1);">
+      <div style="width:180px;flex-shrink:0;font-size:10px;font-family:var(--mono);color:var(--t3)">Small / 13px / 400<br>line: 1.6</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">Use for card descriptions, table cells, helper text, secondary labels.</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:24px;padding:14px 0;border-bottom:1px solid var(--b1);">
+      <div style="width:180px;flex-shrink:0;font-size:10px;font-family:var(--mono);color:var(--t3)">Label / 10px / 800<br>letter: 1.5px CAPS</div>
+      <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3)">SECTION LABEL · CATEGORY TAG</div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:24px;padding:14px 0;">
+      <div style="width:180px;flex-shrink:0;font-size:10px;font-family:var(--mono);color:var(--t3)">Mono / 13px / 500<br>JetBrains Mono</div>
+      <div style="font-size:13px;font-family:var(--mono);color:var(--cyan)">const api = new ClaudeToolkit({ key: "sk-ant..." })</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     §05  COLOR SYSTEM
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="colors">
+  <div class="sec-tag">Section 05 — Foundations</div>
+  <h1 class="sec-h">Color System</h1>
+  <p class="sec-sub">60/30/10 rule enforced. 60% background neutrals. 30% surface/border. 10% brand accent. Per-product accent color applied consistently: hero, active states, CTAs, charts.</p>
+
+  <h3 style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:12px;">Surface Scale — All Products</h3>
+  <div style="display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#07070a;border:1px solid var(--b1);"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#07070a<br>bg</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#0f0f12;"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#0f0f12<br>s1</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#161619;"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#161619<br>s2</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#1e1e22;"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#1e1e22<br>s3</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#2a2a2f;"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#2a2a2f<br>s4</div></div>
+    <div style="width:1px;background:var(--b1);margin:0 8px;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#2d2d33;border:1px solid var(--b2);"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#2d2d33<br>border</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#3d3d45;"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#3d3d45<br>b2</div></div>
+    <div style="width:1px;background:var(--b1);margin:0 8px;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#65657a;"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#65657a<br>t3</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#a0a0b0;"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#a0a0b0<br>t2</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:56px;height:56px;border-radius:10px;background:#f4f4f6;"></div><div style="font-size:9px;color:var(--t3);text-align:center;font-family:var(--mono)">#f4f4f6<br>t1</div></div>
+  </div>
+
+  <h3 style="font-size:14px;font-weight:700;color:var(--t2);margin-bottom:12px;">Product Accent Colors + Gradient Pairs</h3>
+  <div class="col3" style="margin-bottom:28px;">
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden;">
+      <div style="height:6px;background:linear-gradient(90deg,#8b5cf6,#ec4899);"></div>
+      <div style="padding:14px;">
+        <div style="font-size:11px;font-weight:800;margin-bottom:8px;">P01 · Claude Toolkit</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;height:28px;border-radius:6px;background:#8b5cf6;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Violet</div>
+          <div style="flex:1;height:28px;border-radius:6px;background:#ec4899;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Pink</div>
+        </div>
+        <div style="font-size:10px;color:var(--t3);">Creativity · AI · Intelligence</div>
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden;">
+      <div style="height:6px;background:linear-gradient(90deg,#22c55e,#06b6d4);"></div>
+      <div style="padding:14px;">
+        <div style="font-size:11px;font-weight:800;margin-bottom:8px;">P02 · ChatBase</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;height:28px;border-radius:6px;background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Green</div>
+          <div style="flex:1;height:28px;border-radius:6px;background:#06b6d4;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Cyan</div>
+        </div>
+        <div style="font-size:10px;color:var(--t3);">Growth · WhatsApp · Trust</div>
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden;">
+      <div style="height:6px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);"></div>
+      <div style="padding:14px;">
+        <div style="font-size:11px;font-weight:800;margin-bottom:8px;">P03 · TaxPilot</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;height:28px;border-radius:6px;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Blue</div>
+          <div style="flex:1;height:28px;border-radius:6px;background:#8b5cf6;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Violet</div>
+        </div>
+        <div style="font-size:10px;color:var(--t3);">Compliance · Trust · Government</div>
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden;">
+      <div style="height:6px;background:linear-gradient(90deg,#f59e0b,#ef4444);"></div>
+      <div style="padding:14px;">
+        <div style="font-size:11px;font-weight:800;margin-bottom:8px;">P04 · TableFlow</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;height:28px;border-radius:6px;background:#f59e0b;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Amber</div>
+          <div style="flex:1;height:28px;border-radius:6px;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Red</div>
+        </div>
+        <div style="font-size:10px;color:var(--t3);">Warmth · Food · Energy</div>
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden;">
+      <div style="height:6px;background:linear-gradient(90deg,#06b6d4,#3b82f6);"></div>
+      <div style="padding:14px;">
+        <div style="font-size:11px;font-weight:800;margin-bottom:8px;">P05 · ConnectOne</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;height:28px;border-radius:6px;background:#06b6d4;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Cyan</div>
+          <div style="flex:1;height:28px;border-radius:6px;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Blue</div>
+        </div>
+        <div style="font-size:10px;color:var(--t3);">Connectivity · IoT · Tech</div>
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);overflow:hidden;">
+      <div style="height:6px;background:linear-gradient(90deg,#ef4444,#f97316);"></div>
+      <div style="padding:14px;">
+        <div style="font-size:11px;font-weight:800;margin-bottom:8px;">P06 · MachineGuard</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;height:28px;border-radius:6px;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Red</div>
+          <div style="flex:1;height:28px;border-radius:6px;background:#f97316;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Orange</div>
+        </div>
+        <div style="font-size:10px;color:var(--t3);">Urgency · Industrial · Alert</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     §06  MOTION & ANIMATION
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="motion">
+  <div class="sec-tag">Section 06 — Motion</div>
+  <h1 class="sec-h">Motion & Animation</h1>
+  <p class="sec-sub">Animation communicates state, not decoration. Every animation has a reason: guide attention, confirm action, show hierarchy, reduce perceived latency.</p>
+
+  <div class="col2" style="margin-bottom:32px;">
+    <div>
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;">Animation Catalog</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="bento-card" style="padding:14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Fade-Up Entry <span style="font-size:10px;color:var(--t3);font-family:var(--mono)">duration: 400ms · ease-out</span></div>
+          <div style="font-size:11px;color:var(--t2)">All cards/sections animate in from Y+20px, opacity 0→1. Triggered by IntersectionObserver at 20% visibility. Stagger: +50ms per child.</div>
+        </div>
+        <div class="bento-card" style="padding:14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Gradient Shift <span style="font-size:10px;color:var(--t3);font-family:var(--mono)">duration: 4s · ease infinite</span></div>
+          <div style="font-size:11px;color:var(--t2)">Hero H1 gradient text animates background-position 0%→100%→0% on 300% width gradient. Subtle, continuous, draws eye to headline.</div>
+        </div>
+        <div class="bento-card" style="padding:14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Aurora Blob <span style="font-size:10px;color:var(--t3);font-family:var(--mono)">duration: 12–15s · ease infinite</span></div>
+          <div style="font-size:11px;color:var(--t2)">Background gradient blobs translate + scale slowly. Creates depth without distraction. Opacity 10–15%, blur(80px).</div>
+        </div>
+        <div class="bento-card" style="padding:14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Hover Lift <span style="font-size:10px;color:var(--t3);font-family:var(--mono)">duration: 150ms · ease</span></div>
+          <div style="font-size:11px;color:var(--t2)">Cards translateY(-2px) + border-color brightens on hover. Tells user "this is interactive." Never skip on interactive cards.</div>
+        </div>
+        <div class="bento-card" style="padding:14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Pulse Ping <span style="font-size:10px;color:var(--t3);font-family:var(--mono)">duration: 1s · ease infinite</span></div>
+          <div style="font-size:11px;color:var(--t2)">Alert dots scale(1)→scale(2), opacity 1→0. Used ONLY for critical alerts, live status. Never decorative.</div>
+        </div>
+        <div class="bento-card" style="padding:14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Shimmer Skeleton <span style="font-size:10px;color:var(--t3);font-family:var(--mono)">duration: 1.5s · ease infinite</span></div>
+          <div style="font-size:11px;color:var(--t2)">Loading state: sweeping gradient left-to-right. Shows content shape before data arrives. Reduces perceived load time by 40%.</div>
+        </div>
+        <div class="bento-card" style="padding:14px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Count-Up Numbers <span style="font-size:10px;color:var(--t3);font-family:var(--mono)">JS · 1200ms · ease-out</span></div>
+          <div style="font-size:11px;color:var(--t2)">KPI numbers animate from 0 to value when section enters viewport. Makes metrics feel live and impressive. JS requestAnimationFrame.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;">Live Demos</h3>
+      <!-- Animated gradient text -->
+      <div class="bento-card" style="margin-bottom:10px;text-align:center;padding:24px;">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:10px;">GRADIENT SHIFT TEXT</div>
+        <div style="font-size:32px;font-weight:900;letter-spacing:-1px;" class="animated-gradient">Revenue: $82,400</div>
+      </div>
+      <!-- Pulse ping demo -->
+      <div class="bento-card" style="margin-bottom:10px;padding:18px;">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:10px;">PULSE PING — LIVE ALERT STATUS</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="position:relative;width:12px;height:12px;">
+            <div style="position:absolute;inset:0;border-radius:50%;background:var(--red);animation:ping 1.2s ease infinite"></div>
+            <div style="position:absolute;inset:0;border-radius:50%;background:var(--red)"></div>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:var(--red)">Critical: Motor M-07 Bearing</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <div style="position:relative;width:12px;height:12px;">
+            <div style="position:absolute;inset:0;border-radius:50%;background:var(--green);animation:ping 2s ease infinite .5s"></div>
+            <div style="position:absolute;inset:0;border-radius:50%;background:var(--green)"></div>
+          </div>
+          <span style="font-size:13px;color:var(--green)">Live: 45 devices connected</span>
+        </div>
+      </div>
+      <!-- Shimmer demo -->
+      <div class="bento-card" style="margin-bottom:10px;padding:18px;">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:10px;">SHIMMER SKELETON — LOADING STATE</div>
+        <div class="skeleton" style="height:12px;width:60%;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:12px;width:90%;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:12px;width:40%;"></div>
+      </div>
+      <!-- Hover demo -->
+      <div class="bento-card" style="padding:18px;text-align:center;cursor:pointer;">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:8px;">HOVER LIFT — TRY HOVERING</div>
+        <div style="font-size:14px;font-weight:700;">Interactive Card</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:4px;">border-color + translateY(-2px)</div>
+      </div>
+      <div class="ann" style="margin-top:12px;">
+        <div class="ann-title">Motion Rules</div>
+        <ul>
+          <li>Max 2 animations visible simultaneously — more = chaos</li>
+          <li>All transitions ≤ 400ms. Users shouldn't wait for animation</li>
+          <li>Respect prefers-reduced-motion media query</li>
+          <li>Never animate text that's being read</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════
+     §07  LANDING PAGE ANATOMY
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="landing">
+  <div class="sec-tag">Section 07 — Anatomy</div>
+  <h1 class="sec-h">Landing Page Anatomy</h1>
+  <p class="sec-sub">10 sections. Fixed order. Each section has one job. Skipping or reordering drops conversion by 20–40%. Every AddonWeb product landing follows this exact sequence.</p>
+
+  <div class="col2" style="margin-bottom:36px;align-items:start;">
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="padding:10px 14px;background:var(--violet3);border:1px solid rgba(139,92,246,.25);border-radius:var(--r8);font-size:13px;font-weight:800;color:var(--violet);">① Sticky Nav — Trust + Navigation</div>
+      <div style="padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:13px;font-weight:600;">② Hero — Value prop above the fold</div>
+      <div style="padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:13px;font-weight:600;">③ Logo Bar — Trust by association</div>
+      <div style="padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:13px;font-weight:600;">④ Pain → Solution — Emotional hook</div>
+      <div style="padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:13px;font-weight:600;">⑤ Bento Features — Rational proof</div>
+      <div style="padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:13px;font-weight:600;">⑥ Testimonials — Social proof</div>
+      <div style="padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:13px;font-weight:600;">⑦ Pricing — Commitment</div>
+      <div style="padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:13px;font-weight:600;">⑧ FAQ — Handle objections</div>
+      <div style="padding:10px 14px;background:var(--green3);border:1px solid rgba(34,197,94,.25);border-radius:var(--r8);font-size:13px;font-weight:800;color:var(--green);">⑨ Final CTA — Last chance convert</div>
+      <div style="padding:10px 14px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);font-size:13px;font-weight:600;color:var(--t3);">⑩ Footer — Links + legal</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="ann"><div class="ann-title">① NAV — RULES</div><ul><li>Logo left · 4–5 links center · 1 CTA button right. Always.</li><li>Sticky on scroll. Blur backdrop (backdrop-filter: blur(16px)). Background opacity 80% so content behind is visible.</li><li>CTA in nav = secondary. Hero CTA = primary. Same destination, different weight.</li><li>No dropdowns in nav unless absolutely required. Each dropdown = decision fatigue.</li></ul></div>
+      <div class="ann"><div class="ann-title">② HERO — THE MOST IMPORTANT SECTION</div><ul><li>H1 ≤ 8 words. Active verb. Specific outcome. "Ship AI 10× faster" not "Empowering Businesses."</li><li>Product mockup or code snippet in hero — real UI, never abstract illustration</li><li>Primary CTA + ghost CTA. Primary = start trial. Ghost = see demo/docs.</li><li>3 social proof stats below CTAs: user count, rating, revenue processed</li><li>Aurora gradient blob behind text for visual depth</li></ul></div>
+      <div class="ann"><div class="ann-title">④–⑤ PAIN/FEATURES — EMOTIONAL THEN RATIONAL</div><ul><li>Pain card (red border) shows life WITHOUT product. Solution card (green border) shows WITH.</li><li>User thinks "that's exactly my problem" within 3 seconds</li><li>Features use bento grid, not bullet list. Cards are scannable, bullets are walls of text.</li><li>Hover on feature cards: brand accent border glow</li></ul></div>
+      <div class="ann"><div class="ann-title">⑦ PRICING — 3-TIER ALWAYS</div><ul><li>3 tiers: Starter · Growth (featured) · Enterprise. Middle always "Most Popular."</li><li>Annual toggle saves 20%. Show annual by default — higher ACV.</li><li>Enterprise = "Contact Sales." Never show enterprise price publicly.</li><li>Gradient border on featured tier. All other tiers: plain border.</li></ul></div>
+    </div>
+  </div>
+
+  <!-- Rendered AddonWeb Landing Demo -->
+  <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Full Rendered Demo — AddonWeb Parent Brand</h3>
+  <div class="lp">
+    <!-- Nav -->
+    <div class="lp-nav">
+      <div style="font-size:14px;font-weight:900;letter-spacing:-.3px;">Addon<span style="color:var(--violet)">Web</span></div>
+      <div style="display:flex;gap:20px;font-size:12px;color:var(--t3);">
+        <span style="cursor:pointer;transition:color .15s;" onmouseover="this.style.color='#f4f4f6'" onmouseout="this.style.color='#65657a'">Products</span>
+        <span style="cursor:pointer;transition:color .15s;" onmouseover="this.style.color='#f4f4f6'" onmouseout="this.style.color='#65657a'">Enterprise</span>
+        <span style="cursor:pointer;transition:color .15s;" onmouseover="this.style.color='#f4f4f6'" onmouseout="this.style.color='#65657a'">Pricing</span>
+        <span style="cursor:pointer;transition:color .15s;" onmouseover="this.style.color='#f4f4f6'" onmouseout="this.style.color='#65657a'">Docs</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm">Sign in</button>
+        <button class="btn btn-gradient btn-sm">Start Free →</button>
+      </div>
+    </div>
+    <!-- Hero -->
+    <div class="lp-hero" style="background:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(139,92,246,.18),transparent);">
+      <div class="lp-hero-badge pill pill-violet">🚀 Public beta · 500+ businesses live</div>
+      <h1 style="font-size:44px;font-weight:900;letter-spacing:-2px;line-height:1.05;margin-bottom:16px;">Ship AI Products <span class="animated-gradient">10× Faster</span></h1>
+      <p style="font-size:15px;color:var(--t2);max-width:480px;margin:0 auto 28px;line-height:1.75;">The AI-native platform for businesses that automate, grow, and scale — without rebuilding infrastructure.</p>
+      <div class="lp-hero-btns">
+        <button class="btn btn-gradient btn-lg">Create Free Account →</button>
+        <button class="btn btn-ghost btn-lg">▶ Watch 2-min Demo</button>
+      </div>
+      <div style="display:flex;gap:36px;justify-content:center;">
+        <div style="text-align:center;"><div style="font-size:22px;font-weight:900;color:var(--violet)" data-count="500">0</div><div style="font-size:11px;color:var(--t3)">Businesses</div></div>
+        <div style="text-align:center;"><div style="font-size:22px;font-weight:900;color:var(--violet)">4.9★</div><div style="font-size:11px;color:var(--t3)">Rating</div></div>
+        <div style="text-align:center;"><div style="font-size:22px;font-weight:900;color:var(--violet)">$2M+</div><div style="font-size:11px;color:var(--t3)">Processed</div></div>
+      </div>
+    </div>
+    <!-- Logo bar -->
+    <div style="padding:20px 28px;border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);background:var(--s1);text-align:center;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t4);text-transform:uppercase;margin-bottom:14px;">TRUSTED BY TEAMS AT</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <div style="padding:6px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);font-size:11px;font-weight:700;color:var(--t3)">Infosys</div>
+        <div style="padding:6px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);font-size:11px;font-weight:700;color:var(--t3)">Razorpay</div>
+        <div style="padding:6px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);font-size:11px;font-weight:700;color:var(--t3)">Freshworks</div>
+        <div style="padding:6px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);font-size:11px;font-weight:700;color:var(--t3)">Zepto</div>
+        <div style="padding:6px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);font-size:11px;font-weight:700;color:var(--t3)">CRED</div>
+      </div>
+    </div>
+    <!-- Pain/Solution -->
+    <div style="padding:40px 28px;border-bottom:1px solid var(--b1);">
+      <div style="text-align:center;margin-bottom:24px;"><div class="label" style="color:var(--violet);margin-bottom:8px;">THE PROBLEM</div><div style="font-size:24px;font-weight:800;letter-spacing:-.5px;">You're losing to slower competitors</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="background:var(--s1);border:1px solid var(--b1);border-top:2px solid var(--red);border-radius:var(--r12);padding:20px;">
+          <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--red);margin-bottom:10px;">WITHOUT ADDONWEB</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--t2);">
+            <div style="display:flex;gap:8px;"><span style="color:var(--red);flex-shrink:0">✕</span>3 weeks to build a basic AI workflow</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--red);flex-shrink:0">✕</span>3 different vendors for one feature</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--red);flex-shrink:0">✕</span>No observability into what's failing</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--red);flex-shrink:0">✕</span>Engineers burn out on boilerplate</div>
+          </div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--b1);border-top:2px solid var(--green);border-radius:var(--r12);padding:20px;">
+          <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--green);margin-bottom:10px;">WITH ADDONWEB</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--t2);">
+            <div style="display:flex;gap:8px;"><span style="color:var(--green);flex-shrink:0">✓</span>Deploy AI agents in minutes, not weeks</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--green);flex-shrink:0">✓</span>One platform: models, tools, data</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--green);flex-shrink:0">✓</span>Real-time monitoring + error alerts</div>
+            <div style="display:flex;gap:8px;"><span style="color:var(--green);flex-shrink:0">✓</span>Engineers focus on product, not plumbing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Bento Features -->
+    <div style="padding:40px 28px;border-bottom:1px solid var(--b1);">
+      <div style="text-align:center;margin-bottom:24px;"><div class="label" style="color:var(--violet);margin-bottom:8px;">FEATURES</div><div style="font-size:24px;font-weight:800;letter-spacing:-.5px;">Everything you need. Nothing you don't.</div></div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:10px;">
+        <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:20px;grid-row:span 2;display:flex;flex-direction:column;justify-content:space-between;">
+          <div><div style="font-size:24px;margin-bottom:12px;">🤖</div><h4 style="font-size:15px;font-weight:800;margin-bottom:8px;">AI Agent Builder</h4><p style="font-size:12px;color:var(--t2);line-height:1.7;">Drag, drop, deploy. Build multi-step AI agents connected to your data, APIs, and tools — without touching infrastructure. Visual flow editor with 300+ pre-built connectors.</p></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;"><span class="pill pill-violet">Claude 3.7</span><span class="pill pill-blue">300+ APIs</span><span class="pill pill-green">No-code</span></div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;"><div style="font-size:20px;margin-bottom:8px;">🔌</div><h4 style="font-size:13px;font-weight:700;margin-bottom:5px;">Integrations</h4><p style="font-size:11px;color:var(--t2);">WhatsApp, Stripe, GST APIs, IoT sensors — connected out of the box.</p></div>
+        <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;"><div style="font-size:20px;margin-bottom:8px;">📊</div><h4 style="font-size:13px;font-weight:700;margin-bottom:5px;">Live Analytics</h4><p style="font-size:11px;color:var(--t2);">Token cost, latency, errors — real-time dashboard.</p></div>
+        <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;"><div style="font-size:20px;margin-bottom:8px;">🛡️</div><h4 style="font-size:13px;font-weight:700;margin-bottom:5px;">Enterprise Security</h4><p style="font-size:11px;color:var(--t2);">SOC2 ready. E2E encryption. On-prem for regulated industries.</p></div>
+        <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:16px;"><div style="font-size:20px;margin-bottom:8px;">⚡</div><h4 style="font-size:13px;font-weight:700;margin-bottom:5px;">Edge Deployment</h4><p style="font-size:11px;color:var(--t2);">Global CDN. Sub-100ms response time anywhere on Earth.</p></div>
+      </div>
+    </div>
+    <!-- Pricing -->
+    <div style="padding:40px 28px;border-bottom:1px solid var(--b1);">
+      <div style="text-align:center;margin-bottom:24px;"><div class="label" style="color:var(--violet);margin-bottom:8px;">PRICING</div><div style="font-size:24px;font-weight:800;letter-spacing:-.5px;">Simple, transparent pricing</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:20px;"><div style="font-size:10px;font-weight:800;color:var(--t3);margin-bottom:8px;">STARTER</div><div style="font-size:30px;font-weight:900;margin-bottom:4px;">$29<span style="font-size:13px;font-weight:400;color:var(--t3)">/mo</span></div><div style="font-size:11px;color:var(--t2);margin-bottom:14px;">For solo builders and small teams.</div><div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--t2);margin-bottom:16px;"><div>✓ 3 AI agents</div><div>✓ 10k API calls/mo</div><div>✓ Email support</div></div><button class="btn btn-ghost btn-sm" style="width:100%;">Get Started</button></div>
+        <div style="background:var(--s1);border:1.5px solid var(--violet);border-radius:var(--r12);padding:20px;position:relative;">
+          <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--violet);color:#fff;font-size:10px;font-weight:800;padding:3px 12px;border-radius:var(--r999);">Most Popular</div>
+          <div style="font-size:10px;font-weight:800;color:var(--violet);margin-bottom:8px;">GROWTH</div><div style="font-size:30px;font-weight:900;margin-bottom:4px;">$99<span style="font-size:13px;font-weight:400;color:var(--t3)">/mo</span></div><div style="font-size:11px;color:var(--t2);margin-bottom:14px;">For scaling teams that need power.</div><div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--t2);margin-bottom:16px;"><div>✓ Unlimited agents</div><div>✓ 100k API calls/mo</div><div>✓ Priority support</div><div>✓ Custom domains</div></div><button class="btn btn-primary btn-sm" style="width:100%;">Start Free Trial</button>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:20px;"><div style="font-size:10px;font-weight:800;color:var(--t3);margin-bottom:8px;">ENTERPRISE</div><div style="font-size:30px;font-weight:900;margin-bottom:4px;">Custom</div><div style="font-size:11px;color:var(--t2);margin-bottom:14px;">For regulated industries and large deployments.</div><div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--t2);margin-bottom:16px;"><div>✓ Unlimited everything</div><div>✓ On-prem / VPC</div><div>✓ Dedicated CSM + SLA</div></div><button class="btn btn-ghost btn-sm" style="width:100%;">Contact Sales</button></div>
+      </div>
+    </div>
+    <!-- Final CTA -->
+    <div style="padding:56px 28px;text-align:center;position:relative;overflow:hidden;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(139,92,246,.12),transparent);">
+      <h2 style="font-size:32px;font-weight:900;letter-spacing:-1px;margin-bottom:12px;">Start Building in 5 Minutes</h2>
+      <p style="font-size:14px;color:var(--t2);margin-bottom:24px;">Join 500+ businesses. No credit card required.</p>
+      <button class="btn btn-gradient btn-lg">Create Free Account →</button>
+    </div>
+    <!-- Footer -->
+    <div style="padding:32px 28px 20px;border-top:1px solid var(--b1);background:var(--s1);">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:24px;margin-bottom:24px;">
+        <div><div style="font-size:14px;font-weight:800;margin-bottom:8px;">Addon<span style="color:var(--violet)">Web</span></div><p style="font-size:11px;color:var(--t3);line-height:1.6;">AI-native platform for businesses that want to ship faster and grow without limits.</p></div>
+        <div><div style="font-size:11px;font-weight:700;margin-bottom:8px;">Products</div><div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--t3);"><span>Claude Toolkit</span><span>ChatBase</span><span>TaxPilot</span><span>TableFlow</span></div></div>
+        <div><div style="font-size:11px;font-weight:700;margin-bottom:8px;">Company</div><div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--t3);"><span>About</span><span>Blog</span><span>Careers</span></div></div>
+        <div><div style="font-size:11px;font-weight:700;margin-bottom:8px;">Legal</div><div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--t3);"><span>Privacy</span><span>Terms</span><span>Security</span></div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding-top:16px;border-top:1px solid var(--b1);font-size:11px;color:var(--t4);">
+        <span>© 2026 AddonWebSolutions · Ahmedabad, India</span><span>Built with Claude AI ⚡</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     §08  DASHBOARD ANATOMY
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="dashboard">
+  <div class="sec-tag">Section 08 — Anatomy</div>
+  <h1 class="sec-h">Dashboard Anatomy</h1>
+  <p class="sec-sub">7 zones. Mofi-inspired density with AddonWeb dark aesthetic. KPIs always first. Charts always second. Table always third. Period toggles (W/M/Y) on every chart.</p>
+
+  <div class="col2" style="margin-bottom:28px;align-items:start;">
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div style="padding:9px 12px;background:var(--violet3);border:1px solid rgba(139,92,246,.25);border-radius:var(--r8);font-size:12px;font-weight:700;color:var(--violet);">① Fixed Sidebar — Brand + grouped nav</div>
+      <div style="padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:12px;font-weight:600;">② Sticky Topbar — Breadcrumb + actions + avatar</div>
+      <div style="padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:12px;font-weight:600;">③ KPI Row — 3–4 metric cards with delta + mini sparkline</div>
+      <div style="padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:12px;font-weight:600;">④ Chart Area — Line/bar main + donut secondary</div>
+      <div style="padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:12px;font-weight:600;">⑤ Data Table — Sortable, filterable, bulk-selectable</div>
+      <div style="padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);font-size:12px;font-weight:600;">⑥ Command Palette — ⌘K global, always</div>
+      <div style="padding:9px 12px;background:var(--amber3);border:1px solid rgba(245,158,11,.25);border-radius:var(--r8);font-size:12px;font-weight:700;color:var(--amber);">⑦ Notification Panel — Pinned alerts, activity feed</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="ann"><div class="ann-title">SIDEBAR RULES (from Mofi analysis)</div><ul><li>Width: 200–220px fixed. Never collapse on desktop — it breaks muscle memory.</li><li>Grouped nav: Pinned favorites at top, main sections, settings at bottom</li><li>Badge counts (red pill) for unread alerts/notifications on nav items</li><li>Active item: brand-color bg at 12% + left 3px brand accent border</li><li>Logo click = go to dashboard. Never opens a menu.</li></ul></div>
+      <div class="ann"><div class="ann-title">KPI CARD RULES</div><ul><li>Max 4 KPIs per row. Users can't scan more than 4 at a glance.</li><li>Each card: Label → Big Number → Delta (↑/↓ % vs period) → Mini sparkline or progress bar</li><li>Colored top border = category (green=revenue, red=alerts, blue=usage)</li><li>Period filter (W/M/Y) toggles apply to ALL cards simultaneously — one click changes context</li></ul></div>
+      <div class="ann"><div class="ann-title">TABLE RULES (Mofi-inspired)</div><ul><li>Checkbox column for bulk select → bulk action bar slides up from bottom</li><li>Hover row → action icons appear inline right side (edit, delete, view)</li><li>Stacked avatars with +N overflow for team columns</li><li>Progress bar column for completion %, not just numbers</li><li>Type badge (pill) for categories. Never text-only for status.</li></ul></div>
+    </div>
+  </div>
+
+  <!-- Full rendered dashboard -->
+  <div class="db" style="height:520px;">
+    <div class="db-side">
+      <div class="db-side-logo">Addon<span style="color:var(--violet)">Web</span></div>
+      <div class="db-nav-g">
+        <div class="db-nav-label">Pinned</div>
+        <div class="db-item active"><div class="db-item-icon">📊</div>Overview</div>
+        <div class="db-item"><div class="db-item-icon">⚡</div>Quick Actions</div>
+      </div>
+      <div class="db-nav-g">
+        <div class="db-nav-label">Main</div>
+        <div class="db-item"><div class="db-item-icon">🤖</div>Agents</div>
+        <div class="db-item"><div class="db-item-icon">🔌</div>Integrations</div>
+        <div class="db-item"><div class="db-item-icon">📈</div>Analytics<div class="db-item-badge">3</div></div>
+      </div>
+      <div class="db-nav-g">
+        <div class="db-nav-label">Account</div>
+        <div class="db-item"><div class="db-item-icon">👥</div>Team</div>
+        <div class="db-item"><div class="db-item-icon">💳</div>Billing</div>
+        <div class="db-item"><div class="db-item-icon">⚙️</div>Settings</div>
+      </div>
+    </div>
+    <div class="db-main">
+      <div class="db-top">
+        <div>
+          <span style="font-size:10px;color:var(--t3);">Dashboard › </span>
+          <span class="db-top-title">Overview</span>
+        </div>
+        <div class="db-top-actions">
+          <button class="btn btn-ghost btn-sm">⌘K Search</button>
+          <button class="btn btn-primary btn-sm">+ New Agent</button>
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--pink));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">AW</div>
+        </div>
+      </div>
+      <div class="db-content">
+        <!-- Period toggle -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:700;">April 2026</div>
+          <div class="period-tabs"><div class="period-tab active">W</div><div class="period-tab">M</div><div class="period-tab">Y</div></div>
+        </div>
+        <!-- KPI Row -->
+        <div class="col4" style="margin-bottom:12px;">
+          <div class="kpi" style="border-top:2px solid var(--violet);">
+            <div class="kpi-label">API Calls</div>
+            <div class="kpi-val" style="color:var(--violet)" data-count="84291">0</div>
+            <div class="kpi-sub kpi-up">↑ 12.4%</div>
+            <div class="kpi-bar" style="margin-top:8px;"><div class="kpi-bar-fill" style="width:72%;background:var(--violet);"></div></div>
+          </div>
+          <div class="kpi" style="border-top:2px solid var(--green);">
+            <div class="kpi-label">Active Agents</div>
+            <div class="kpi-val" style="color:var(--green)" data-count="24">0</div>
+            <div class="kpi-sub kpi-up">↑ 3 new</div>
+            <div class="kpi-bar" style="margin-top:8px;"><div class="kpi-bar-fill" style="width:60%;background:var(--green);"></div></div>
+          </div>
+          <div class="kpi" style="border-top:2px solid var(--amber);">
+            <div class="kpi-label">Monthly Spend</div>
+            <div class="kpi-val" style="color:var(--amber)">$482</div>
+            <div class="kpi-sub kpi-down">↑ 8.2%</div>
+            <div class="kpi-bar" style="margin-top:8px;"><div class="kpi-bar-fill" style="width:48%;background:var(--amber);"></div></div>
+          </div>
+          <div class="kpi" style="border-top:2px solid var(--red);">
+            <div class="kpi-label">Error Rate</div>
+            <div class="kpi-val" style="color:var(--green)">0.3%</div>
+            <div class="kpi-sub kpi-up">↓ 0.1%</div>
+            <div class="kpi-bar" style="margin-top:8px;"><div class="kpi-bar-fill" style="width:3%;background:var(--green);"></div></div>
+          </div>
+        </div>
+        <!-- Charts -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px;">
+          <div class="chart-wrap">
+            <div class="chart-head">
+              <div class="chart-title">API Calls — Last 7 Days</div>
+              <div class="period-tabs"><div class="period-tab active">7D</div><div class="period-tab">30D</div><div class="period-tab">90D</div></div>
+            </div>
+            <svg width="100%" height="70" viewBox="0 0 400 70" preserveAspectRatio="none">
+              <defs><linearGradient id="vg" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#8b5cf6" stop-opacity=".3"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient></defs>
+              <path d="M0,55 L57,44 L114,48 L171,28 L228,34 L285,18 L342,24 L400,8" stroke="#8b5cf6" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M0,55 L57,44 L114,48 L171,28 L228,34 L285,18 L342,24 L400,8 L400,70 L0,70Z" fill="url(#vg)"/>
+              <circle cx="400" cy="8" r="3" fill="#8b5cf6"/>
+            </svg>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-head"><div class="chart-title">Agent Types</div></div>
+            <svg width="100%" height="70" viewBox="0 0 120 70">
+              <circle cx="60" cy="35" r="28" fill="none" stroke="#2a2a2f" stroke-width="12"/>
+              <circle cx="60" cy="35" r="28" fill="none" stroke="#8b5cf6" stroke-width="12" stroke-dasharray="88 88" stroke-dashoffset="22" transform="rotate(-90 60 35)"/>
+              <circle cx="60" cy="35" r="28" fill="none" stroke="#22c55e" stroke-width="12" stroke-dasharray="44 132" stroke-dashoffset="-66" transform="rotate(-90 60 35)"/>
+              <text x="60" y="39" text-anchor="middle" fill="#f4f4f6" font-size="13" font-weight="900" font-family="Inter">24</text>
+            </svg>
+          </div>
+        </div>
+        <!-- Table -->
+        <div class="tbl-wrap">
+          <div style="padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--b1);">
+            <div style="font-size:11px;font-weight:700;color:var(--t2);">Recent Agents</div>
+            <button class="btn btn-ghost btn-sm">View All →</button>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Agent</th><th>Calls Today</th><th>Latency</th><th>Team</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600;color:var(--t1)">Invoice Processor</td>
+                <td>2,341</td>
+                <td>142ms</td>
+                <td>
+                  <div class="avatar-stack">
+                    <div class="avatar" style="background:var(--violet3);color:var(--violet);">AK</div>
+                    <div class="avatar" style="background:var(--green3);color:var(--green);">PM</div>
+                    <div class="avatar avatar-overflow">+2</div>
+                  </div>
+                </td>
+                <td><span class="pill pill-green">Active</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--t1)">WhatsApp Bot</td>
+                <td>1,892</td>
+                <td>89ms</td>
+                <td>
+                  <div class="avatar-stack">
+                    <div class="avatar" style="background:var(--blue3);color:var(--blue);">RS</div>
+                    <div class="avatar avatar-overflow">+1</div>
+                  </div>
+                </td>
+                <td><span class="pill pill-green">Active</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--t1)">GST Filer</td>
+                <td>743</td>
+                <td>210ms</td>
+                <td>
+                  <div class="avatar-stack">
+                    <div class="avatar" style="background:var(--amber3);color:var(--amber);">VK</div>
+                  </div>
+                </td>
+                <td><span class="pill pill-amber">Pending</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     §09  COMPONENTS
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="components">
+  <div class="sec-tag">Section 09 — Components</div>
+  <h1 class="sec-h">Component Decision Matrix</h1>
+  <p class="sec-sub">The answer to "which component do I use here?" — before you open Figma or write a line of code.</p>
+
+  <div class="tbl-wrap" style="margin-bottom:28px;">
+    <table class="tbl">
+      <thead><tr><th>Scenario</th><th>Use</th><th style="color:var(--red)">Not</th><th>Because</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A key metric number</strong><br><span style="font-size:10px;color:var(--t3)">Revenue, users, uptime</span></td><td><span class="pill pill-violet">Stat Card</span></td><td style="color:var(--red);font-size:11px;">Table row</td><td style="font-size:11px;color:var(--t2)">Cards are scannable in 0.2s. Tables require column tracking.</td></tr>
+        <tr><td><strong>5+ structured items</strong><br><span style="font-size:10px;color:var(--t3)">Invoices, orders, agents</span></td><td><span class="pill pill-blue">Data Table</span></td><td style="color:var(--red);font-size:11px;">Card grid</td><td style="font-size:11px;color:var(--t2)">Tables allow sort, filter, bulk action. Cards waste space on dense data.</td></tr>
+        <tr><td><strong>3–6 features/products</strong><br><span style="font-size:10px;color:var(--t3)">Feature grid, pricing</span></td><td><span class="pill pill-cyan">Bento Grid</span></td><td style="color:var(--red);font-size:11px;">Bullet list</td><td style="font-size:11px;color:var(--t2)">Bento has visual hierarchy. Bullets flatten everything to equal weight.</td></tr>
+        <tr><td><strong>Navigating ≤5 views</strong><br><span style="font-size:10px;color:var(--t3)">Dashboard sections</span></td><td><span class="pill pill-green">Tab Bar</span></td><td style="color:var(--red);font-size:11px;">Dropdown</td><td style="font-size:11px;color:var(--t2)">Tabs surface all options. Dropdowns hide them — extra click.</td></tr>
+        <tr><td><strong>Status / category</strong><br><span style="font-size:10px;color:var(--t3)">Active, Pending, Error</span></td><td><span class="pill pill-amber">Pill Badge</span></td><td style="color:var(--red);font-size:11px;">Icon only</td><td style="font-size:11px;color:var(--t2)">Color + text together. Color alone fails accessibility. Text alone is slow.</td></tr>
+        <tr><td><strong>Irreversible action confirm</strong><br><span style="font-size:10px;color:var(--t3)">Delete, reset, cancel</span></td><td><span class="pill pill-red">Modal Dialog</span></td><td style="color:var(--red);font-size:11px;">Toast</td><td style="font-size:11px;color:var(--t2)">Modals block and force decision. Toasts are skippable — dangerous for destructive.</td></tr>
+        <tr><td><strong>Non-blocking feedback</strong><br><span style="font-size:10px;color:var(--t3)">Saved, copied, sent</span></td><td><span class="pill pill-green">Toast</span></td><td style="color:var(--red);font-size:11px;">Modal</td><td style="font-size:11px;color:var(--t2)">Toasts auto-dismiss, don't break flow. Modals demand attention for trivial info.</td></tr>
+        <tr><td><strong>Long form, many fields</strong><br><span style="font-size:10px;color:var(--t3)">Invoice, onboarding</span></td><td><span class="pill pill-cyan">Step Wizard</span></td><td style="color:var(--red);font-size:11px;">One long page</td><td style="font-size:11px;color:var(--t2)">Steps reduce cognitive load. Each step = one job. Progress bar reduces anxiety.</td></tr>
+        <tr><td><strong>Global navigation</strong><br><span style="font-size:10px;color:var(--t3)">Any action, any record</span></td><td><span class="pill pill-violet">⌘K Palette</span></td><td style="color:var(--red);font-size:11px;">Search bar</td><td style="font-size:11px;color:var(--t2)">Palette handles search + commands + navigation. Search bars only search.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;">Button System — One Primary Per View</h3>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:20px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);margin-bottom:10px;">
+    <button class="btn btn-gradient">Primary Action</button>
+    <button class="btn btn-primary">Solid Violet</button>
+    <button class="btn btn-ghost">Secondary</button>
+    <button class="btn btn-danger">Destructive</button>
+    <button class="btn" style="background:transparent;border:none;color:var(--t2);text-decoration:underline;padding:9px 0;">Tertiary Link</button>
+    <button class="btn" style="opacity:.4;cursor:not-allowed;background:var(--s3);color:var(--t3);border:1px solid var(--b1);">Disabled</button>
+    <button class="btn btn-sm btn-primary">Small</button>
+    <button class="btn btn-lg btn-gradient">Large CTA →</button>
+  </div>
+  <div class="ann"><div class="ann-title">RULE: STRICT BUTTON HIERARCHY</div><p>Gradient/Solid = primary (one per page). Ghost = secondary. Text = tertiary. Never two primary buttons at the same visual level. Never a red button for anything non-destructive. Disabled = not clickable + 40% opacity, always.</p></div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     §10  SUPER ADMIN PANEL
+════════════════════════════════════════════════════════ -->
+<section class="sec" id="superadmin">
+  <div class="sec-tag">Section 10 — Super Admin</div>
+  <h1 class="sec-h">Super Admin Panel</h1>
+  <p class="sec-sub">The founder's control room. One panel to see ALL 6 products, ALL customers, ALL revenue, ALL alerts — across the entire AddonWebSolutions empire. Zero context switching.</p>
+
+  <div class="col3" style="margin-bottom:24px;">
+    <div class="ann" style="margin:0"><div class="ann-title">WHO USES THIS</div><p>Founder only. No customer sees this panel. Contains: all product revenue, all user accounts, all agent logs, billing across products, system health, Claude API spend across all products.</p></div>
+    <div class="ann" style="margin:0"><div class="ann-title">ZERO-CLICK RULES</div><ul><li>All 6 product KPIs visible on load — no tabs, no clicks</li><li>Any alert is clickable → expands inline, no new page</li><li>⌘K handles 90% of admin actions</li><li>Bulk user management: select + action, 2 clicks max</li></ul></div>
+    <div class="ann" style="margin:0"><div class="ann-title">SECURITY RULES</div><ul><li>2FA enforced, cannot be disabled</li><li>All actions are audit-logged</li><li>Destructive actions require re-auth</li><li>IP whitelist option for enterprise access</li></ul></div>
+  </div>
+
+  <div class="sa-shell">
+    <!-- Super Admin Sidebar -->
+    <div class="sa-side">
+      <div style="padding:14px 14px 10px;border-bottom:1px solid var(--b1);">
+        <div style="font-size:11px;font-weight:900;letter-spacing:.5px;">ADDON<span style="color:var(--violet)">WEB</span></div>
+        <div style="font-size:9px;color:var(--red);font-weight:700;margin-top:2px;">⬡ SUPER ADMIN</div>
+      </div>
+      <div style="padding:10px 6px 0;flex:1;overflow-y:auto;">
+        <div style="font-size:9px;font-weight:800;letter-spacing:1.2px;color:var(--t4);padding:0 8px;margin-bottom:3px;text-transform:uppercase;">Overview</div>
+        <div class="db-item active"><div class="db-item-icon">🌐</div>All Products</div>
+        <div class="db-item"><div class="db-item-icon">💰</div>Revenue<div class="db-item-badge" style="background:var(--green3);color:var(--green);">$4.2k</div></div>
+        <div class="db-item"><div class="db-item-icon">👥</div>All Users</div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:1.2px;color:var(--t4);padding:6px 8px 3px;text-transform:uppercase;">Products</div>
+        <div class="db-item"><div class="db-item-icon" style="background:var(--violet3);">⚡</div><span style="font-size:10px;">P01 Toolkit</span></div>
+        <div class="db-item"><div class="db-item-icon" style="background:var(--green3);">💬</div><span style="font-size:10px;">P02 ChatBase</span></div>
+        <div class="db-item"><div class="db-item-icon" style="background:var(--blue3);">📋</div><span style="font-size:10px;">P03 TaxPilot</span></div>
+        <div class="db-item"><div class="db-item-icon" style="background:var(--amber3);">🍽️</div><span style="font-size:10px;">P04 TableFlow</span></div>
+        <div class="db-item"><div class="db-item-icon" style="background:var(--cyan3);">🌐</div><span style="font-size:10px;">P05 ConnectOne</span></div>
+        <div class="db-item"><div class="db-item-icon" style="background:var(--red3);">🛡️</div><span style="font-size:10px;">P06 MachineGuard</span><div class="db-item-badge">3</div></div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:1.2px;color:var(--t4);padding:6px 8px 3px;text-transform:uppercase;">System</div>
+        <div class="db-item"><div class="db-item-icon">🤖</div><span style="font-size:10px;">Agents</span></div>
+        <div class="db-item"><div class="db-item-icon">📊</div><span style="font-size:10px;">Claude API Spend</span></div>
+        <div class="db-item"><div class="db-item-icon">🔒</div><span style="font-size:10px;">Audit Log</span></div>
+        <div class="db-item"><div class="db-item-icon">⚙️</div><span style="font-size:10px;">Settings</span></div>
+      </div>
+    </div>
+    <!-- Main area -->
+    <div style="flex:1;display:flex;flex-direction:column;background:var(--bg);">
+      <!-- Topbar -->
+      <div style="height:44px;border-bottom:1px solid var(--b1);padding:0 16px;display:flex;align-items:center;justify-content:space-between;background:var(--s1);flex-shrink:0;">
+        <div style="font-size:12px;font-weight:700;">All Products Overview</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn btn-ghost btn-sm">⌘K Command</button>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--red3);border:1px solid rgba(239,68,68,.25);border-radius:var(--r8);padding:4px 10px;">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--red);animation:ping 1s ease infinite;"></div>
+            <span style="font-size:10px;font-weight:700;color:var(--red);">3 Critical</span>
+          </div>
+          <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--pink));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;">F</div>
+        </div>
+      </div>
+      <!-- Content -->
+      <div style="flex:1;padding:14px;overflow-y:auto;">
+        <!-- Global KPIs -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;">
+          <div class="kpi" style="border-top:2px solid var(--green)"><div class="kpi-label">Total MRR</div><div class="kpi-val" style="font-size:18px;color:var(--green)">$4,280</div><div class="kpi-sub kpi-up">↑ 34% WoW</div></div>
+          <div class="kpi" style="border-top:2px solid var(--violet)"><div class="kpi-label">Total Users</div><div class="kpi-val" style="font-size:18px;color:var(--violet)">284</div><div class="kpi-sub kpi-up">↑ 12 today</div></div>
+          <div class="kpi" style="border-top:2px solid var(--blue)"><div class="kpi-label">API Spend MTD</div><div class="kpi-val" style="font-size:18px;color:var(--blue)">$182</div><div class="kpi-sub kpi-neutral">$500 budget</div></div>
+          <div class="kpi" style="border-top:2px solid var(--amber)"><div class="kpi-label">Churn Rate</div><div class="kpi-val" style="font-size:18px;color:var(--green)">1.2%</div><div class="kpi-sub kpi-up">↓ 0.3%</div></div>
+          <div class="kpi" style="border-top:2px solid var(--red)"><div class="kpi-label">Open Alerts</div><div class="kpi-val" style="font-size:18px;color:var(--red)">7</div><div class="kpi-sub kpi-down">↑ 2 critical</div></div>
+        </div>
+        <!-- Per-product strip -->
+        <div class="tbl-wrap" style="margin-bottom:10px;">
+          <div style="padding:8px 12px;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:11px;font-weight:700;color:var(--t2);">Product Performance</div>
+            <div class="period-tabs"><div class="period-tab active">W</div><div class="period-tab">M</div><div class="period-tab">Y</div></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Product</th><th>MRR</th><th>Users</th><th>Growth</th><th>Health</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><div style="display:flex;align-items:center;gap:7px;"><div style="width:20px;height:20px;border-radius:5px;background:var(--violet3);display:flex;align-items:center;justify-content:center;font-size:10px;">⚡</div><span style="font-weight:600;font-size:12px;">Claude Toolkit</span></div></td><td style="color:var(--green);font-weight:700;">$1,240</td><td>84</td><td><span style="color:var(--green);font-size:11px;">↑ 42%</span></td><td><span class="pill pill-green" style="font-size:9px;">Healthy</span></td><td><button class="btn btn-ghost btn-sm" style="font-size:10px;">View →</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:7px;"><div style="width:20px;height:20px;border-radius:5px;background:var(--green3);display:flex;align-items:center;justify-content:center;font-size:10px;">💬</div><span style="font-weight:600;font-size:12px;">ChatBase</span></div></td><td style="color:var(--green);font-weight:700;">$890</td><td>67</td><td><span style="color:var(--green);font-size:11px;">↑ 28%</span></td><td><span class="pill pill-green" style="font-size:9px;">Healthy</span></td><td><button class="btn btn-ghost btn-sm" style="font-size:10px;">View →</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:7px;"><div style="width:20px;height:20px;border-radius:5px;background:var(--blue3);display:flex;align-items:center;justify-content:center;font-size:10px;">📋</div><span style="font-weight:600;font-size:12px;">TaxPilot</span></div></td><td style="color:var(--green);font-weight:700;">$720</td><td>53</td><td><span style="color:var(--green);font-size:11px;">↑ 19%</span></td><td><span class="pill pill-green" style="font-size:9px;">Healthy</span></td><td><button class="btn btn-ghost btn-sm" style="font-size:10px;">View →</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:7px;"><div style="width:20px;height:20px;border-radius:5px;background:var(--amber3);display:flex;align-items:center;justify-content:center;font-size:10px;">🍽️</div><span style="font-weight:600;font-size:12px;">TableFlow</span></div></td><td style="color:var(--amber);font-weight:700;">$480</td><td>34</td><td><span style="color:var(--amber);font-size:11px;">↑ 8%</span></td><td><span class="pill pill-amber" style="font-size:9px;">Watch</span></td><td><button class="btn btn-ghost btn-sm" style="font-size:10px;">View →</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:7px;"><div style="width:20px;height:20px;border-radius:5px;background:var(--cyan3);display:flex;align-items:center;justify-content:center;font-size:10px;">🌐</div><span style="font-weight:600;font-size:12px;">ConnectOne</span></div></td><td style="color:var(--green);font-weight:700;">$620</td><td>29</td><td><span style="color:var(--green);font-size:11px;">↑ 31%</span></td><td><span class="pill pill-green" style="font-size:9px;">Healthy</span></td><td><button class="btn btn-ghost btn-sm" style="font-size:10px;">View →</button></td></tr>
+              <tr><td><div style="display:flex;align-items:center;gap:7px;"><div style="width:20px;height:20px;border-radius:5px;background:var(--red3);display:flex;align-items:center;justify-content:center;font-size:10px;">🛡️</div><span style="font-weight:600;font-size:12px;">MachineGuard</span></div></td><td style="color:var(--blue);font-weight:700;">$330</td><td>17</td><td><span style="color:var(--red);font-size:11px;">↓ 3%</span></td><td><span class="pill pill-red" style="font-size:9px;">Alert</span></td><td><button class="btn btn-danger btn-sm" style="font-size:10px;">Review</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Bottom row: Claude API spend + recent signups -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="chart-wrap">
+            <div class="chart-head"><div class="chart-title">Claude API Spend by Product</div></div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px;">
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;"><span style="width:60px;color:var(--t3);">P01</span><div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;"><div style="width:68%;height:100%;background:var(--violet);border-radius:3px;"></div></div><span style="color:var(--t2);width:36px;text-align:right;">$68</span></div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;"><span style="width:60px;color:var(--t3);">P02</span><div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;"><div style="width:42%;height:100%;background:var(--green);border-radius:3px;"></div></div><span style="color:var(--t2);width:36px;text-align:right;">$42</span></div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;"><span style="width:60px;color:var(--t3);">P03</span><div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;"><div style="width:35%;height:100%;background:var(--blue);border-radius:3px;"></div></div><span style="color:var(--t2);width:36px;text-align:right;">$35</span></div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;"><span style="width:60px;color:var(--t3);">P04</span><div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;"><div style="width:19%;height:100%;background:var(--amber);border-radius:3px;"></div></div><span style="color:var(--t2);width:36px;text-align:right;">$19</span></div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;"><span style="width:60px;color:var(--t3);">P05+P06</span><div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;"><div style="width:18%;height:100%;background:var(--cyan);border-radius:3px;"></div></div><span style="color:var(--t2);width:36px;text-align:right;">$18</span></div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-head"><div class="chart-title">Recent Signups</div></div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;"><div style="width:20px;height:20px;border-radius:50%;background:var(--violet3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--violet);flex-shrink:0;">AK</div><div style="flex:1;"><div style="color:var(--t1);font-weight:600;">Arjun Kumar</div><div style="color:var(--t3);font-size:10px;">P01 Growth · 2h ago</div></div><span class="pill pill-violet" style="font-size:9px;">New</span></div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;"><div style="width:20px;height:20px;border-radius:50%;background:var(--green3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--green);flex-shrink:0;">PT</div><div style="flex:1;"><div style="color:var(--t1);font-weight:600;">Patel Traders</div><div style="color:var(--t3);font-size:10px;">P02 Starter · 4h ago</div></div><span class="pill pill-green" style="font-size:9px;">New</span></div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:11px;"><div style="width:20px;height:20px;border-radius:50%;background:var(--blue3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--blue);flex-shrink:0;">RS</div><div style="flex:1;"><div style="color:var(--t1);font-weight:600;">Raj Steel Ltd</div><div style="color:var(--t3);font-size:10px;">P06 Enterprise · 6h ago</div></div><span class="pill pill-blue" style="font-size:9px;">Enterprise</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     P01: CLAUDE TOOLKIT
+════════════════════════════════════════════════════════ -->
+<section class="prod-sec" id="p01">
+  <div class="aurora-bg"><div class="aurora-blob" style="width:400px;height:400px;background:var(--violet);top:-150px;right:-100px;animation:aurora 14s ease infinite;"></div></div>
+  <div class="prod-header">
+    <div class="prod-icon-box" style="background:var(--violet3);border:1px solid rgba(139,92,246,.25);">⚡</div>
+    <div class="prod-meta">
+      <h2>P01 · Claude Toolkit</h2>
+      <p>Skills, MCP Servers & Agent Bundles — Ship Claude-powered features in minutes</p>
+    </div>
+    <div class="prod-badges"><span class="pill pill-violet">Day 15 Launch</span><span class="pill pill-green">Priority #1</span></div>
+  </div>
+
+  <div class="col2" style="margin-bottom:24px;align-items:start;">
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--violet)">Landing Page — Dev Aesthetic</div>
+      <div class="lp">
+        <div class="lp-nav">
+          <div style="font-size:13px;font-weight:900;color:var(--violet);">⚡ Claude Toolkit</div>
+          <div style="display:flex;gap:16px;font-size:11px;color:var(--t3);"><span>Skills</span><span>MCP</span><span>Agents</span><span>Pricing</span></div>
+          <button class="btn btn-primary btn-sm">Install Free</button>
+        </div>
+        <div class="lp-hero" style="padding:40px 20px 32px;background:radial-gradient(ellipse 60% 50% at 50% -10%,rgba(139,92,246,.2),transparent);">
+          <div class="lp-hero-badge pill pill-violet">✦ Claude-native · MCP-ready</div>
+          <h1 style="font-size:32px;font-weight:900;letter-spacing:-1.5px;margin-bottom:10px;">Supercharge Claude<br><span style="background:linear-gradient(135deg,var(--violet),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">With Real Powers</span></h1>
+          <p style="font-size:13px;margin-bottom:20px;">50+ pre-built Skills and MCP servers. Plug into Claude Code or Claude.ai in seconds.</p>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button class="btn btn-primary btn-sm">Browse Skills →</button>
+            <button class="btn btn-ghost btn-sm">GitHub ↗</button>
+          </div>
+          <!-- Terminal block -->
+          <div style="margin-top:20px;background:#050508;border:1px solid rgba(139,92,246,.25);border-radius:10px;padding:12px 16px;text-align:left;max-width:360px;margin-left:auto;margin-right:auto;font-family:var(--mono);font-size:11px;">
+            <div style="color:var(--t3);margin-bottom:6px;"># Install Claude Toolkit</div>
+            <div style="color:var(--green);">npm install <span style="color:var(--violet);">@addonweb/claude-toolkit</span></div>
+            <div style="color:var(--t3);margin-top:6px;"># Add a skill in one command</div>
+            <div style="color:var(--t1);">claude skills <span style="color:var(--amber);">add</span> <span style="color:var(--violet);">invoice-generator</span></div>
+            <div style="color:var(--green);margin-top:4px;">✓ Skill active in Claude Code</div>
+          </div>
+        </div>
+        <div class="lp-features-strip">
+          <div class="lp-feat"><div class="lp-feat-icon">🧠</div><h4>50+ Skills</h4><p>Invoice gen, code review, GST lookup — ready in seconds via /slash commands.</p></div>
+          <div class="lp-feat"><div class="lp-feat-icon">🔌</div><h4>MCP Servers</h4><p>Give Claude access to your DB, APIs, and Stripe via Model Context Protocol.</p></div>
+          <div class="lp-feat"><div class="lp-feat-icon">🤖</div><h4>Agent Bundles</h4><p>Pre-configured agent stacks for sales, support, and finance — deploy as a team.</p></div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top:10px;"><div class="ann-title">P01 LANDING DECISIONS</div><ul><li>Terminal code snippet in hero = developer credibility signal. Never use abstract illustration for dev tools.</li><li>Primary CTA = "Browse Skills" (exploration intent, low friction) not "Buy Now"</li><li>GitHub link = trust signal for developer audience. OSS credibility.</li><li>Violet + Pink gradient = AI/creativity. Distinct from competitors using blue.</li></ul></div>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--violet)">Developer Dashboard</div>
+      <div class="db" style="height:380px;">
+        <div class="db-side" style="width:170px;">
+          <div class="db-side-logo" style="color:var(--violet);">⚡ Toolkit</div>
+          <div class="db-nav-g">
+            <div class="db-item active"><div class="db-item-icon" style="background:var(--violet3);">📊</div>Overview</div>
+            <div class="db-item"><div class="db-item-icon">🧠</div>My Skills</div>
+            <div class="db-item"><div class="db-item-icon">🔌</div>MCP Servers</div>
+            <div class="db-item"><div class="db-item-icon">📈</div>Usage</div>
+            <div class="db-item"><div class="db-item-icon">🛒</div>Marketplace<div class="db-item-badge" style="background:var(--violet3);color:var(--violet);">50+</div></div>
+          </div>
+        </div>
+        <div class="db-main">
+          <div class="db-top"><span class="db-top-title">Developer Overview</span><button class="btn btn-primary btn-sm" style="font-size:10px;">+ Add Skill</button></div>
+          <div class="db-content">
+            <div class="col3" style="margin-bottom:10px;">
+              <div class="kpi" style="border-top:2px solid var(--violet);"><div class="kpi-label">Skills Active</div><div class="kpi-val" style="font-size:18px;color:var(--violet);">12</div><div class="kpi-sub kpi-up">↑ 3 this week</div></div>
+              <div class="kpi"><div class="kpi-label">Calls Today</div><div class="kpi-val" style="font-size:18px;" data-count="8421">0</div><div class="kpi-sub kpi-up">↑ 24%</div></div>
+              <div class="kpi"><div class="kpi-label">Budget Used</div><div class="kpi-val" style="font-size:18px;">$48</div><div class="kpi-sub kpi-neutral">of $100</div></div>
+            </div>
+            <div class="tbl-wrap">
+              <div style="padding:7px 10px;border-bottom:1px solid var(--b1);font-size:10px;font-weight:700;color:var(--t3);">INSTALLED SKILLS</div>
+              <table class="tbl">
+                <tbody>
+                  <tr><td style="font-weight:600;font-size:11px;">📄 invoice-generator</td><td style="font-size:10px;color:var(--t3);">v2.1.0</td><td style="font-size:10px;color:var(--t3);">1,240 calls</td><td><span class="pill pill-green" style="font-size:9px;">Active</span></td></tr>
+                  <tr><td style="font-weight:600;font-size:11px;">🔍 code-reviewer</td><td style="font-size:10px;color:var(--t3);">v1.8.2</td><td style="font-size:10px;color:var(--t3);">892 calls</td><td><span class="pill pill-green" style="font-size:9px;">Active</span></td></tr>
+                  <tr><td style="font-weight:600;font-size:11px;">💰 gst-calculator</td><td style="font-size:10px;color:var(--t3);">v1.2.1</td><td style="font-size:10px;color:var(--t3);">340 calls</td><td><span class="pill pill-green" style="font-size:9px;">Active</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P02: CHATBASE -->
+<section class="prod-sec" id="p02">
+  <div class="aurora-bg"><div class="aurora-blob" style="width:400px;height:400px;background:var(--green);top:-150px;left:-100px;animation:aurora2 16s ease infinite;"></div></div>
+  <div class="prod-header">
+    <div class="prod-icon-box" style="background:var(--green3);border:1px solid rgba(34,197,94,.25);">💬</div>
+    <div class="prod-meta"><h2>P02 · ChatBase</h2><p>WhatsApp AI Business Suite — Turn conversations into automated revenue</p></div>
+    <div class="prod-badges"><span class="pill pill-green">Priority #2</span></div>
+  </div>
+  <div class="col2" style="margin-bottom:24px;align-items:start;">
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--green)">Landing Page — WhatsApp Trust Aesthetic</div>
+      <div class="lp">
+        <div class="lp-nav">
+          <div style="font-size:13px;font-weight:900;color:var(--green);">💬 ChatBase</div>
+          <div style="display:flex;gap:16px;font-size:11px;color:var(--t3);"><span>Features</span><span>Pricing</span><span>Demo</span></div>
+          <button class="btn btn-sm" style="background:var(--green);color:#fff;border:none;">Start Free Trial</button>
+        </div>
+        <div class="lp-hero" style="padding:40px 20px 28px;background:radial-gradient(ellipse 60% 50% at 50% -10%,rgba(34,197,94,.18),transparent);">
+          <div class="lp-hero-badge pill pill-green">📱 Works on your existing WhatsApp Business number</div>
+          <h1 style="font-size:30px;font-weight:900;letter-spacing:-1.5px;margin-bottom:10px;">Your Business.<br><span style="background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">On WhatsApp. Automated.</span></h1>
+          <p style="font-size:12px;margin-bottom:18px;">AI handles queries, orders, invoices, follow-ups — 24/7. You just review the reports.</p>
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+            <button class="btn btn-sm" style="background:var(--green);color:#fff;border:none;">Connect WhatsApp →</button>
+            <button class="btn btn-ghost btn-sm">Watch Demo</button>
+          </div>
+          <!-- Chat mockup -->
+          <div style="background:#0a1628;border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:12px;max-width:280px;margin:0 auto;text-align:left;">
+            <div style="font-size:9px;color:var(--t3);text-align:center;margin-bottom:8px;">📱 LIVE CHAT PREVIEW</div>
+            <div style="display:flex;justify-content:flex-start;margin-bottom:6px;"><div style="background:var(--s2);padding:7px 10px;border-radius:10px 10px 10px 2px;font-size:11px;color:var(--t2);max-width:180px;">Price for 50 units of Item A?</div></div>
+            <div style="display:flex;justify-content:flex-end;margin-bottom:6px;"><div style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.2);padding:7px 10px;border-radius:10px 10px 2px 10px;font-size:11px;color:var(--green);max-width:200px;">₹24,500 + GST. Shall I send a formal quote? 📄</div></div>
+            <div style="text-align:center;font-size:10px;color:var(--green);margin-top:4px;">✦ AI replied in 0.8s · Invoice sent ✓</div>
+          </div>
+        </div>
+        <div class="lp-features-strip">
+          <div class="lp-feat"><div class="lp-feat-icon">🤖</div><h4>AI Sales Agent</h4><p>Qualifies leads, answers questions, sends quotes — autonomously, 24/7.</p></div>
+          <div class="lp-feat"><div class="lp-feat-icon">📄</div><h4>Auto Invoicing</h4><p>Order placed → AI creates invoice → Sends via WhatsApp + email instantly.</p></div>
+          <div class="lp-feat"><div class="lp-feat-icon">📊</div><h4>Owner Dashboard</h4><p>All chats, orders, revenue in one view. Not buried in WhatsApp threads.</p></div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top:10px;"><div class="ann-title">P02 DECISIONS</div><ul><li>WhatsApp green = instant brand recognition. Users already trust this color for messaging.</li><li>₹ rupee symbol everywhere — Indian SMB market. Local trust signal.</li><li>Chat mockup in hero shows product working, not abstract promise.</li><li>CTA "Connect WhatsApp" is specific action, not vague "Get Started".</li></ul></div>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--green)">Owner Dashboard — Conversation First</div>
+      <div class="db" style="height:380px;">
+        <div class="db-side" style="width:160px;">
+          <div class="db-side-logo" style="color:var(--green);">💬 ChatBase</div>
+          <div class="db-nav-g">
+            <div class="db-item active"><div class="db-item-icon" style="background:var(--green3);">📊</div>Dashboard</div>
+            <div class="db-item"><div class="db-item-icon">💬</div>Live Chats<div class="db-item-badge">3</div></div>
+            <div class="db-item"><div class="db-item-icon">🛒</div>Orders</div>
+            <div class="db-item"><div class="db-item-icon">📄</div>Invoices</div>
+            <div class="db-item"><div class="db-item-icon">🤖</div>AI Config</div>
+          </div>
+        </div>
+        <div class="db-main">
+          <div class="db-top"><span class="db-top-title">Today · AI Active</span><span style="padding:3px 8px;background:var(--green3);border:1px solid rgba(34,197,94,.25);border-radius:var(--r8);font-size:10px;color:var(--green);font-weight:700;">🟢 Online</span></div>
+          <div class="db-content">
+            <div class="col3" style="margin-bottom:10px;">
+              <div class="kpi" style="border-top:2px solid var(--green);"><div class="kpi-label">Messages</div><div class="kpi-val" style="font-size:18px;color:var(--green);">142</div><div class="kpi-sub kpi-up">↑ 38%</div></div>
+              <div class="kpi"><div class="kpi-label">Orders</div><div class="kpi-val" style="font-size:18px;">18</div><div class="kpi-sub kpi-neutral" style="color:var(--green);">₹84k value</div></div>
+              <div class="kpi"><div class="kpi-label">AI Handled</div><div class="kpi-val" style="font-size:18px;">94%</div><div class="kpi-sub kpi-neutral">6% manual</div></div>
+            </div>
+            <div class="tbl-wrap">
+              <div style="padding:7px 10px;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--t3);">RECENT CHATS <span style="color:var(--amber)">3 need review</span></div>
+              <table class="tbl">
+                <tbody>
+                  <tr><td style="font-size:11px;font-weight:600;">Rajesh Traders</td><td style="font-size:10px;color:var(--t3);">Invoice ₹12,400 sent ✓</td><td><span class="pill pill-green" style="font-size:9px;">Done</span></td></tr>
+                  <tr><td style="font-size:11px;font-weight:600;">Patel Wholesale</td><td style="font-size:10px;color:var(--t3);">Asking bulk discount</td><td><span class="pill pill-amber" style="font-size:9px;">Review</span></td></tr>
+                  <tr><td style="font-size:11px;font-weight:600;">+91 98765 43210</td><td style="font-size:10px;color:var(--t3);">AI qualifying lead...</td><td><span class="pill pill-violet" style="font-size:9px;">Live</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P03: TAXPILOT -->
+<section class="prod-sec" id="p03">
+  <div class="aurora-bg"><div class="aurora-blob" style="width:400px;height:400px;background:var(--blue);top:-150px;right:-100px;animation:aurora 18s ease infinite;"></div></div>
+  <div class="prod-header">
+    <div class="prod-icon-box" style="background:var(--blue3);border:1px solid rgba(59,130,246,.25);">📋</div>
+    <div class="prod-meta"><h2>P03 · TaxPilot</h2><p>AI GST & Invoicing Platform — File in 5 minutes, not 5 hours</p></div>
+    <div class="prod-badges"><span class="pill pill-blue">Priority #3</span><span class="pill pill-violet">🇮🇳 India-first</span></div>
+  </div>
+  <div class="col2" style="margin-bottom:24px;align-items:start;">
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--blue)">Landing Page — Compliance + Trust</div>
+      <div class="lp">
+        <div class="lp-nav">
+          <div style="font-size:13px;font-weight:900;color:var(--blue);">📋 TaxPilot</div>
+          <div style="display:flex;gap:16px;font-size:11px;color:var(--t3);"><span>Invoicing</span><span>GST Filing</span><span>Pricing</span></div>
+          <button class="btn btn-sm" style="background:var(--blue);color:#fff;border:none;">Try Free — 14 Days</button>
+        </div>
+        <div class="lp-hero" style="padding:40px 20px 28px;background:radial-gradient(ellipse 60% 50% at 50% -10%,rgba(59,130,246,.18),transparent);">
+          <div class="lp-hero-badge pill pill-blue">🇮🇳 Built for Indian GST · GSTIN Verified · e-Invoice Ready</div>
+          <h1 style="font-size:30px;font-weight:900;letter-spacing:-1.5px;margin-bottom:10px;">File GST in<br><span style="background:linear-gradient(135deg,var(--blue),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Under 5 Minutes</span></h1>
+          <p style="font-size:12px;margin-bottom:18px;">AI reads invoices, calculates GST, detects errors, files returns. No CA needed for routine filings.</p>
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+            <button class="btn btn-sm" style="background:var(--blue);color:#fff;border:none;">Start Filing Free →</button>
+            <button class="btn btn-ghost btn-sm">Sample Report</button>
+          </div>
+          <!-- Invoice preview -->
+          <div style="background:#0a0d1a;border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:12px;max-width:300px;margin:0 auto;text-align:left;font-size:11px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-weight:700;color:var(--t1);">INV-2094</span><span style="color:var(--green);font-weight:700;">✓ e-Invoice</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;color:var(--t3);margin-bottom:8px;">
+              <div>Subtotal: <span style="color:var(--t1);">₹50,000</span></div>
+              <div>CGST 9%: <span style="color:var(--t1);">₹4,500</span></div>
+              <div>SGST 9%: <span style="color:var(--t1);">₹4,500</span></div>
+              <div style="color:var(--blue);font-weight:700;">Total: ₹59,000</div>
+            </div>
+            <div style="background:var(--blue3);border-radius:6px;padding:6px 8px;font-size:10px;color:var(--blue);">🤖 AI verified HSN, GST rate, GSTIN — no errors</div>
+          </div>
+        </div>
+        <div class="lp-features-strip">
+          <div class="lp-feat"><div class="lp-feat-icon">🧾</div><h4>Smart Invoicing</h4><p>AI auto-fills HSN codes, tax rates, GSTIN. GST-compliant in seconds.</p></div>
+          <div class="lp-feat"><div class="lp-feat-icon">📤</div><h4>Auto Filing</h4><p>GSTR-1 and GSTR-3B filed automatically. Reconciliation included.</p></div>
+          <div class="lp-feat"><div class="lp-feat-icon">⚠️</div><h4>Error Detection</h4><p>AI catches mismatched rates and wrong HSN codes before you file.</p></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--blue)">Accountant Dashboard — GST Period View</div>
+      <div class="db" style="height:380px;">
+        <div class="db-side" style="width:160px;">
+          <div class="db-side-logo" style="color:var(--blue);">📋 TaxPilot</div>
+          <div class="db-nav-g">
+            <div class="db-item active"><div class="db-item-icon" style="background:var(--blue3);">📊</div>Dashboard</div>
+            <div class="db-item"><div class="db-item-icon">🧾</div>Invoices</div>
+            <div class="db-item"><div class="db-item-icon">📤</div>GST Returns</div>
+            <div class="db-item"><div class="db-item-icon">👥</div>Clients</div>
+            <div class="db-item"><div class="db-item-icon">🔍</div>Reconcile</div>
+          </div>
+        </div>
+        <div class="db-main">
+          <div class="db-top"><span class="db-top-title">April 2026 GST Period</span><button class="btn btn-sm" style="background:var(--blue);color:#fff;border:none;font-size:10px;">File GSTR-3B →</button></div>
+          <div class="db-content">
+            <div class="col3" style="margin-bottom:10px;">
+              <div class="kpi" style="border-top:2px solid var(--blue);"><div class="kpi-label">GST Payable</div><div class="kpi-val" style="font-size:16px;color:var(--blue);">₹48,200</div><div class="kpi-sub kpi-neutral">Due: 20 May</div></div>
+              <div class="kpi" style="border-top:2px solid var(--green);"><div class="kpi-label">ITC Available</div><div class="kpi-val" style="font-size:16px;color:var(--green);">₹18,400</div><div class="kpi-sub kpi-up">Auto-matched</div></div>
+              <div class="kpi" style="border-top:2px solid var(--amber);"><div class="kpi-label">Errors Found</div><div class="kpi-val" style="font-size:16px;color:var(--amber);">3</div><div class="kpi-sub kpi-down">Need fix</div></div>
+            </div>
+            <div class="tbl-wrap">
+              <div style="padding:7px 10px;border-bottom:1px solid var(--b1);font-size:10px;font-weight:700;color:var(--t3);">RETURN STATUS — FY 2025-26</div>
+              <table class="tbl">
+                <tbody>
+                  <tr><td style="font-size:11px;">GSTR-1 (Mar 2026)</td><td style="color:var(--green);font-size:11px;font-weight:700;">✓ Filed 11 Apr</td></tr>
+                  <tr><td style="font-size:11px;">GSTR-3B (Mar 2026)</td><td style="color:var(--green);font-size:11px;font-weight:700;">✓ Filed 20 Apr</td></tr>
+                  <tr><td style="font-size:11px;">GSTR-1 (Apr 2026)</td><td><span class="pill pill-amber" style="font-size:9px;">⏳ Due 11 May</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P04: TABLEFLOW -->
+<section class="prod-sec" id="p04">
+  <div class="aurora-bg"><div class="aurora-blob" style="width:400px;height:400px;background:var(--amber);top:-150px;left:-100px;animation:aurora 13s ease infinite;opacity:.1;"></div></div>
+  <div class="prod-header">
+    <div class="prod-icon-box" style="background:var(--amber3);border:1px solid rgba(245,158,11,.25);">🍽️</div>
+    <div class="prod-meta"><h2>P04 · TableFlow</h2><p>Smart Restaurant OS — QR Order + Kitchen Display + Owner Analytics</p></div>
+    <div class="prod-badges"><span class="pill pill-amber">Priority #4</span></div>
+  </div>
+  <div class="col2" style="margin-bottom:24px;align-items:start;">
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--amber)">Landing Page — 3-Screen Story</div>
+      <div class="lp">
+        <div class="lp-nav">
+          <div style="font-size:13px;font-weight:900;color:var(--amber);">🍽️ TableFlow</div>
+          <div style="display:flex;gap:16px;font-size:11px;color:var(--t3);"><span>Features</span><span>Pricing</span><span>Demo</span></div>
+          <button class="btn btn-sm" style="background:var(--amber);color:#07070a;border:none;font-weight:800;">Setup in 10 Min →</button>
+        </div>
+        <div class="lp-hero" style="padding:36px 20px 24px;background:radial-gradient(ellipse 60% 50% at 50% -10%,rgba(245,158,11,.12),transparent);">
+          <div class="lp-hero-badge pill pill-amber">🍴 QR Ordering · Kitchen Display · Live Revenue</div>
+          <h1 style="font-size:28px;font-weight:900;letter-spacing:-1.5px;margin-bottom:10px;">Your Restaurant.<br><span style="background:linear-gradient(135deg,var(--amber),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Fully Automated.</span></h1>
+          <p style="font-size:12px;margin-bottom:16px;">Customers scan QR, order, pay. Kitchen gets instant tickets. Owner sees live revenue. No hardware needed.</p>
+          <!-- 3-screen mini mockup -->
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            <div style="background:#0d0a00;border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px;width:90px;text-align:left;">
+              <div style="font-size:8px;color:var(--t3);margin-bottom:5px;">📱 CUSTOMER</div>
+              <div style="font-size:9px;color:var(--amber);font-weight:700;margin-bottom:3px;">Table 7</div>
+              <div style="font-size:9px;color:var(--t2);">🍔 ₹180<br>🍕 ₹240<br>🥤 ₹60</div>
+              <div style="margin-top:5px;background:var(--amber);color:#07070a;border-radius:4px;text-align:center;font-size:8px;font-weight:800;padding:3px;">Order →</div>
+            </div>
+            <div style="background:#0d0a00;border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px;width:90px;text-align:left;">
+              <div style="font-size:8px;color:var(--t3);margin-bottom:5px;">👨‍🍳 KITCHEN</div>
+              <div style="background:var(--red3);border:1px solid rgba(239,68,68,.2);border-radius:4px;padding:4px;font-size:8px;color:var(--red);font-weight:700;margin-bottom:4px;">T7 · NEW<br>1×Burger 2×Pizza</div>
+              <div style="background:var(--amber3);border:1px solid rgba(245,158,11,.2);border-radius:4px;padding:4px;font-size:8px;color:var(--amber);">T3 · 8min<br>1×Pasta</div>
+            </div>
+            <div style="background:#0d0a00;border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px;width:90px;text-align:left;">
+              <div style="font-size:8px;color:var(--t3);margin-bottom:5px;">📊 OWNER</div>
+              <div style="font-size:16px;font-weight:900;color:var(--green);">₹18k</div>
+              <div style="font-size:8px;color:var(--t3);margin-bottom:3px;">Today</div>
+              <div style="font-size:8px;color:var(--t2);">84 orders<br>Avg ₹219</div>
+            </div>
+          </div>
+        </div>
+        <div class="lp-features-strip">
+          <div class="lp-feat"><div class="lp-feat-icon">📱</div><h4>QR Ordering</h4><p>Scan → order → pay. No app download. Works on any smartphone.</p></div>
+          <div class="lp-feat"><div class="lp-feat-icon">👨‍🍳</div><h4>Kitchen Display</h4><p>Real-time order tickets. Color-coded by urgency. Auto-prints to KDS.</p></div>
+          <div class="lp-feat"><div class="lp-feat-icon">📈</div><h4>Revenue Analytics</h4><p>Hourly revenue, top dishes, table turnover — live owner dashboard.</p></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--amber)">Restaurant Owner Dashboard</div>
+      <div class="db" style="height:380px;background:#0a0800;">
+        <div class="db-side" style="width:155px;background:#050400;">
+          <div class="db-side-logo" style="color:var(--amber);">🍽️ TableFlow</div>
+          <div class="db-nav-g">
+            <div class="db-item active"><div class="db-item-icon" style="background:var(--amber3);">📊</div>Dashboard</div>
+            <div class="db-item"><div class="db-item-icon">🪑</div>Tables</div>
+            <div class="db-item"><div class="db-item-icon">📋</div>Orders<div class="db-item-badge">4</div></div>
+            <div class="db-item"><div class="db-item-icon">🍕</div>Menu</div>
+            <div class="db-item"><div class="db-item-icon">💰</div>Revenue</div>
+          </div>
+        </div>
+        <div class="db-main">
+          <div class="db-top" style="background:#0a0800;border-color:rgba(245,158,11,.15);"><span class="db-top-title" style="color:var(--amber);">Live · 12 Tables Active</span><span style="font-size:10px;color:var(--green);background:var(--green3);padding:3px 8px;border-radius:var(--r8);">All systems ✓</span></div>
+          <div class="db-content" style="background:#07060a;">
+            <div class="col3" style="margin-bottom:10px;">
+              <div class="kpi" style="border-top:2px solid var(--amber);background:#0a0800;"><div class="kpi-label">Today Revenue</div><div class="kpi-val" style="font-size:16px;color:var(--amber);">₹28,440</div><div class="kpi-sub kpi-up">↑ 22%</div></div>
+              <div class="kpi" style="background:#0a0800;"><div class="kpi-label">Orders</div><div class="kpi-val" style="font-size:16px;">124</div><div class="kpi-sub kpi-neutral">Avg ₹229</div></div>
+              <div class="kpi" style="background:#0a0800;"><div class="kpi-label">Tables</div><div class="kpi-val" style="font-size:16px;">12/16</div><div class="kpi-sub" style="color:var(--amber);">Peak hours</div></div>
+            </div>
+            <!-- Table grid -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;">
+              <div style="background:var(--green3);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:6px;text-align:center;font-size:9px;"><div style="font-weight:700;color:var(--green);">T1</div><div style="color:var(--t3);">Occupied</div></div>
+              <div style="background:var(--amber3);border:1px solid rgba(245,158,11,.2);border-radius:6px;padding:6px;text-align:center;font-size:9px;"><div style="font-weight:700;color:var(--amber);">T2</div><div style="color:var(--t3);">Ordering</div></div>
+              <div style="background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:6px;text-align:center;font-size:9px;"><div style="font-weight:700;color:var(--t3);">T3</div><div style="color:var(--t4);">Empty</div></div>
+              <div style="background:var(--red3);border:1px solid rgba(239,68,68,.2);border-radius:6px;padding:6px;text-align:center;font-size:9px;"><div style="font-weight:700;color:var(--red);">T4</div><div style="color:var(--t3);">Bill due</div></div>
+            </div>
+            <div class="tbl-wrap" style="background:#0a0800;border-color:rgba(245,158,11,.15);">
+              <div style="padding:7px 10px;border-bottom:1px solid rgba(245,158,11,.1);font-size:10px;font-weight:700;color:var(--amber);">TOP DISHES</div>
+              <table class="tbl">
+                <tbody>
+                  <tr><td style="font-size:11px;">🍕 Margherita Pizza</td><td style="color:var(--amber);font-weight:700;font-size:11px;">48 orders</td></tr>
+                  <tr><td style="font-size:11px;">🍔 Classic Burger</td><td style="color:var(--amber);font-weight:700;font-size:11px;">36 orders</td></tr>
+                  <tr><td style="font-size:11px;">🥤 Fresh Lime Soda</td><td style="color:var(--amber);font-weight:700;font-size:11px;">29 orders</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P05: CONNECTONE -->
+<section class="prod-sec" id="p05">
+  <div class="aurora-bg"><div class="aurora-blob" style="width:400px;height:400px;background:var(--cyan);top:-150px;right:-100px;animation:aurora2 20s ease infinite;opacity:.1;"></div></div>
+  <div class="prod-header">
+    <div class="prod-icon-box" style="background:var(--cyan3);border:1px solid rgba(6,182,212,.25);">🌐</div>
+    <div class="prod-meta"><h2>P05 · ConnectOne</h2><p>IoT Plug-and-Play Platform — Connect any device in under 5 minutes</p></div>
+    <div class="prod-badges"><span class="pill pill-cyan">Priority #5</span></div>
+  </div>
+  <div class="col2" style="margin-bottom:24px;align-items:start;">
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--cyan)">Landing Page — Technical Confidence</div>
+      <div class="lp" style="background:#020d0f;">
+        <div class="lp-nav" style="border-color:rgba(6,182,212,.15);">
+          <div style="font-size:13px;font-weight:900;color:var(--cyan);">🌐 ConnectOne</div>
+          <div style="display:flex;gap:16px;font-size:11px;color:var(--t3);"><span>Devices</span><span>Protocol</span><span>Enterprise</span></div>
+          <button class="btn btn-sm" style="background:var(--cyan);color:#020d0f;border:none;font-weight:800;">Connect First Device</button>
+        </div>
+        <div class="lp-hero" style="padding:36px 20px 24px;background:radial-gradient(ellipse 60% 50% at 50% -10%,rgba(6,182,212,.15),transparent);">
+          <div class="lp-hero-badge pill pill-cyan">⚡ MQTT · ESP32 · STM32 · nRF · No cloud lock-in</div>
+          <h1 style="font-size:28px;font-weight:900;letter-spacing:-1.5px;margin-bottom:10px;">Any Device.<br><span style="background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">One Platform.</span></h1>
+          <p style="font-size:12px;margin-bottom:18px;">Connect ESP32, industrial sensors, or custom PCBs in minutes. Real-time telemetry, alerts, OTA updates.</p>
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+            <button class="btn btn-sm" style="background:var(--cyan);color:#020d0f;border:none;font-weight:800;">Start Free (5 Devices) →</button>
+            <button class="btn btn-ghost btn-sm">Architecture Docs</button>
+          </div>
+          <!-- Network diagram -->
+          <div style="position:relative;height:60px;max-width:320px;margin:0 auto;">
+            <div style="position:absolute;left:0;top:8px;background:#0d1f23;border:1px solid rgba(6,182,212,.3);border-radius:6px;padding:4px 8px;font-size:9px;color:var(--cyan);font-weight:700;">ESP32</div>
+            <div style="position:absolute;left:0;top:36px;background:#0d1f23;border:1px solid rgba(6,182,212,.3);border-radius:6px;padding:4px 8px;font-size:9px;color:var(--cyan);font-weight:700;">Sensor</div>
+            <div style="position:absolute;left:50%;top:16px;transform:translateX(-50%);background:var(--cyan3);border:1px solid rgba(6,182,212,.4);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--cyan);">HUB</div>
+            <div style="position:absolute;right:0;top:8px;background:#0d1f23;border:1px solid rgba(6,182,212,.3);border-radius:6px;padding:4px 8px;font-size:9px;color:var(--cyan);font-weight:700;">Dashboard</div>
+            <div style="position:absolute;right:0;top:36px;background:#0d1f23;border:1px solid rgba(6,182,212,.3);border-radius:6px;padding:4px 8px;font-size:9px;color:var(--cyan);font-weight:700;">Alerts</div>
+          </div>
+        </div>
+        <div class="lp-features-strip" style="background:#020d0f;border-color:rgba(6,182,212,.1);">
+          <div class="lp-feat" style="background:#0d1f23;border-color:rgba(6,182,212,.15);"><div class="lp-feat-icon">🔌</div><h4>5-Line SDK</h4><p>Firmware code snippet connects any ESP32 to the cloud in minutes.</p></div>
+          <div class="lp-feat" style="background:#0d1f23;border-color:rgba(6,182,212,.15);"><div class="lp-feat-icon">📡</div><h4>Real-time Telemetry</h4><p>Temperature, GPS, pressure — all streamed live via MQTT.</p></div>
+          <div class="lp-feat" style="background:#0d1f23;border-color:rgba(6,182,212,.15);"><div class="lp-feat-icon">🔔</div><h4>Smart Alerts</h4><p>AI anomaly detection. WhatsApp + SMS + webhook on failure.</p></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--cyan)">Fleet Dashboard — Device Health Map</div>
+      <div class="db" style="height:380px;background:#020d0f;border-color:rgba(6,182,212,.15);">
+        <div class="db-side" style="width:155px;background:#020d0f;border-color:rgba(6,182,212,.15);">
+          <div class="db-side-logo" style="color:var(--cyan);border-color:rgba(6,182,212,.15);">🌐 ConnectOne</div>
+          <div class="db-nav-g">
+            <div class="db-item active" style="background:var(--cyan3);color:var(--cyan);"><div class="db-item-icon" style="background:transparent;">📊</div>Fleet View</div>
+            <div class="db-item"><div class="db-item-icon">📡</div>Live Data</div>
+            <div class="db-item"><div class="db-item-icon">🔔</div>Alerts<div class="db-item-badge">2</div></div>
+            <div class="db-item"><div class="db-item-icon">🗺️</div>Map View</div>
+            <div class="db-item"><div class="db-item-icon">⬆️</div>OTA Updates</div>
+          </div>
+        </div>
+        <div class="db-main">
+          <div class="db-top" style="background:#020d0f;border-color:rgba(6,182,212,.15);"><span class="db-top-title" style="color:var(--cyan);">Fleet — 48 Devices</span><span style="font-size:10px;color:var(--green);background:var(--green3);padding:3px 8px;border-radius:var(--r8);">45 Online</span></div>
+          <div class="db-content" style="background:#020d0f;">
+            <div class="col3" style="margin-bottom:10px;">
+              <div class="kpi" style="border-top:2px solid var(--cyan);background:#0d1f23;border-color:rgba(6,182,212,.15);"><div class="kpi-label">Online</div><div class="kpi-val" style="font-size:16px;color:var(--cyan);">45/48</div><div class="kpi-sub kpi-up">93.7%</div></div>
+              <div class="kpi" style="background:#0d1f23;border-color:rgba(6,182,212,.15);"><div class="kpi-label">Data/min</div><div class="kpi-val" style="font-size:16px;">12,840</div><div class="kpi-sub kpi-neutral">nominal</div></div>
+              <div class="kpi" style="background:#0d1f23;border-color:rgba(6,182,212,.15);"><div class="kpi-label">Alerts</div><div class="kpi-val" style="font-size:16px;color:var(--red);">2</div><div class="kpi-sub kpi-down">critical</div></div>
+            </div>
+            <div class="tbl-wrap" style="background:#0d1f23;border-color:rgba(6,182,212,.15);">
+              <div style="padding:7px 10px;border-bottom:1px solid rgba(6,182,212,.1);font-size:10px;font-weight:700;color:var(--cyan);">DEVICE STATUS</div>
+              <table class="tbl">
+                <tbody>
+                  <tr>
+                    <td><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);"></div><span style="font-size:11px;">ESP32-A1 Temp</span></div></td>
+                    <td style="font-family:var(--mono);font-size:10px;color:var(--cyan);">24.3°C</td>
+                    <td style="font-size:10px;color:var(--t3);">2s ago</td>
+                  </tr>
+                  <tr>
+                    <td><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);"></div><span style="font-size:11px;">nRF5340-B3 GPS</span></div></td>
+                    <td style="font-family:var(--mono);font-size:10px;color:var(--cyan);">23.02°N</td>
+                    <td style="font-size:10px;color:var(--t3);">5s ago</td>
+                  </tr>
+                  <tr>
+                    <td><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--red);animation:ping 1s ease infinite;"></div><span style="font-size:11px;">STM32-C7 Pressure</span></div></td>
+                    <td style="font-size:10px;color:var(--red);font-weight:700;">OFFLINE</td>
+                    <td style="font-size:10px;color:var(--t3);">14min</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- P06: MACHINEGUARD -->
+<section class="prod-sec" id="p06">
+  <div class="aurora-bg"><div class="aurora-blob" style="width:500px;height:400px;background:var(--red);top:-200px;right:-100px;animation:aurora 11s ease infinite;opacity:.08;"></div></div>
+  <div class="prod-header">
+    <div class="prod-icon-box" style="background:var(--red3);border:1px solid rgba(239,68,68,.25);">🛡️</div>
+    <div class="prod-meta"><h2>P06 · MachineGuard</h2><p>IoT Predictive Maintenance — Prevent failures 48 hours before they happen</p></div>
+    <div class="prod-badges"><span class="pill pill-red">Priority #6</span><span class="pill pill-amber">Enterprise GTM</span></div>
+  </div>
+  <div class="col2" style="margin-bottom:24px;align-items:start;">
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--red)">Landing Page — Cost of Inaction First</div>
+      <div class="lp" style="background:#0f0202;">
+        <div class="lp-nav" style="border-color:rgba(239,68,68,.15);">
+          <div style="font-size:13px;font-weight:900;color:var(--red);">🛡️ MachineGuard</div>
+          <div style="display:flex;gap:16px;font-size:11px;color:var(--t3);"><span>Solutions</span><span>Enterprise</span><span>ROI</span></div>
+          <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;">Book Demo</button>
+        </div>
+        <div class="lp-hero" style="padding:36px 20px 24px;background:radial-gradient(ellipse 60% 50% at 50% -10%,rgba(239,68,68,.12),transparent);">
+          <div class="lp-hero-badge pill pill-red">⚠️ Unplanned downtime costs $260k/hour on average</div>
+          <h1 style="font-size:28px;font-weight:900;letter-spacing:-1.5px;margin-bottom:10px;">Predict Failures<br><span style="background:linear-gradient(135deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">48 Hours Early</span></h1>
+          <p style="font-size:12px;margin-bottom:18px;">AI monitors vibration, temperature, current signatures. Alerts your team before a breakdown — not after.</p>
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px;">
+            <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;font-weight:800;">Book Enterprise Demo →</button>
+            <button class="btn btn-ghost btn-sm">ROI Calculator</button>
+          </div>
+          <!-- Alert preview -->
+          <div style="background:#1a0505;border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px;max-width:300px;margin:0 auto;text-align:left;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:14px;">⚠️</span><span style="font-size:11px;font-weight:700;color:var(--red);">Predictive Alert — Motor M-07</span><span style="margin-left:auto;font-size:9px;color:var(--t3);">2min ago</span></div>
+            <div style="font-size:11px;color:var(--t2);line-height:1.6;margin-bottom:8px;">Bearing vibration 340% above baseline. <strong style="color:var(--red);">Failure predicted in 36–48h</strong> · 94% confidence.</div>
+            <div style="display:flex;gap:6px;"><button style="padding:4px 8px;background:var(--red);border:none;border-radius:4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">Schedule Maintenance</button><button style="padding:4px 8px;background:transparent;border:1px solid rgba(239,68,68,.3);border-radius:4px;font-size:10px;color:var(--red);cursor:pointer;">View Analysis</button></div>
+          </div>
+        </div>
+        <div class="lp-features-strip" style="background:#0f0202;border-color:rgba(239,68,68,.1);">
+          <div class="lp-feat" style="background:#1a0505;border-color:rgba(239,68,68,.15);"><div class="lp-feat-icon">📡</div><h4>24/7 Monitoring</h4><p>Every machine, every second. Vibration, temp, current via IoT sensors.</p></div>
+          <div class="lp-feat" style="background:#1a0505;border-color:rgba(239,68,68,.15);"><div class="lp-feat-icon">🧠</div><h4>AI Prediction</h4><p>Trained on 10M+ machine hours. 48h early warning, 94% accuracy.</p></div>
+          <div class="lp-feat" style="background:#1a0505;border-color:rgba(239,68,68,.15);"><div class="lp-feat-icon">💰</div><h4>ROI Dashboard</h4><p>Track downtime prevented and maintenance costs saved in dollars.</p></div>
+        </div>
+      </div>
+      <div class="ann" style="margin-top:10px;"><div class="ann-title">P06 KEY DECISIONS</div><ul><li>Cost of inaction ($260k/hour) in hero badge — makes pain quantified and visceral immediately</li><li>CTA = "Book Enterprise Demo" not "Start Free" — enterprise motion, not self-serve</li><li>ROI Calculator = enterprise lead magnet. High-value, high-intent signal for sales team.</li><li>Red + dark red bg = urgency, industrial seriousness. Matches "control room" mental model.</li></ul></div>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:12px;color:var(--red)">Industrial Control Room Dashboard</div>
+      <div class="db" style="height:380px;background:#0f0202;border-color:rgba(239,68,68,.15);">
+        <div class="db-side" style="width:155px;background:#0f0202;border-color:rgba(239,68,68,.15);">
+          <div class="db-side-logo" style="color:var(--red);border-color:rgba(239,68,68,.15);">🛡️ MachineGuard</div>
+          <div class="db-nav-g">
+            <div class="db-item active" style="background:var(--red3);color:var(--red);"><div class="db-item-icon" style="background:transparent;">🏭</div>Control Room</div>
+            <div class="db-item"><div class="db-item-icon">⚠️</div>Alerts<div class="db-item-badge" style="background:var(--red3);color:var(--red);">3</div></div>
+            <div class="db-item"><div class="db-item-icon">🔧</div>Maintenance</div>
+            <div class="db-item"><div class="db-item-icon">📊</div>Analytics</div>
+            <div class="db-item"><div class="db-item-icon">💰</div>ROI Tracker</div>
+          </div>
+        </div>
+        <div class="db-main">
+          <div class="db-top" style="background:#0f0202;border-color:rgba(239,68,68,.15);"><span class="db-top-title" style="color:var(--red);">🏭 Plant Floor · Live</span>
+            <div style="display:flex;align-items:center;gap:4px;background:var(--red3);border:1px solid rgba(239,68,68,.2);border-radius:var(--r8);padding:3px 8px;">
+              <div style="width:6px;height:6px;border-radius:50%;background:var(--red);animation:ping 1s ease infinite;"></div>
+              <span style="font-size:10px;font-weight:700;color:var(--red);">3 Critical</span>
+            </div>
+          </div>
+          <div class="db-content" style="background:#0f0202;">
+            <div class="col3" style="margin-bottom:10px;">
+              <div class="kpi" style="border-top:2px solid var(--red);background:#1a0505;border-color:rgba(239,68,68,.15);"><div class="kpi-label">Machines</div><div class="kpi-val" style="font-size:16px;color:var(--red);">48</div><div class="kpi-sub kpi-up">45 healthy</div></div>
+              <div class="kpi" style="background:#1a0505;border-color:rgba(239,68,68,.15);"><div class="kpi-label">Saved QTD</div><div class="kpi-val" style="font-size:16px;color:var(--green);">$1.2M</div><div class="kpi-sub kpi-up">downtime</div></div>
+              <div class="kpi" style="background:#1a0505;border-color:rgba(239,68,68,.15);"><div class="kpi-label">AI Accuracy</div><div class="kpi-val" style="font-size:16px;">94.2%</div><div class="kpi-sub kpi-up">↑ 2.1%</div></div>
+            </div>
+            <!-- Alerts -->
+            <div style="background:#1a0505;border:1px solid rgba(239,68,68,.2);border-radius:var(--r8);overflow:hidden;margin-bottom:10px;">
+              <div style="padding:7px 10px;border-bottom:1px solid rgba(239,68,68,.15);font-size:10px;font-weight:700;color:var(--red);">⚠️ CRITICAL ALERTS</div>
+              <div style="font-size:11px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(239,68,68,.08);">
+                  <div><div style="font-weight:700;color:var(--red);">Motor M-07 — Bearing</div><div style="font-size:10px;color:var(--t3);">36–48h · Vibration +340%</div></div>
+                  <button class="btn btn-sm" style="background:var(--red);border:none;color:#fff;font-size:9px;padding:3px 7px;">Act Now</button>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;">
+                  <div><div style="font-weight:700;color:var(--amber);">Pump P-12 — High Temp</div><div style="font-size:10px;color:var(--t3);">92°C · threshold 85°C</div></div>
+                  <button class="btn btn-sm btn-ghost" style="font-size:9px;padding:3px 7px;color:var(--amber);border-color:rgba(245,158,11,.3);">Inspect</button>
+                </div>
+              </div>
+            </div>
+            <!-- Vibration chart -->
+            <div class="chart-wrap" style="background:#1a0505;border-color:rgba(239,68,68,.15);">
+              <div class="chart-head"><div class="chart-title" style="color:var(--red);">Motor M-07 · Vibration (24h)</div></div>
+              <svg width="100%" height="44" viewBox="0 0 400 44" preserveAspectRatio="none">
+                <line x1="0" y1="22" x2="400" y2="22" stroke="rgba(239,68,68,.2)" stroke-width="1" stroke-dasharray="4"/>
+                <path d="M0,36 L50,34 L100,35 L150,32 L200,28 L250,20 L300,12 L350,6 L400,3" stroke="#ef4444" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M0,36 L50,34 L100,35 L150,32 L200,28 L250,20 L300,12 L350,6 L400,3 L400,44 L0,44Z" fill="rgba(239,68,68,.08)"/>
+                <circle cx="400" cy="3" r="3" fill="#ef4444"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// Intersection observer for reveal + stagger
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
+
+// Sidebar active link tracking
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.sb-link');
+const linkObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector('.sb-link[href="#' + e.target.id + '"]');
+      if (a) a.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => linkObserver.observe(s));
+
+links.forEach(l => {
+  l.addEventListener('click', e => {
+    const h = l.getAttribute('href');
+    if (h && h.startsWith('#')) {
+      e.preventDefault();
+      document.querySelector(h)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+});
+
+// Period tabs
+document.querySelectorAll('.period-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    tab.closest('.period-tabs').querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+// Count-up animation
+function countUp(el, target, duration = 1200) {
+  let start = null;
+  const step = (ts) => {
+    if (!start) start = ts;
+    const progress = Math.min((ts - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(ease * target).toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+const countObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const target = parseInt(e.target.dataset.count);
+      if (target) countUp(e.target, target);
+      countObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+</script>
+</body>
+</html>
