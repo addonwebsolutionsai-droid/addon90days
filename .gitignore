@@ -46,6 +46,10 @@ credentials.json
 coverage/
 .nyc_output/
 
+# TypeScript incremental build info
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
 # Claude local settings (keep agents/commands, not local overrides)
 .claude/settings.local.json
 

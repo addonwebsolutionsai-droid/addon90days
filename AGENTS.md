@@ -14,12 +14,12 @@ We don't have a single-project build — this repo is a collection of plans, age
 
 Per-product conventions (when code is added):
 
-- **Install:** `pnpm install`
-- **Dev:** `pnpm dev`
-- **Test:** `pnpm test`
-- **Lint:** `pnpm lint:fix`
-- **Typecheck:** `pnpm typecheck`
-- **Build:** `pnpm build`
+- **Install:** `npm install --legacy-peer-deps`
+- **Dev:** `npm run dev`
+- **Test:** `npm test`
+- **Lint:** `npm run lint`
+- **Typecheck:** `npm run type-check`
+- **Build:** `npm run build`
 
 All products use TypeScript strict mode.
 

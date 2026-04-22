@@ -1,122 +1,103 @@
 # State
 
-**This file is Claude's memory between sessions.** It is read at the start of every session (via EXECUTE.md) and updated at the end. Keep it accurate.
+**Claude's single source of truth between sessions.** Read this at the start of every session. Update it at the end.
 
 ---
 
 ## Project status
 
-**Start date:** [UPDATE ON DAY 1]
-**Current day:** [UPDATE DAILY]
-**Current phase:** 1 (Foundation)
-**Last session:** [UPDATE AT SESSION END]
+**Start date:** 2026-04-22
+**Current day:** 1
+**Current phase:** 1 — Foundation + P01 build
+**Last session:** 2026-04-22
 
 ---
 
 ## Next action
 
-**What to do first in the next session:**
-> [The very next task. Be specific.]
-
-Example: "Run `/daily-standup`. Orchestrator will load Day 3 plan from runbook. Focus: deploy internal approval dashboard per runbook Day 3 plan. Blockers: none expected."
+**What to do first in the next session (2026-04-23, 11:00 AM IST):**
+> Continue P01 execution. Next step: Stripe checkout integration for skill pack purchases. Then /dashboard page, API route to run skills, Vercel deploy, npm publish prep. Read `products/01-claude-reseller/.claude/memory/context.md` for exact steps.
 
 ---
 
 ## In-flight (work carrying across sessions)
 
-| Task | Owner agent | Status | Pointer |
+| Task | Owner | Status | Pointer |
 |---|---|---|---|
-| *(empty on Day 0)* | | | |
+| P01 Stripe checkout | @api-engineer + @frontend-architect | not started | `products/01-claude-reseller/app/src/app/` |
+| P01 /dashboard page | @frontend-architect | not started | `products/01-claude-reseller/app/src/app/` |
+| P01 API route /api/skills/run | @api-engineer | not started | `products/01-claude-reseller/app/src/app/api/` |
+| P01 npm publish prep | @infra-engineer | not started | `products/01-claude-reseller/packages/toolkit/` |
+| GitHub PAT rotation | founder | **URGENT** | Regenerate at github.com/settings/tokens |
 
 ---
 
 ## Products — build status
 
-| Product | Status | Owner lead | Last update | Pointer |
-|---|---|---|---|---|
-| 01-claude-reseller | queued-day-12 | @infra-engineer | — | `products/01-claude-reseller/PRD.md` |
-| 02-whatsapp-ai-suite | planning | @api-engineer | — | `products/02-whatsapp-ai-suite/PRD.md` |
-| 03-gst-invoicing | planning | @api-engineer | — | `products/03-gst-invoicing/PRD.md` |
-| 04-restaurant-os | planning | @api-engineer | — | `products/04-restaurant-os/PRD.md` |
-| 05-iot-platform | planning | @infra-engineer | — | `products/05-iot-platform/PRD.md` |
-| 06-predictive-maintenance | planning | @infra-engineer | — | `products/06-predictive-maintenance/PRD.md` |
-| 00-addonweb-rebrand | queued-day-25 | @ui-builder | — | `rebrand/README.md` |
-
-Statuses: `researching → to-validate → validating → planning → building → beta → launched → scaling → mature → killed`
-
----
-
-## Active cohorts / campaigns
-
-| Cohort | Product | Status | Last send | Next action |
-|---|---|---|---|---|
-| *(empty — add as launched)* | | | | |
-
----
-
-## Blockers requiring founder attention
-
-| Blocker | Raised by | Date | Description |
+| Product | Status | Last update | Pointer |
 |---|---|---|---|
-| *(empty — add as they arise)* | | | |
-
-→ Also check `operations/approval-queue.md` for items awaiting approval.
+| 01-claude-reseller | **building** — core done, Stripe + deploy next | 2026-04-22 | `products/01-claude-reseller/.claude/memory/context.md` |
+| 02-whatsapp-ai-suite | queued (after P01 launch) | 2026-04-22 | `products/02-whatsapp-ai-suite/PRD.md` |
+| 03-gst-invoicing | queued (parallel with P05) | 2026-04-22 | `products/03-gst-invoicing/PRD.md` |
+| 04-restaurant-os | on hold — Day 28 kill/keep decision | 2026-04-22 | `products/04-restaurant-os/PRD.md` |
+| 05-iot-platform | queued (parallel with P03) | 2026-04-22 | `products/05-iot-platform/PRD.md` |
+| 06-predictive-maintenance | queued (after P05 infra ready) | 2026-04-22 | `products/06-predictive-maintenance/PRD.md` |
 
 ---
 
-## KPI snapshot (updated at end of each week via /weekly-review)
+## What's built (Day 1)
+
+### P01 — @addonweb/claude-toolkit
+- 10 skills: invoice-generator, gst-calculator, email-drafter, code-reviewer, pr-description, sql-query-builder, test-generator, iot-firmware-scaffold, iot-device-registry-schema, iot-ota-pipeline
+- runSkill() generic runner — Zod validation + Anthropic SDK
+- MCP server (stdio) — all 10 skills exposed to Claude Code / Claude Desktop
+- Next.js 15 marketplace: landing page, skills browser, Clerk auth, dark violet theme
+- TypeScript strict, type-checks clean, toolkit compiles to dist/
+
+### Repo
+- GitHub: github.com/addonwebsolutions-AI/addon90days — main + dev branches live
+- All 6 product .claude/ structures initialized
+- Global memory in ~/.claude/projects/c--Users-Lenovo-Downloads-AWS_90days/memory/
+- design-pro.html — canonical UI/UX design system
+
+---
+
+## Env vars needed before P01 can run
+
+| Key | Where to get it |
+|---|---|
+| ANTHROPIC_API_KEY | console.anthropic.com |
+| CLERK_SECRET_KEY | clerk.com dashboard |
+| NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY | clerk.com dashboard |
+| STRIPE_SECRET_KEY | stripe.com dashboard (test mode) |
+| NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY | stripe.com dashboard |
+
+Add all to `products/01-claude-reseller/.env.local`
+
+---
+
+## KPI snapshot
 
 - **MRR:** $0
 - **Paying customers:** 0
 - **Active pipeline:** $0
-- **Leads this week:** 0
-- **Meetings booked this week:** 0
-- **Content shipped this week:** 0
-- **Claude API spend this month:** $0 (cap: $5,000)
+- **Day 15 target:** P01 live on Vercel + @addonweb/claude-toolkit published to npm
 
 ---
 
 ## Last session notes
 
-### Session: [not yet started]
+### Session: 2026-04-22
 
-Completed: *(nothing yet)*
+**Completed:**
+- design-pro.html — full UI/UX design system
+- Per-product .claude/ structure for all 6 products
+- @addonweb/claude-toolkit — 10 skills, MCP server, Next.js marketplace scaffold
+- GitHub pushed (addon90days, main + dev)
+- Global memory files, CLAUDE.md updated with agent protocol
+- Repo cleanup: ghost dirs removed, stale docs removed, .gitignore updated
 
-Carried forward: *(nothing yet)*
+**Next action (2026-04-23, 11:00 AM IST):**
+P01: Stripe checkout → /dashboard → /api/skills/run → Vercel → npm publish.
 
-Notes for next time: *(empty)*
-
----
-
-## State update template (use at session end)
-
-Overwrite the "Last session notes" section with this format:
-
-```markdown
-### Session: {YYYY-MM-DD HH:MM}
-
-**Completed this session:**
-- @{agent}: {what they shipped}
-- @{agent}: {what they shipped}
-
-**In-flight carried to next session:**
-- {task}: {where it stands}, pointer: {file/URL}
-
-**Next action (for next Claude session):**
-{One clear action. Include the product, the agent, the specific step.}
-
-**Blockers (if any):**
-- {blocker}: {what unblocks it}
-
-**Day number at next session:** {N+1}
-```
-
-Also update the "Next action" section at the top of this file to match.
-
----
-
-## Why this file matters
-
-Without this file, every session starts from zero and Claude burns 50k+ tokens just figuring out where we are. With this file, Claude reads one 200-line document and immediately knows what to do.
-
-Keep it clean. Archive old session notes to `operations/daily-log/` — don't let this file grow past 300 lines.
+**Day number at next session:** 2
