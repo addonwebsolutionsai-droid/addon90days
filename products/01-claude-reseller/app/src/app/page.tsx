@@ -1,322 +1,212 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  Github,
-  Terminal,
-  Cpu,
-  FileText,
-  Code2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SkillCard } from "@/components/skill-card";
-import type { SkillCardProps } from "@/components/skill-card";
+import { ArrowRight, Terminal, Zap, Shield, Package } from "lucide-react";
 
-// --- Static data: featured skills for the hero grid -------------------------
+const STATS = [
+  { value: "10", label: "Skills" },
+  { value: "3", label: "Packs" },
+  { value: "Free", label: "Gemini tier" },
+  { value: "1-line", label: "Install" },
+];
 
-const FEATURED_SKILLS: SkillCardProps[] = [
+const PACKS = [
   {
-    id: "invoice-generator",
-    name: "Invoice Generator",
-    description:
-      "Generate professional GST-compliant invoices from a single prompt. Outputs PDF-ready HTML + JSON. Handles CGST/SGST/IGST splits automatically.",
-    category: "finance",
-    priceUsd: 19,
-    tags: ["gst", "invoice", "pdf", "finance"],
-    featured: true,
+    id: "iot-developer-pack",
+    accentHex: "#06b6d4",
+    name: "IoT Developer Pack",
+    price: "₹4,067",
+    tag: "Hardware engineers",
+    skills: ["iot-firmware-scaffold", "iot-device-registry-schema", "iot-ota-pipeline"],
+    desc: "ESP32/STM32 firmware scaffold, TimescaleDB fleet schema, atomic OTA with staged rollout.",
   },
   {
-    id: "code-reviewer",
-    name: "Code Reviewer",
-    description:
-      "Deep code review with actionable suggestions. Catches security issues, perf anti-patterns, and TypeScript pitfalls. Returns structured JSON diff.",
-    category: "developer",
-    priceUsd: 14,
-    tags: ["typescript", "security", "review", "ci"],
-    featured: true,
+    id: "developer-productivity-pack",
+    accentHex: "#8b5cf6",
+    name: "Developer Productivity Pack",
+    price: "₹2,407",
+    tag: "Most popular",
+    skills: ["code-reviewer", "sql-query-builder", "test-generator", "pr-description"],
+    desc: "Security-focused code review, NL→SQL, test generation, and PR descriptions from git diffs.",
   },
   {
-    id: "pr-description",
-    name: "PR Description Writer",
-    description:
-      "Turn a git diff into a full pull request description with summary, test plan, and risk flags. Reads your existing PR template.",
-    category: "developer",
-    priceUsd: 9,
-    tags: ["git", "github", "pr", "docs"],
-    featured: false,
+    id: "smb-operations-pack",
+    accentHex: "#22c55e",
+    name: "SMB Operations Pack",
+    price: "₹2,407",
+    tag: "Indian businesses",
+    skills: ["invoice-generator", "gst-calculator", "email-drafter"],
+    desc: "GST-compliant invoices, CGST/SGST/IGST calculator, professional email drafting.",
   },
 ];
 
-// --- Stat row data -----------------------------------------------------------
+const CODE_SNIPPET = `import { invoiceGenerator, runSkill } from "@addonweb/claude-toolkit"
 
-type Stat = { label: string; value: string };
-
-const STATS: Stat[] = [
-  { value: "6", label: "Skill Packs" },
-  { value: "$49", label: "avg price" },
-  { value: "1-line", label: "install" },
-  { value: "100%", label: "TypeScript" },
-];
-
-// --- Terminal snippet (static, no JS needed) ---------------------------------
-
-const INSTALL_SNIPPET = `npx @addonweb/claude-toolkit add invoice-generator
-# ✓ Skill installed in .claude/skills/
-# ✓ Use: /invoice-generator`;
-
-// --- Page -------------------------------------------------------------------
+const result = await runSkill(invoiceGenerator, {
+  sellerName: "AddonWeb Solutions",
+  buyerName: "Acme Corp",
+  invoiceNumber: "INV-2026-001",
+  lineItems: [{
+    description: "Software License",
+    quantity: 1, unit: "Nos",
+    ratePerUnit: 50000, gstRate: 18
+  }],
+  currency: "INR"
+})
+// result.data.summary →
+// { subtotal: 50000, totalGst: 9000, totalAmount: 59000 }`;
 
 export default function HomePage() {
   return (
-    <main className="relative overflow-hidden">
-      {/* Aurora background blobs — design system spec: 10-15% opacity, blur 80px */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-violet-500/10 blur-[120px] animate-aurora-1" />
-        <div className="absolute top-1/2 -right-60 w-[500px] h-[500px] rounded-full bg-pink-500/8 blur-[100px] animate-aurora-2" />
-      </div>
+    <main className="min-h-screen bg-[#07070a] text-white">
 
-      <div className="relative z-10">
-        {/* ------------------------------------------------------------------ */}
-        {/* NAV                                                                 */}
-        {/* ------------------------------------------------------------------ */}
-        <nav className="sticky top-0 z-50 glass-panel border-b border-border-subtle">
-          <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-violet-500 font-mono text-lg font-bold">⚡</span>
-              <span className="font-semibold text-white text-sm tracking-tight">
-                Claude Toolkit
-              </span>
+      {/* Nav */}
+      <nav className="border-b border-white/5 px-6 py-4 flex items-center justify-between sticky top-0 backdrop-blur-md bg-[#07070a]/80 z-50">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center">
+            <Zap size={13} />
+          </div>
+          <span className="font-semibold text-sm">Claude Toolkit</span>
+          <span className="text-[10px] bg-violet-500/20 text-violet-300 px-1.5 py-0.5 rounded font-mono">v1.0</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link href="/skills" className="text-sm text-white/50 hover:text-white transition-colors">Skills</Link>
+          <Link href="/sign-in" className="text-sm text-white/50 hover:text-white transition-colors">Sign in</Link>
+          <Link href="/sign-up" className="px-4 py-2 bg-violet-600 hover:bg-violet-500 rounded-lg text-sm font-medium transition-colors">
+            Get started
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
+        <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs text-white/60 mb-8">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          Built by practitioners who run a 13-agent AI company
+        </div>
+
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight mb-6 leading-tight">
+          Production-ready{" "}
+          <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-violet-400 bg-clip-text text-transparent">
+            Claude Skills
+          </span>
+          <br />for real work
+        </h1>
+
+        <p className="text-lg text-white/50 max-w-2xl mx-auto mb-10">
+          10 skills across IoT, developer tooling, and Indian business ops.
+          One npm install. Runs in Claude Code, your API, or the MCP server.
+        </p>
+
+        <div className="flex items-center justify-center gap-4 mb-16 flex-wrap">
+          <Link href="/skills" className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors">
+            Browse skill packs <ArrowRight size={15} />
+          </Link>
+          <a href="https://github.com/addonwebsolutions-AI/addon90days" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-medium transition-colors text-sm">
+            <Terminal size={15} /> View on GitHub
+          </a>
+        </div>
+
+        <div className="bg-[#0f0f12] border border-white/5 rounded-xl p-4 inline-flex items-center gap-3 text-sm font-mono">
+          <span className="text-white/30">$</span>
+          <span className="text-green-400">npm install @addonweb/claude-toolkit</span>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="border-y border-white/5 py-8">
+        <div className="max-w-3xl mx-auto px-6 grid grid-cols-4 gap-8 text-center">
+          {STATS.map(({ value, label }) => (
+            <div key={label}>
+              <div className="text-3xl font-bold">{value}</div>
+              <div className="text-xs text-white/40 mt-1">{label}</div>
             </div>
-            <div className="flex items-center gap-1">
-              <Link href="/skills">
-                <Button variant="ghost" size="sm">
-                  Browse Skills
-                </Button>
-              </Link>
-              <a
-                href="https://github.com/addonwebsolutions-AI/aws-90days"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Button variant="ghost" size="sm">
-                  <Github size={15} />
-                  GitHub
-                </Button>
-              </a>
-              <Link href="/dashboard">
-                <Button size="sm">Sign In</Button>
-              </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Code + explainer */}
+      <section className="max-w-5xl mx-auto px-6 py-20">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-3">How it works</p>
+            <h2 className="text-3xl font-bold mb-4">One function call.<br />Real output.</h2>
+            <p className="text-white/50 text-sm leading-relaxed mb-6">
+              Every skill has a typed Zod schema. Pass structured input, get structured output.
+              No prompt engineering. No parsing. Works in any Node.js project.
+            </p>
+            <div className="flex items-center gap-3 text-sm text-white/40 mb-2">
+              <Shield size={14} className="text-green-400 shrink-0" />
+              Input validated before any API call
+            </div>
+            <div className="flex items-center gap-3 text-sm text-white/40">
+              <Package size={14} className="text-violet-400 shrink-0" />
+              Output parsed against typed schema
             </div>
           </div>
-        </nav>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* HERO                                                                */}
-        {/* ------------------------------------------------------------------ */}
-        <section className="max-w-6xl mx-auto px-6 pt-24 pb-16">
-          {/* Eyebrow badge */}
-          <div className="flex justify-center mb-8">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/30 bg-violet-500/8 text-violet-400 text-xs font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-              Day 15 Launch — Now Available
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl md:text-6xl font-black text-center leading-[1.05] tracking-[-1.5px] mb-6 max-w-4xl mx-auto">
-            Production-Ready{" "}
-            <span className="text-gradient-violet">Claude Skills</span>,{" "}
-            MCP Servers{" "}
-            <span className="text-white/40">&amp;</span> Agent Packs
-          </h1>
-
-          {/* Sub */}
-          <p className="text-center text-white/50 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Built by practitioners who run a 13-agent AI company. Every tool is
-            tested in real production — not a demo.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <Link href="/skills">
-              <Button size="lg">
-                Browse Skill Packs
-                <ArrowRight size={16} />
-              </Button>
-            </Link>
-            <a
-              href="https://github.com/addonwebsolutions-AI/aws-90days"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Button variant="outline" size="lg">
-                <Github size={16} />
-                View on GitHub
-              </Button>
-            </a>
-          </div>
-
-          {/* Stats row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px mt-16 rounded-16 overflow-hidden border border-border-subtle bg-border-subtle">
-            {STATS.map(({ value, label }) => (
-              <div
-                key={label}
-                className="flex flex-col items-center gap-0.5 py-5 bg-bg-surface"
-              >
-                <span className="text-2xl font-black text-white tabular-nums">
-                  {value}
-                </span>
-                <span className="text-xs text-white/40 uppercase tracking-wider">
-                  {label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* TERMINAL SNIPPET                                                    */}
-        {/* ------------------------------------------------------------------ */}
-        <section className="max-w-6xl mx-auto px-6 pb-16">
-          <div className="rounded-16 border border-border bg-bg-surface overflow-hidden">
-            {/* Terminal chrome */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border-subtle bg-bg-s2">
-              <span className="w-3 h-3 rounded-full bg-red-500/70" />
-              <span className="w-3 h-3 rounded-full bg-amber-500/70" />
-              <span className="w-3 h-3 rounded-full bg-green-500/70" />
-              <span className="ml-3 text-xs text-white/30 font-mono">
-                terminal
-              </span>
+          <div className="bg-[#0f0f12] rounded-xl border border-white/5 overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+              <span className="text-xs text-white/30 ml-2 font-mono">invoice.ts</span>
             </div>
-            <pre className="p-6 text-sm font-mono text-green-400 leading-relaxed overflow-x-auto whitespace-pre">
-              {INSTALL_SNIPPET}
+            <pre className="p-5 text-xs font-mono text-white/80 overflow-x-auto leading-relaxed whitespace-pre">
+              <code>{CODE_SNIPPET}</code>
             </pre>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ------------------------------------------------------------------ */}
-        {/* FEATURED SKILLS — bento grid                                        */}
-        {/* ------------------------------------------------------------------ */}
-        <section className="max-w-6xl mx-auto px-6 pb-24">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">
-                Featured Skills
-              </p>
-              <h2 className="text-2xl font-bold text-white tracking-tight">
-                Ship faster with battle-tested tools
-              </h2>
-            </div>
-            <Link href="/skills">
-              <Button variant="ghost" size="sm">
-                View all
-                <ArrowRight size={13} />
-              </Button>
-            </Link>
-          </div>
-
-          {/* 3-column grid on md+; single column on mobile */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {FEATURED_SKILLS.map((skill) => (
-              <SkillCard key={skill.id} {...skill} />
-            ))}
-          </div>
-        </section>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* USE CASES — 3 icon bento tiles                                      */}
-        {/* ------------------------------------------------------------------ */}
-        <section className="max-w-6xl mx-auto px-6 pb-24">
-          <p className="text-xs text-white/30 font-medium uppercase tracking-widest mb-4 text-center">
-            What you can do
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                icon: <Terminal size={20} className="text-violet-400" />,
-                title: "Supercharge Claude Code",
-                body: "Install skills as slash commands. /invoice-generator, /code-reviewer, /pr-description — ready in seconds.",
-              },
-              {
-                icon: <Cpu size={20} className="text-cyan-400" />,
-                title: "IoT Firmware Scaffolding",
-                body: "Generate ESP32 / STM32 firmware skeletons with pin configs, interrupt handlers, and MQTT publishing code.",
-              },
-              {
-                icon: <FileText size={20} className="text-green-400" />,
-                title: "Finance & GST Automation",
-                body: "GST-compliant invoice generation, GSTR-1 summary prep, HSN code validation — all from plain English prompts.",
-              },
-            ].map(({ icon, title, body }) => (
-              <div
-                key={title}
-                className="flex flex-col gap-3 rounded-16 border border-border-subtle bg-bg-surface p-6 hover:border-violet-500/20 transition-colors"
-              >
-                <div className="w-9 h-9 rounded-12 bg-bg-s2 border border-border-subtle flex items-center justify-center">
-                  {icon}
-                </div>
-                <h3 className="font-semibold text-white text-sm">{title}</h3>
-                <p className="text-white/45 text-sm leading-relaxed">{body}</p>
+      {/* Packs */}
+      <section className="max-w-5xl mx-auto px-6 pb-20">
+        <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-3 text-center">Skill packs</p>
+        <h2 className="text-3xl font-bold text-center mb-10">Pick what you need</h2>
+        <div className="grid md:grid-cols-3 gap-5">
+          {PACKS.map((pack) => (
+            <div key={pack.id} className="bg-[#0f0f12] rounded-xl border border-white/5 p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded"
+                  style={{ color: pack.accentHex, background: `${pack.accentHex}15` }}>
+                  {pack.tag}
+                </span>
+                <span className="text-lg font-bold">{pack.price}</span>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* FINAL CTA                                                           */}
-        {/* ------------------------------------------------------------------ */}
-        <section className="max-w-6xl mx-auto px-6 pb-24">
-          <div className="rounded-20 border border-violet-500/20 bg-violet-glow bg-bg-surface p-12 text-center relative overflow-hidden">
-            <div aria-hidden className="absolute inset-0 bg-violet-glow pointer-events-none" />
-            <Code2 size={32} className="text-violet-400 mx-auto mb-4 relative" />
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight relative">
-              Start building with Claude Toolkit
-            </h2>
-            <p className="text-white/50 mb-8 max-w-md mx-auto relative">
-              Individual skills from $9. All-Access subscription at $29/mo. No
-              lock-in.
-            </p>
-            <Link href="/skills">
-              <Button size="lg" className="relative">
-                Browse all skills
-                <ArrowRight size={16} />
-              </Button>
-            </Link>
-          </div>
-        </section>
-
-        {/* ------------------------------------------------------------------ */}
-        {/* FOOTER                                                              */}
-        {/* ------------------------------------------------------------------ */}
-        <footer className="border-t border-border-subtle">
-          <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between flex-wrap gap-4">
-            <span className="text-white/30 text-sm">
-              © 2026 AddonWeb Solutions · Built with Claude
-            </span>
-            <div className="flex items-center gap-6">
-              <Link
-                href="/skills"
-                className="text-white/30 hover:text-white text-sm transition-colors"
-              >
-                Skills
-              </Link>
-              <a
-                href="https://github.com/addonwebsolutions-AI/aws-90days"
-                target="_blank"
-                rel="noreferrer"
-                className="text-white/30 hover:text-white text-sm transition-colors"
-              >
-                GitHub
-              </a>
-              <Link
-                href="/dashboard"
-                className="text-white/30 hover:text-white text-sm transition-colors"
-              >
-                Dashboard
+              <h3 className="font-semibold mb-2">{pack.name}</h3>
+              <p className="text-xs text-white/40 leading-relaxed mb-5 flex-1">{pack.desc}</p>
+              <div className="space-y-1.5 mb-6">
+                {pack.skills.map((s) => (
+                  <div key={s} className="flex items-center gap-2 text-xs text-white/50">
+                    <span style={{ color: pack.accentHex }}>›</span>
+                    <code>{s}</code>
+                  </div>
+                ))}
+              </div>
+              <Link href={`/skills?buy=${pack.id}`}
+                className="text-center py-2.5 rounded-lg text-sm font-medium transition-colors border"
+                style={{ borderColor: `${pack.accentHex}40`, color: pack.accentHex }}>
+                Buy pack
               </Link>
             </div>
+          ))}
+        </div>
+
+        <div className="mt-5 bg-gradient-to-r from-violet-900/30 to-pink-900/20 rounded-xl border border-violet-500/20 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <div className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">Best value</div>
+            <h3 className="text-xl font-bold mb-1">All-Access — ₹2,407/mo</h3>
+            <p className="text-white/40 text-sm">Every skill, current and future. API access included.</p>
           </div>
-        </footer>
-      </div>
+          <Link href="/sign-up"
+            className="shrink-0 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm">
+            Start All-Access
+          </Link>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/5 py-8 text-center text-xs text-white/20">
+        © 2026 AddonWeb Solutions · Ahmedabad, India ·{" "}
+        <a href="mailto:support@addonweb.io" className="hover:text-white/50 transition-colors">support@addonweb.io</a>
+      </footer>
     </main>
   );
 }
