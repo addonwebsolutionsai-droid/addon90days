@@ -6,6 +6,7 @@ import { ArrowLeft, Search } from "lucide-react";
 import { SkillCard } from "@/components/skill-card";
 import type { SkillCardProps } from "@/components/skill-card";
 import { Button } from "@/components/ui/button";
+import { BuyButton } from "@/components/buy-button";
 import { cn } from "@/lib/utils";
 
 // --- Skills registry (mirrors packages/toolkit/src/registry.ts) -------------
@@ -111,12 +112,6 @@ export default function SkillsPage() {
     return matchesCategory && matchesQuery;
   });
 
-  function handleAddToCart(id: string) {
-    // TODO: wire to Stripe checkout / cart state via Zustand store
-    // Kept as console until cart module is built (Sprint 2)
-    console.info("Add to cart:", id);
-  }
-
   return (
     <main className="min-h-screen bg-bg-base">
       {/* ------------------------------------------------------------------ */}
@@ -221,7 +216,7 @@ export default function SkillsPage() {
               <SkillCard
                 key={skill.id}
                 {...skill}
-                onAddToCart={handleAddToCart}
+                onAddToCart={() => undefined}
               />
             ))}
           </div>
@@ -255,11 +250,11 @@ export default function SkillsPage() {
               All current + future skills. API access included. Cancel anytime.
             </p>
           </div>
-          <Link href="/dashboard">
-            <Button size="lg">
-              Start All-Access
-            </Button>
-          </Link>
+          <BuyButton
+            packId="all-access-monthly"
+            packLabel="All-Access Monthly"
+            priceDisplay="₹2,407/mo"
+          />
         </div>
       </div>
     </main>
