@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@addonweb/claude-toolkit": "^0.1.0",
     "@clerk/nextjs": "^5.0.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.400.0",
