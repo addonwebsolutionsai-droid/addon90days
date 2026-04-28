@@ -12,8 +12,8 @@ import {
   iotFirmwareScaffold,
   iotDeviceSchema,
   iotOtaPipeline,
-} from "@addonweb/claude-toolkit";
-import type { SkillDefinition } from "@addonweb/claude-toolkit";
+} from "@/lib/toolkit";
+import type { SkillDefinition } from "@/lib/toolkit";
 import { z } from "zod";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
