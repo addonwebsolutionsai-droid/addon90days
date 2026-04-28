@@ -19,7 +19,7 @@ npm-installable toolkit: 50+ Skills (slash commands for Claude Code), MCP server
 - npm package: `@addonweb/claude-toolkit`
 - MCP protocol (stdio transport for Claude Code, SSE for web)
 - Anthropic SDK for Claude API calls
-- Stripe for marketplace payments (individual skills $5–29, All-Access $29/mo)
+- Razorpay for marketplace payments (Stripe not available in India — Razorpay test mode for sandbox)
 - Next.js 15 for marketplace UI
 - Vercel deploy
 
@@ -52,7 +52,7 @@ products/01-claude-reseller/
 ## Launch Checklist (Day 15)
 - [ ] 10 skills in marketplace
 - [ ] MCP server: filesystem + PostgreSQL connectors
-- [ ] Stripe checkout live
+- [ ] Razorpay checkout live (test mode)
 - [ ] npm publish: @addonweb/claude-toolkit@1.0.0
 - [ ] Docs: 5-minute quickstart for Claude Code
 - [ ] Landing page live (design-pro.html P01 section as reference)
@@ -67,4 +67,6 @@ products/01-claude-reseller/
 ## Key Decisions Made
 - First 10 skills: invoice-generator, code-reviewer, gst-calculator, email-drafter, data-extractor, sql-query-builder, pr-description, commit-message, test-generator, api-docs
 - Pricing: individual skills $5–29 + All-Access $29/mo subscription
-- MCP servers priority: filesystem → database → Stripe → WhatsApp
+- Payments: Razorpay (not Stripe — unavailable in India). INR pricing = USD × 83.
+- LLM: Gemini 1.5 Flash (haiku-tier) + Gemini 1.5 Pro (sonnet-tier). Free quota sufficient for launch.
+- MCP servers priority: filesystem → database → Razorpay → WhatsApp

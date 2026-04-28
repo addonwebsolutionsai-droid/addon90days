@@ -1,8 +1,15 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 import type { SkillDefinition, SkillResult } from "../types/skill.js";
 
-const client = new Anthropic();
+const genAI = new GoogleGenerativeAI(process.env["GEMINI_API_KEY"] ?? "");
+
+// Map Claude model tiers to Gemini equivalents
+function resolveModel(claudeModel: string): string {
+  if (claudeModel.includes("haiku")) return "gemini-1.5-flash";
+  if (claudeModel.includes("sonnet")) return "gemini-1.5-pro";
+  return "gemini-1.5-flash";
+}
 
 export async function runSkill<
   TInput extends z.ZodType,
@@ -13,26 +20,18 @@ export async function runSkill<
 ): Promise<SkillResult<z.infer<TOutput>>> {
   const parsed = skill.input.schema.safeParse(rawInput);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.message,
-      code: "VALIDATION",
-    };
+    return { success: false, error: parsed.error.message, code: "VALIDATION" };
   }
 
   const start = Date.now();
   try {
-    const response = await client.messages.create({
-      model: skill.meta.model,
-      max_tokens: 4096,
-      system: skill.systemPrompt,
-      messages: [
-        { role: "user", content: skill.buildUserPrompt(parsed.data) },
-      ],
+    const model = genAI.getGenerativeModel({
+      model: resolveModel(skill.meta.model),
+      systemInstruction: skill.systemPrompt,
     });
 
-    const text =
-      response.content[0]?.type === "text" ? response.content[0].text : "";
+    const result = await model.generateContent(skill.buildUserPrompt(parsed.data));
+    const text = result.response.text();
 
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
     const rawJson = jsonMatch ? jsonMatch[1] : text;
@@ -52,7 +51,7 @@ export async function runSkill<
     return {
       success: true,
       data: outputParsed.data,
-      tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
+      tokensUsed: result.response.usageMetadata?.totalTokenCount ?? 0,
       durationMs: Date.now() - start,
     };
   } catch (err) {
