@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { razorpay, SKILL_PACK_PRICES, type SkillPackId } from "@/lib/razorpay";
+import { getRazorpay, SKILL_PACK_PRICES, type SkillPackId } from "@/lib/razorpay";
 
 export async function POST(req: Request) {
   const body = await req.json() as { packId: string };
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid pack" }, { status: 400 });
   }
 
-  const order = await razorpay.orders.create({
+  const order = await getRazorpay().orders.create({
     amount: pack.amountPaise,
     currency: "INR",
     receipt: `receipt_${packId}_${Date.now()}`,
