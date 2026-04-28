@@ -100,7 +100,7 @@ export default function HomePage() {
           <Link href="/skills" className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors">
             Browse skill packs <ArrowRight size={15} />
           </Link>
-          <a href="https://github.com/addonwebsolutions-AI/addon90days" target="_blank" rel="noopener noreferrer"
+          <a href="https://github.com/addonwebsolutionsai-droid/addon90days" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-medium transition-colors text-sm">
             <Terminal size={15} /> View on GitHub
           </a>

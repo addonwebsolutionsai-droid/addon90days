@@ -177,9 +177,9 @@ When working on any product, read `products/<id>/.claude/CLAUDE.md` BEFORE writi
 
 ## 13. GitHub
 
-- **Username:** addonwebsolutions-AI
+- **Username:** addonwebsolutionsai-droid
 - **Email:** addonwebsolutions.ai@gmail.com
-- **Repo:** github.com/addonwebsolutions-AI/addon90days
+- **Repo:** github.com/addonwebsolutionsai-droid/addon90days
 - All commits use this identity. No personal accounts.
 - Branch strategy: `main` (protected) · `dev` · `feature/<name>` · `product/<id>`
 - Never force-push to main. Never skip CI hooks.
