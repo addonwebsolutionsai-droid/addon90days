@@ -51,7 +51,7 @@ type RootLayoutProps = {
   children: React.ReactNode;
 };
 
-export function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <ClerkProvider>
       <html
@@ -69,4 +69,3 @@ export function RootLayout({ children }: RootLayoutProps) {
   );
 }
 
-export default RootLayout;
