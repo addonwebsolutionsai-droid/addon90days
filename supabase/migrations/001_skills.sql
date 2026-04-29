@@ -1,5 +1,4 @@
 -- Migration 001: Skills marketplace table
--- Run against Supabase project via: supabase db push
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -26,6 +25,7 @@ CREATE TABLE skills (
   steps           jsonb       NOT NULL DEFAULT '[]',
   video_url       text,
   video_thumbnail text,
+  search_vector   tsvector,
   trending_score  integer     NOT NULL DEFAULT 0,
   view_count      integer     NOT NULL DEFAULT 0,
   purchase_count  integer     NOT NULL DEFAULT 0,
@@ -45,19 +45,26 @@ CREATE INDEX idx_skills_slug      ON skills(slug);
 CREATE INDEX idx_skills_published ON skills(published) WHERE published = true;
 CREATE INDEX idx_skills_is_free   ON skills(is_free);
 CREATE INDEX idx_skills_tags      ON skills USING GIN(tags);
+CREATE INDEX idx_skills_search    ON skills USING GIN(search_vector);
 
--- Full-text search column (generated, stored)
-ALTER TABLE skills ADD COLUMN search_vector tsvector
-  GENERATED ALWAYS AS (
-    setweight(to_tsvector('english', coalesce(title, '')),       'A') ||
-    setweight(to_tsvector('english', coalesce(tagline, '')),     'B') ||
-    setweight(to_tsvector('english', coalesce(description, '')), 'C') ||
-    setweight(to_tsvector('english', array_to_string(tags, ' ')), 'D')
-  ) STORED;
+-- Trigger function: keep search_vector up to date on insert/update
+CREATE OR REPLACE FUNCTION skills_update_search_vector()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.search_vector :=
+    setweight(to_tsvector('english', coalesce(NEW.title, '')),       'A') ||
+    setweight(to_tsvector('english', coalesce(NEW.tagline, '')),     'B') ||
+    setweight(to_tsvector('english', coalesce(NEW.description, '')), 'C') ||
+    setweight(to_tsvector('english', array_to_string(NEW.tags, ' ')), 'D');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-CREATE INDEX idx_skills_search ON skills USING GIN(search_vector);
+CREATE TRIGGER skills_search_vector_trigger
+  BEFORE INSERT OR UPDATE ON skills
+  FOR EACH ROW EXECUTE FUNCTION skills_update_search_vector();
 
--- Auto-update updated_at on any row change
+-- Auto-update updated_at on row change
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -78,7 +85,9 @@ CREATE POLICY "public_read_published"
   ON skills FOR SELECT
   USING (published = true);
 
--- Service role: full access (used by supabaseAdmin client)
+-- Service role: full access for server-side admin operations
 CREATE POLICY "service_role_all"
   ON skills
-  USING (auth.role() = 'service_role');
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
