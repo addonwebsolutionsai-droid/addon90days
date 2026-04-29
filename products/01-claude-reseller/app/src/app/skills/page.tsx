@@ -14,7 +14,6 @@
  *     └── Pagination
  *
  * Data flow: all fetch calls go to /api/skills with URLSearchParams.
- * No hardcoded skill data — empty state shown while API boots.
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -24,11 +23,11 @@ import {
   Flame,
   ArrowLeft,
   ArrowRight,
-  Zap,
   ChevronDown,
 } from "lucide-react";
 import type { Skill } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
+import { Nav } from "@/components/nav";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -54,9 +53,9 @@ const DIFFICULTY_OPTIONS = ["All", "beginner", "intermediate", "advanced"] as co
 type DifficultyOption = (typeof DIFFICULTY_OPTIONS)[number];
 
 const SORT_OPTIONS = [
-  { value: "trending",  label: "Trending"   },
-  { value: "newest",    label: "Newest"     },
-  { value: "most-used", label: "Most Used"  },
+  { value: "trending",  label: "Trending"  },
+  { value: "newest",    label: "Newest"    },
+  { value: "most-used", label: "Most Used" },
 ] as const;
 type SortOption = (typeof SORT_OPTIONS)[number]["value"];
 
@@ -68,19 +67,25 @@ const PAGE_SIZE = 12;
 
 function SkillSkeleton() {
   return (
-    <div className="rounded-xl border border-white/5 bg-[#0f0f12] p-5 flex flex-col gap-3 animate-pulse">
-      <div className="h-4 w-24 rounded bg-white/10" />
-      <div className="h-5 w-3/4 rounded bg-white/10" />
-      <div className="h-3 w-full rounded bg-white/10" />
-      <div className="h-3 w-5/6 rounded bg-white/10" />
+    <div
+      className="rounded-xl border p-5 flex flex-col gap-3 animate-pulse"
+      style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
+    >
+      <div className="h-4 w-24 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+      <div className="h-5 w-3/4 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+      <div className="h-3 w-full rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+      <div className="h-3 w-5/6 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
       <div className="flex gap-1.5 mt-1">
-        <div className="h-5 w-12 rounded bg-white/10" />
-        <div className="h-5 w-14 rounded bg-white/10" />
-        <div className="h-5 w-10 rounded bg-white/10" />
+        <div className="h-5 w-12 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+        <div className="h-5 w-14 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+        <div className="h-5 w-10 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
       </div>
-      <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/5">
-        <div className="h-4 w-16 rounded bg-white/10" />
-        <div className="h-4 w-12 rounded bg-white/10" />
+      <div
+        className="flex items-center justify-between mt-auto pt-2 border-t"
+        style={{ borderColor: "var(--border-subtle)" }}
+      >
+        <div className="h-4 w-16 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+        <div className="h-4 w-12 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
       </div>
     </div>
   );
@@ -99,85 +104,124 @@ function SkillGridCard({ skill }: SkillGridCardProps) {
   const color = meta?.color ?? "#8b5cf6";
   const label = meta?.label ?? skill.category;
 
-  const difficultyDot: Record<string, string> = {
-    beginner:     "bg-green-400",
+  const difficultyColor: Record<string, string> = {
+    beginner:     "bg-green-500",
     intermediate: "bg-amber-400",
     advanced:     "bg-red-400",
   };
 
-  return (
-    <article className="group relative flex flex-col rounded-xl border border-white/5 bg-[#0f0f12] p-5 transition-all duration-200 hover:border-white/15 hover:shadow-lg hover:shadow-black/40">
-      {/* Trending badge — top right */}
-      {skill.is_trending && (
-        <span
-          aria-label="Trending"
-          className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-semibold text-orange-400"
-        >
-          <Flame size={11} className="fill-orange-400" />
-          TRENDING
-        </span>
-      )}
+  const stepCount = Array.isArray(skill.steps) ? skill.steps.length : 0;
 
-      {/* Category + NEW badge */}
-      <div className="flex items-center gap-2 mb-3">
-        <span
-          className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded"
-          style={{ color, background: `${color}18` }}
-        >
-          {label}
-        </span>
-        {skill.is_new && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-green-500/15 text-green-400">
-            NEW
+  return (
+    <article
+      className="group relative flex flex-col rounded-xl border transition-all duration-200 hover:shadow-lg"
+      style={{
+        backgroundColor: "var(--bg-surface)",
+        borderColor: "var(--border-subtle)",
+        borderLeftColor: color,
+        borderLeftWidth: "3px",
+      }}
+    >
+      <div className="p-5 flex flex-col flex-1">
+        {/* Trending badge */}
+        {skill.is_trending && (
+          <span
+            aria-label="Trending"
+            className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-semibold text-orange-400"
+          >
+            <Flame size={11} className="fill-orange-400" />
+            TRENDING
           </span>
         )}
-      </div>
 
-      {/* Title */}
-      <h3 className="font-semibold text-white text-sm leading-snug mb-1">
-        {skill.title}
-      </h3>
-
-      {/* Tagline */}
-      <p className="text-white/45 text-xs leading-relaxed line-clamp-2 mb-3 flex-1">
-        {skill.tagline}
-      </p>
-
-      {/* Tags */}
-      {skill.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4" aria-label="Skill tags">
-          {skill.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/40 text-[10px] font-mono"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-2 border-t border-white/5">
-        <div className="flex items-center gap-1.5">
+        {/* Category + NEW badge */}
+        <div className="flex items-center gap-2 mb-3">
           <span
-            className={cn(
-              "w-1.5 h-1.5 rounded-full shrink-0",
-              difficultyDot[skill.difficulty] ?? "bg-white/30"
-            )}
-          />
-          <span className="text-[10px] text-white/40 capitalize">{skill.difficulty}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-white">
-            {skill.is_free ? "Free" : `₹${skill.price_inr.toLocaleString("en-IN")}`}
-          </span>
-          <Link
-            href={`/skills/${skill.slug}`}
-            className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 transition-colors font-medium"
+            className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded"
+            style={{ color, backgroundColor: `${color}18` }}
           >
-            View <ArrowRight size={11} />
-          </Link>
+            {label}
+          </span>
+          {skill.is_new && (
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-green-500/15 text-green-500">
+              NEW
+            </span>
+          )}
+          {stepCount > 0 && (
+            <span
+              className="text-[10px] font-mono px-1.5 py-0.5 rounded ml-auto"
+              style={{ color: "var(--text-muted)", backgroundColor: "var(--bg-s2)" }}
+            >
+              {stepCount} steps
+            </span>
+          )}
+        </div>
+
+        {/* Title */}
+        <h3
+          className="font-semibold text-sm leading-snug mb-1"
+          style={{ color: "var(--text-primary)" }}
+        >
+          {skill.title}
+        </h3>
+
+        {/* Tagline */}
+        <p
+          className="text-xs leading-relaxed line-clamp-2 mb-3 flex-1"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          {skill.tagline}
+        </p>
+
+        {/* Tags */}
+        {skill.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4" aria-label="Skill tags">
+            {skill.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-0.5 rounded text-[10px] font-mono border"
+                style={{
+                  backgroundColor: "var(--bg-s2)",
+                  borderColor: "var(--border-subtle)",
+                  color: "var(--text-muted)",
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Footer */}
+        <div
+          className="flex items-center justify-between pt-2 border-t"
+          style={{ borderColor: "var(--border-subtle)" }}
+        >
+          <div className="flex items-center gap-1.5">
+            <span
+              className={cn(
+                "w-1.5 h-1.5 rounded-full shrink-0",
+                difficultyColor[skill.difficulty] ?? "bg-gray-400"
+              )}
+            />
+            <span
+              className="text-[10px] capitalize"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {skill.difficulty}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+              {skill.is_free ? "Free" : `₹${skill.price_inr.toLocaleString("en-IN")}`}
+            </span>
+            <Link
+              href={`/skills/${skill.slug}`}
+              className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 transition-colors font-medium"
+            >
+              View <ArrowRight size={11} />
+            </Link>
+          </div>
         </div>
       </div>
     </article>
@@ -189,19 +233,19 @@ function SkillGridCard({ skill }: SkillGridCardProps) {
 // ---------------------------------------------------------------------------
 
 export default function SkillsPage() {
-  const [skills, setSkills]               = useState<Skill[]>([]);
-  const [total, setTotal]                 = useState(0);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState<string | null>(null);
+  const [skills, setSkills]                 = useState<Skill[]>([]);
+  const [total, setTotal]                   = useState(0);
+  const [loading, setLoading]               = useState(true);
+  const [error, setError]                   = useState<string | null>(null);
 
   // Filters
-  const [query, setQuery]                 = useState("");
+  const [query, setQuery]                   = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [difficulty, setDifficulty]       = useState<DifficultyOption>("All");
-  const [freeOnly, setFreeOnly]           = useState(false);
-  const [sort, setSort]                   = useState<SortOption>("trending");
-  const [page, setPage]                   = useState(1);
+  const [difficulty, setDifficulty]         = useState<DifficultyOption>("All");
+  const [freeOnly, setFreeOnly]             = useState(false);
+  const [sort, setSort]                     = useState<SortOption>("trending");
+  const [page, setPage]                     = useState(1);
 
   // Debounce search input — 300ms
   useEffect(() => {
@@ -219,12 +263,12 @@ export default function SkillsPage() {
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (debouncedQuery)       params.set("q", debouncedQuery);
+      if (debouncedQuery)           params.set("q", debouncedQuery);
       if (activeCategory !== "all") params.set("category", activeCategory);
-      if (difficulty !== "All") params.set("difficulty", difficulty);
-      if (freeOnly)             params.set("free", "true");
-      params.set("sort", sort);
-      params.set("page", String(page));
+      if (difficulty !== "All")     params.set("difficulty", difficulty);
+      if (freeOnly)                 params.set("free", "true");
+      params.set("sort",     sort);
+      params.set("page",     String(page));
       params.set("pageSize", String(PAGE_SIZE));
 
       const res = await fetch(`/api/skills?${params.toString()}`);
@@ -259,34 +303,15 @@ export default function SkillsPage() {
   const endIndex   = Math.min(page * PAGE_SIZE, total);
 
   return (
-    <main className="min-h-screen bg-[#07070a] text-white">
-
-      {/* ------------------------------------------------------------------ */}
-      {/* NAV                                                                 */}
-      {/* ------------------------------------------------------------------ */}
-      <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#07070a]/90 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <ArrowLeft size={14} className="text-white/40 group-hover:text-white transition-colors" />
-            <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
-              <Zap size={12} />
-            </div>
-            <span className="font-semibold text-sm">Claude Toolkit</span>
-          </Link>
-          <Link
-            href="/dashboard"
-            className="px-4 py-1.5 bg-violet-600 hover:bg-violet-500 rounded-lg text-sm font-medium transition-colors"
-          >
-            Dashboard
-          </Link>
-        </div>
-      </nav>
+    <main
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
+    >
+      <Nav />
 
       <div className="max-w-6xl mx-auto px-6 py-12">
 
-        {/* ---------------------------------------------------------------- */}
-        {/* PAGE HEADER                                                       */}
-        {/* ---------------------------------------------------------------- */}
+        {/* Page header */}
         <div className="mb-10">
           <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-2">
             Marketplace
@@ -294,18 +319,17 @@ export default function SkillsPage() {
           <h1 className="text-3xl font-bold tracking-tight mb-2">
             Skills Marketplace
           </h1>
-          <p className="text-white/45 text-sm max-w-lg">
+          <p className="text-sm max-w-lg" style={{ color: "var(--text-secondary)" }}>
             New skills added daily. Browse, preview, and run in seconds.
           </p>
         </div>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* SEARCH                                                            */}
-        {/* ---------------------------------------------------------------- */}
+        {/* Search */}
         <div className="relative mb-6">
           <Search
             size={14}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none"
+            className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: "var(--text-muted)" }}
           />
           <input
             type="search"
@@ -314,21 +338,23 @@ export default function SkillsPage() {
             placeholder="Search skills by name, tag, or category..."
             aria-label="Search skills"
             className={cn(
-              "w-full h-11 pl-10 pr-4 rounded-xl bg-[#0f0f12] border border-white/10",
-              "text-white text-sm placeholder:text-white/30",
+              "w-full h-11 pl-10 pr-4 rounded-xl border text-sm",
               "focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent",
               "transition-colors"
             )}
+            style={{
+              backgroundColor: "var(--bg-surface)",
+              borderColor: "var(--border)",
+              color: "var(--text-primary)",
+            }}
           />
         </div>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* CATEGORY PILLS                                                    */}
-        {/* ---------------------------------------------------------------- */}
+        {/* Category pills */}
         <div
           role="tablist"
           aria-label="Filter by category"
-          className="flex items-center gap-2 overflow-x-auto pb-2 mb-5 scrollbar-none"
+          className="flex items-center gap-2 overflow-x-auto pb-2 mb-5"
           style={{ scrollbarWidth: "none" }}
         >
           <button
@@ -339,8 +365,17 @@ export default function SkillsPage() {
               "shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all",
               activeCategory === "all"
                 ? "bg-violet-600 text-white"
-                : "bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10"
+                : "border"
             )}
+            style={
+              activeCategory !== "all"
+                ? {
+                    backgroundColor: "var(--bg-surface)",
+                    borderColor: "var(--border)",
+                    color: "var(--text-secondary)",
+                  }
+                : {}
+            }
           >
             All
           </button>
@@ -353,14 +388,16 @@ export default function SkillsPage() {
                 onClick={() => setActiveCategory(key)}
                 className={cn(
                   "shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border",
-                  activeCategory === key
-                    ? "text-white border-transparent"
-                    : "text-white/50 border-white/10 bg-white/5 hover:text-white hover:bg-white/10"
+                  activeCategory === key ? "text-white border-transparent" : ""
                 )}
                 style={
                   activeCategory === key
                     ? { background: color, borderColor: color }
-                    : {}
+                    : {
+                        backgroundColor: "var(--bg-surface)",
+                        borderColor: "var(--border)",
+                        color: "var(--text-secondary)",
+                      }
                 }
               >
                 <span aria-hidden>{emoji}</span>
@@ -370,9 +407,7 @@ export default function SkillsPage() {
           )}
         </div>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* FILTER BAR                                                        */}
-        {/* ---------------------------------------------------------------- */}
+        {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-3 mb-8">
           {/* Difficulty */}
           <div className="relative">
@@ -381,18 +416,27 @@ export default function SkillsPage() {
               onChange={(e) => setDifficulty(e.target.value as DifficultyOption)}
               aria-label="Filter by difficulty"
               className={cn(
-                "appearance-none h-9 pl-3 pr-8 rounded-lg bg-[#0f0f12] border border-white/10",
-                "text-white/70 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500",
-                "cursor-pointer transition-colors hover:border-white/20"
+                "appearance-none h-9 pl-3 pr-8 rounded-lg border",
+                "text-xs focus:outline-none focus:ring-2 focus:ring-violet-500",
+                "cursor-pointer transition-colors"
               )}
+              style={{
+                backgroundColor: "var(--bg-surface)",
+                borderColor: "var(--border)",
+                color: "var(--text-secondary)",
+              }}
             >
               {DIFFICULTY_OPTIONS.map((d) => (
-                <option key={d} value={d} className="bg-[#0f0f12]">
+                <option key={d} value={d} style={{ backgroundColor: "var(--bg-surface)" }}>
                   {d === "All" ? "All difficulties" : d.charAt(0).toUpperCase() + d.slice(1)}
                 </option>
               ))}
             </select>
-            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
+            <ChevronDown
+              size={12}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: "var(--text-muted)" }}
+            />
           </div>
 
           {/* Free toggle */}
@@ -402,9 +446,18 @@ export default function SkillsPage() {
             className={cn(
               "h-9 px-4 rounded-lg text-xs font-medium transition-all border",
               freeOnly
-                ? "bg-green-500/15 border-green-500/40 text-green-400"
-                : "bg-[#0f0f12] border-white/10 text-white/50 hover:text-white hover:border-white/20"
+                ? "bg-green-500/15 border-green-500/40 text-green-500"
+                : ""
             )}
+            style={
+              !freeOnly
+                ? {
+                    backgroundColor: "var(--bg-surface)",
+                    borderColor: "var(--border)",
+                    color: "var(--text-secondary)",
+                  }
+                : {}
+            }
           >
             Free only
           </button>
@@ -416,43 +469,55 @@ export default function SkillsPage() {
               onChange={(e) => setSort(e.target.value as SortOption)}
               aria-label="Sort skills"
               className={cn(
-                "appearance-none h-9 pl-3 pr-8 rounded-lg bg-[#0f0f12] border border-white/10",
-                "text-white/70 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500",
-                "cursor-pointer transition-colors hover:border-white/20"
+                "appearance-none h-9 pl-3 pr-8 rounded-lg border",
+                "text-xs focus:outline-none focus:ring-2 focus:ring-violet-500",
+                "cursor-pointer transition-colors"
               )}
+              style={{
+                backgroundColor: "var(--bg-surface)",
+                borderColor: "var(--border)",
+                color: "var(--text-secondary)",
+              }}
             >
               {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value} className="bg-[#0f0f12]">
+                <option key={o.value} value={o.value} style={{ backgroundColor: "var(--bg-surface)" }}>
                   Sort: {o.label}
                 </option>
               ))}
             </select>
-            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
+            <ChevronDown
+              size={12}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: "var(--text-muted)" }}
+            />
           </div>
         </div>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* TRENDING SECTION                                                  */}
-        {/* ---------------------------------------------------------------- */}
+        {/* Trending section */}
         {showTrending && (
           <section className="mb-12" aria-label="Trending skills">
             <div className="flex items-center gap-2 mb-5">
               <Flame size={15} className="text-orange-400 fill-orange-400" />
-              <h2 className="font-semibold text-sm text-white">Trending right now</h2>
+              <h2 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+                Trending right now
+              </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {trendingSkills.map((skill) => (
                 <SkillGridCard key={skill.id} skill={skill} />
               ))}
             </div>
-            <div className="mt-8 border-b border-white/5" />
-            <h2 className="font-semibold text-sm text-white mt-8 mb-5">All Skills</h2>
+            <div className="mt-8 border-b" style={{ borderColor: "var(--border-subtle)" }} />
+            <h2
+              className="font-semibold text-sm mt-8 mb-5"
+              style={{ color: "var(--text-primary)" }}
+            >
+              All Skills
+            </h2>
           </section>
         )}
 
-        {/* ---------------------------------------------------------------- */}
-        {/* SKILLS GRID                                                       */}
-        {/* ---------------------------------------------------------------- */}
+        {/* Skills grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
@@ -462,7 +527,9 @@ export default function SkillsPage() {
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <p className="text-white/40 text-sm mb-2">{error}</p>
+            <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>
+              {error}
+            </p>
             <button
               onClick={() => void fetchSkills()}
               className="text-violet-400 text-sm hover:text-violet-300 transition-colors"
@@ -472,9 +539,15 @@ export default function SkillsPage() {
           </div>
         ) : skills.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-12 h-12 rounded-full border-2 border-white/10 border-t-violet-500 animate-spin mb-6" />
-            <p className="text-white/50 text-sm mb-1">Skills are loading...</p>
-            <p className="text-white/30 text-xs">Check back shortly</p>
+            <div className="w-12 h-12 rounded-full border-2 border-t-violet-500 animate-spin mb-6"
+              style={{ borderColor: "var(--border)", borderTopColor: "#8b5cf6" }}
+            />
+            <p className="text-sm mb-1" style={{ color: "var(--text-secondary)" }}>
+              Skills are loading...
+            </p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Check back shortly
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -484,12 +557,10 @@ export default function SkillsPage() {
           </div>
         )}
 
-        {/* ---------------------------------------------------------------- */}
-        {/* PAGINATION                                                        */}
-        {/* ---------------------------------------------------------------- */}
+        {/* Pagination */}
         {!loading && total > PAGE_SIZE && (
           <div className="flex items-center justify-between mt-10">
-            <span className="text-xs text-white/30">
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
               Showing {startIndex}–{endIndex} of {total} skills
             </span>
             <div className="flex items-center gap-2">
@@ -499,14 +570,17 @@ export default function SkillsPage() {
                 aria-label="Previous page"
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
-                  page === 1
-                    ? "border-white/5 text-white/20 cursor-not-allowed"
-                    : "border-white/10 text-white/60 hover:text-white hover:border-white/20"
+                  page === 1 ? "opacity-30 cursor-not-allowed" : "hover:border-violet-500/50"
                 )}
+                style={{
+                  backgroundColor: "var(--bg-surface)",
+                  borderColor: "var(--border)",
+                  color: "var(--text-secondary)",
+                }}
               >
                 <ArrowLeft size={12} /> Prev
               </button>
-              <span className="text-xs text-white/30">
+              <span className="text-xs px-2" style={{ color: "var(--text-muted)" }}>
                 {page} / {totalPages}
               </span>
               <button
@@ -515,10 +589,13 @@ export default function SkillsPage() {
                 aria-label="Next page"
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
-                  page === totalPages
-                    ? "border-white/5 text-white/20 cursor-not-allowed"
-                    : "border-white/10 text-white/60 hover:text-white hover:border-white/20"
+                  page === totalPages ? "opacity-30 cursor-not-allowed" : "hover:border-violet-500/50"
                 )}
+                style={{
+                  backgroundColor: "var(--bg-surface)",
+                  borderColor: "var(--border)",
+                  color: "var(--text-secondary)",
+                }}
               >
                 Next <ArrowRight size={12} />
               </button>
@@ -526,9 +603,7 @@ export default function SkillsPage() {
           </div>
         )}
 
-        {/* ---------------------------------------------------------------- */}
-        {/* ALL-ACCESS UPSELL                                                 */}
-        {/* ---------------------------------------------------------------- */}
+        {/* All-Access upsell */}
         <div className="mt-16 rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-pink-900/10 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
             <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">
@@ -537,22 +612,26 @@ export default function SkillsPage() {
             <h2 className="text-lg font-bold mb-1">
               Get every skill for ₹2,407/mo
             </h2>
-            <p className="text-white/40 text-sm">
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
               All current + future skills. API access included. Cancel anytime.
             </p>
           </div>
           <Link
             href="/sign-up"
-            className="shrink-0 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm"
+            className="shrink-0 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
           >
             Start All-Access
           </Link>
         </div>
       </div>
 
-      <footer className="border-t border-white/5 py-8 text-center text-xs text-white/20">
+      {/* Footer */}
+      <footer
+        className="border-t py-8 text-center text-xs"
+        style={{ borderColor: "var(--border-subtle)", color: "var(--text-muted)" }}
+      >
         © 2026 AddonWeb Solutions · Ahmedabad, India ·{" "}
-        <a href="mailto:support@addonweb.io" className="hover:text-white/50 transition-colors">
+        <a href="mailto:support@addonweb.io" className="hover:text-violet-400 transition-colors">
           support@addonweb.io
         </a>
       </footer>

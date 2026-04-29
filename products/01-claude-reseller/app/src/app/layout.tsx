@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 const inter = Inter({
@@ -51,21 +52,29 @@ type RootLayoutProps = {
   children: React.ReactNode;
 };
 
+// Next.js App Router requires the root layout to be a default export.
+// Named exports are used everywhere else; this is the one justified exception.
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <ClerkProvider>
       <html
         lang="en"
-        className={`dark ${inter.variable} ${jetbrainsMono.variable}`}
+        suppressHydrationWarning
+        className={`${inter.variable} ${jetbrainsMono.variable}`}
       >
-        <body
-          className="font-sans bg-bg-base text-white min-h-screen"
-          suppressHydrationWarning
-        >
-          {children}
+        <body className="font-sans min-h-screen" suppressHydrationWarning>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
   );
 }
+
 

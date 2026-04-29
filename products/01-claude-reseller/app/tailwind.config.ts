@@ -6,22 +6,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Background scale — 60% of the UI
+        // CSS variable-driven semantic tokens
         bg: {
-          base: "#07070a",
-          surface: "#0f0f12",
-          s2: "#161619",
-          s3: "#1c1c20",
+          base:    "var(--bg-base)",
+          surface: "var(--bg-surface)",
+          s2:      "var(--bg-s2)",
+          s3:      "var(--bg-s3)",
         },
-        // Border scale
         border: {
-          subtle: "#1f1f24",
-          DEFAULT: "#27272d",
-          strong: "#3a3a42",
+          subtle:  "var(--border-subtle)",
+          DEFAULT: "var(--border)",
+          strong:  "var(--border-strong)",
         },
-        // Accent colors — P01 violet + pink
+        text: {
+          primary:   "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          muted:     "var(--text-muted)",
+        },
+        // Accent — violet stays the same in both themes
         violet: {
-          50: "#f5f3ff",
+          50:  "#f5f3ff",
           100: "#ede9fe",
           200: "#ddd6fe",
           300: "#c4b5fd",
@@ -37,10 +41,10 @@ const config: Config = {
           600: "#db2777",
         },
         green: {
+          400: "#4ade80",
           500: "#22c55e",
           600: "#16a34a",
         },
-        // Category badge colors
         blue: {
           400: "#60a5fa",
           500: "#3b82f6",
@@ -56,13 +60,19 @@ const config: Config = {
           500: "#f59e0b",
           900: "#3d2400",
         },
+        red: {
+          400: "#f87171",
+          500: "#ef4444",
+        },
+        orange: {
+          400: "#fb923c",
+        },
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "Menlo", "monospace"],
       },
       backgroundImage: {
-        // Subtle violet-to-transparent gradient used on cards
         "violet-glow":
           "radial-gradient(ellipse at top left, rgba(139,92,246,0.12) 0%, transparent 60%)",
         "pink-glow":
@@ -70,11 +80,12 @@ const config: Config = {
       },
       boxShadow: {
         "violet-sm": "0 0 0 1px rgba(139,92,246,0.25)",
-        "violet-md": "0 0 16px rgba(139,92,246,0.15), 0 0 0 1px rgba(139,92,246,0.2)",
+        "violet-md":
+          "0 0 16px rgba(139,92,246,0.15), 0 0 0 1px rgba(139,92,246,0.2)",
       },
       borderRadius: {
-        "4": "4px",
-        "8": "8px",
+        "4":  "4px",
+        "8":  "8px",
         "12": "12px",
         "16": "16px",
         "20": "20px",
@@ -82,21 +93,21 @@ const config: Config = {
       keyframes: {
         "aurora-1": {
           "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
-          "50%": { transform: "translate(8%, -12%) scale(1.15)" },
+          "50%":      { transform: "translate(8%, -12%) scale(1.15)" },
         },
         "aurora-2": {
           "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
-          "50%": { transform: "translate(-10%, 8%) scale(1.1)" },
+          "50%":      { transform: "translate(-10%, 8%) scale(1.1)" },
         },
         "fade-up": {
           from: { opacity: "0", transform: "translateY(16px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
+          to:   { opacity: "1", transform: "translateY(0)" },
         },
       },
       animation: {
         "aurora-1": "aurora-1 12s ease-in-out infinite",
         "aurora-2": "aurora-2 16s ease-in-out infinite",
-        "fade-up": "fade-up 0.5s ease-out forwards",
+        "fade-up":  "fade-up 0.5s ease-out forwards",
       },
     },
   },
