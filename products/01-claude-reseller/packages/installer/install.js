@@ -4,7 +4,7 @@
  * @addonweb/claude-toolkit installer
  *
  * Usage:
- *   npx @addonweb/claude-toolkit@latest install <skill-slug>
+ *   npx @addonweb/claude-skills@latest install <skill-slug>
  *
  * What it does:
  *   1. Fetches skill data from the Claude Toolkit API
@@ -82,8 +82,10 @@ function formatSkillFile(skill) {
     lines.push("## Steps");
     lines.push("");
 
-    for (const step of skill.steps) {
-      lines.push(`### Step ${step.number}: ${step.title}`);
+    for (let i = 0; i < skill.steps.length; i++) {
+      const step = skill.steps[i];
+      const stepNum = step.number ?? i + 1;
+      lines.push(`### Step ${stepNum}: ${step.title}`);
       lines.push("");
       if (step.description) {
         lines.push(step.description);
@@ -100,7 +102,7 @@ function formatSkillFile(skill) {
   }
 
   lines.push("---");
-  lines.push(`*Installed from Claude Toolkit — https://addon90days.vercel.app/skills/${skill.slug}*`);
+  lines.push(`*Installed from Claude Toolkit — ${API_BASE}/skills/${skill.slug}*`);
 
   return lines.join("\n");
 }
@@ -118,8 +120,8 @@ async function main() {
   let slug = args[0] === "install" ? args[1] : args[0];
 
   if (!slug) {
-    console.error("\nUsage: npx @addonweb/claude-toolkit@latest install <skill-slug>\n");
-    console.error("Example: npx @addonweb/claude-toolkit@latest install invoice-generator\n");
+    console.error("\nUsage: npx @addonweb/claude-skills@latest install <skill-slug>\n");
+    console.error("Example: npx @addonweb/claude-skills@latest install invoice-generator\n");
     process.exit(1);
   }
 

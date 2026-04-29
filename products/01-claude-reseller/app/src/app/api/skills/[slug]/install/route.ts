@@ -28,8 +28,10 @@ function buildSkillMarkdown(skill: Skill): string {
     lines.push("## Steps");
     lines.push("");
 
-    for (const step of skill.steps as SkillStep[]) {
-      lines.push(`### Step ${step.number}: ${step.title}`);
+    for (let i = 0; i < (skill.steps as SkillStep[]).length; i++) {
+      const step = (skill.steps as SkillStep[])[i]!;
+      const stepNum = step.number ?? i + 1;
+      lines.push(`### Step ${stepNum}: ${step.title}`);
       lines.push("");
       if (step.description) {
         lines.push(step.description);
