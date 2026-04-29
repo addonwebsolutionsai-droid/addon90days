@@ -155,33 +155,51 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
         {active === "cli" && (
           <div className="space-y-4">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              <strong>Best for:</strong> anyone using <em>Claude Code</em> (the terminal app).
-              This single command installs the skill into your current project.
+              <strong>Best for:</strong> anyone using <em>Claude Code</em> (Anthropic&apos;s
+              terminal app). This installs the skill as a slash command in your project.
             </p>
+
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 mb-2">
+              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                <strong className="text-amber-400">Don&apos;t have Claude Code yet?</strong>{" "}
+                Install it first (one-time, 30 seconds):
+              </p>
+              <CopyBlock text={`curl -fsSL https://claude.ai/install.sh | bash\necho 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc\nsource ~/.zshrc`} />
+            </div>
 
             <div className="space-y-3">
               <Step n={1}>
                 Open <strong>Terminal</strong> (macOS / Linux) or <strong>PowerShell</strong> (Windows).
-                Navigate to the project folder where you want this skill available:
+                Move into the project folder where you want this skill available:
                 <CopyBlock text="cd path/to/your-project" />
               </Step>
 
               <Step n={2}>
                 Paste this command and press <kbd className="px-1.5 py-0.5 rounded text-[10px] border" style={{ borderColor: "var(--border)" }}>Enter</kbd>:
                 <CopyBlock text={cliCommand} />
+                <span className="text-xs block mt-1" style={{ color: "var(--text-muted)" }}>
+                  This writes <code className="font-mono">.claude/commands/{slug}.md</code> in your project.
+                </span>
               </Step>
 
               <Step n={3}>
-                You&apos;ll see <span className="font-mono text-xs">Skill installed: {slug}</span>.
-                Now open Claude Code in this folder:
+                Now <strong>start Claude Code</strong>. Type this in the same terminal:
                 <CopyBlock text="claude" />
+                <span className="text-xs block mt-1" style={{ color: "var(--text-muted)" }}>
+                  You&apos;ll see a <strong>new prompt</strong> appear (it looks like{" "}
+                  <code className="font-mono">{">"}</code> or <code className="font-mono">{"?"}</code>).
+                  That&apos;s Claude Code itself — you&apos;ve left the regular shell.
+                </span>
               </Step>
 
               <Step n={4}>
-                Inside Claude Code, type the slash command:
+                <strong>Inside that new prompt</strong>, type the slash command:
                 <CopyBlock text={`/${slug}`} />
-                <span className="text-xs italic block mt-1" style={{ color: "var(--text-muted)" }}>
-                  Claude will follow the steps in this skill automatically.
+                <span className="text-xs block mt-1" style={{ color: "var(--text-muted)" }}>
+                  Claude will execute the skill. (If you typed{" "}
+                  <code className="font-mono">/{slug}</code> in your regular zsh/bash terminal and got{" "}
+                  <code className="font-mono text-red-400">no such file or directory</code> — that&apos;s
+                  why; slash commands work <strong>only inside Claude Code</strong>.)
                 </span>
               </Step>
             </div>
@@ -270,22 +288,31 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
               </Step>
 
               <Step n={2}>
-                Open Terminal (macOS / Linux) and run these commands inside your project folder:
-                <CopyBlock label="macOS / Linux" text={`mkdir -p .claude/skills && mv ~/Downloads/${slug}.md .claude/skills/`} />
+                Open Terminal (macOS / Linux) and move the file into{" "}
+                <code className="font-mono text-xs">.claude/commands/</code> inside your project folder:
+                <CopyBlock label="macOS / Linux" text={`mkdir -p .claude/commands && mv ~/Downloads/${slug}.md .claude/commands/`} />
                 <span className="text-xs block mt-2 mb-1" style={{ color: "var(--text-muted)" }}>
                   On Windows (PowerShell):
                 </span>
-                <CopyBlock label="Windows" text={`New-Item -ItemType Directory -Force .claude/skills; Move-Item $HOME/Downloads/${slug}.md .claude/skills/`} />
+                <CopyBlock label="Windows" text={`New-Item -ItemType Directory -Force .claude/commands; Move-Item $HOME/Downloads/${slug}.md .claude/commands/`} />
               </Step>
 
               <Step n={3}>
-                Open Claude Code in the same folder:
+                Start Claude Code in that same folder:
                 <CopyBlock text="claude" />
+                <span className="text-xs block mt-1" style={{ color: "var(--text-muted)" }}>
+                  Wait for Claude Code&apos;s new prompt to appear (looks like{" "}
+                  <code className="font-mono">{">"}</code> or <code className="font-mono">{"?"}</code>).
+                </span>
               </Step>
 
               <Step n={4}>
-                Type the slash command:
+                <strong>Inside Claude Code&apos;s prompt</strong> (not in zsh/bash), type:
                 <CopyBlock text={`/${slug}`} />
+                <span className="text-xs block mt-1" style={{ color: "var(--text-muted)" }}>
+                  If <code className="font-mono">claude: command not found</code> — see install
+                  command in the &quot;One Command&quot; tab above.
+                </span>
               </Step>
             </div>
 
