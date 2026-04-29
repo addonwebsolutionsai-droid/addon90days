@@ -4,7 +4,7 @@
  * @addonweb/claude-toolkit installer
  *
  * Usage:
- *   npx @addonweb/claude-skills@latest install <skill-slug>
+ *   npx addonweb-claude-skills@latest install <skill-slug>
  *
  * What it does:
  *   1. Fetches skill data from the Claude Toolkit API
@@ -120,8 +120,8 @@ async function main() {
   let slug = args[0] === "install" ? args[1] : args[0];
 
   if (!slug) {
-    console.error("\nUsage: npx @addonweb/claude-skills@latest install <skill-slug>\n");
-    console.error("Example: npx @addonweb/claude-skills@latest install invoice-generator\n");
+    console.error("\nUsage: npx addonweb-claude-skills@latest install <skill-slug>\n");
+    console.error("Example: npx addonweb-claude-skills@latest install invoice-generator\n");
     process.exit(1);
   }
 

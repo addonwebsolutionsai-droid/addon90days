@@ -1,5 +1,5 @@
 {
-  "name": "@addonweb/claude-skills",
+  "name": "addonweb-claude-skills",
   "version": "1.0.0",
   "description": "Install Claude skills from the AddonWeb Claude Toolkit marketplace",
   "main": "install.js",

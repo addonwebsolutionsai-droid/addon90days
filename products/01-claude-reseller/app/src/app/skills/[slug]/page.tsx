@@ -122,7 +122,7 @@ export default async function SkillDetailPage({
   const label = meta?.label ?? skill.category;
   const emoji = meta?.emoji ?? "";
 
-  const installCommand = `npx @addonweb/claude-skills@latest install ${skill.slug}`;
+  const installCommand = `npx addonweb-claude-skills@latest install ${skill.slug}`;
 
   return (
     <div
