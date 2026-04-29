@@ -17,16 +17,51 @@ import type { Skill, SkillStep } from "@/lib/database.types";
 function buildSkillMarkdown(skill: Skill): string {
   const lines: string[] = [];
 
+  // ---- Frontmatter (Claude Code reads this to register the slash command) ----
   lines.push("---");
   lines.push(`name: ${skill.slug}`);
   lines.push(`description: ${skill.tagline}`);
   lines.push("---");
   lines.push("");
+
+  // ---- LAYMAN INSTRUCTIONS — first thing the user sees ----
+  lines.push("<!-- ============================================================ -->");
+  lines.push("<!-- HOW TO USE THIS FILE                                          -->");
+  lines.push("<!-- ============================================================ -->");
+  lines.push("<!--                                                                -->");
+  lines.push("<!-- You just downloaded a Claude Code Skill. Follow these 3 steps:-->");
+  lines.push("<!--                                                                -->");
+  lines.push("<!-- STEP 1 — Move this file into your project's .claude folder    -->");
+  lines.push("<!--                                                                -->");
+  lines.push("<!--   On macOS / Linux, open Terminal and run:                    -->");
+  lines.push(`<!--     mkdir -p .claude/skills && mv ~/Downloads/${skill.slug}.md .claude/skills/ -->`);
+  lines.push("<!--                                                                -->");
+  lines.push("<!--   On Windows (PowerShell):                                    -->");
+  lines.push(`<!--     New-Item -ItemType Directory -Force .claude/skills; Move-Item $HOME/Downloads/${skill.slug}.md .claude/skills/ -->`);
+  lines.push("<!--                                                                -->");
+  lines.push("<!-- STEP 2 — Open Claude Code in that project folder              -->");
+  lines.push("<!--                                                                -->");
+  lines.push("<!--   Run: claude                                                  -->");
+  lines.push("<!--   (Claude Code automatically picks up files in .claude/skills)-->");
+  lines.push("<!--                                                                -->");
+  lines.push(`<!-- STEP 3 — Type the slash command:  /${skill.slug}              -->`);
+  lines.push("<!--                                                                -->");
+  lines.push("<!-- That's it. Claude will follow the steps below to do the job.  -->");
+  lines.push("<!--                                                                -->");
+  lines.push("<!-- ─────────────────────────────────────────────────────────── -->");
+  lines.push("<!--  SHORTCUT — skip the manual move:                            -->");
+  lines.push(`<!--    npx addonweb-claude-skills install ${skill.slug}          -->`);
+  lines.push("<!--  (one command — auto-creates folder, drops the file in.)    -->");
+  lines.push("<!-- ============================================================ -->");
+  lines.push("");
+
+  lines.push("# " + skill.title);
+  lines.push("");
   lines.push(skill.description);
   lines.push("");
 
   if (Array.isArray(skill.steps) && skill.steps.length > 0) {
-    lines.push("## Steps");
+    lines.push("## What this skill will do for you");
     lines.push("");
 
     for (let i = 0; i < (skill.steps as SkillStep[]).length; i++) {
@@ -50,7 +85,11 @@ function buildSkillMarkdown(skill: Skill): string {
 
   const appUrl = process.env["NEXT_PUBLIC_APP_URL"] ?? "https://addon90days.vercel.app";
   lines.push("---");
-  lines.push(`*Installed from Claude Toolkit — ${appUrl}/skills/${skill.slug}*`);
+  lines.push("");
+  lines.push("**Need help?** Visit " + appUrl + "/skills/" + skill.slug + " for the full guide,");
+  lines.push("or email support@addonweb.io.");
+  lines.push("");
+  lines.push(`_Installed from AddonWeb Claude Toolkit · ${appUrl}_`);
 
   return lines.join("\n");
 }

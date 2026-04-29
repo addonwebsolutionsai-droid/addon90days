@@ -15,10 +15,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Download, Sparkles } from "lucide-react";
+import { ArrowLeft, Download, Sparkles } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
 import type { Skill } from "@/lib/database.types";
 import { SkillDetailTabs } from "@/components/skill-detail-tabs";
+import { InstallMethods } from "@/components/install-methods";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -200,26 +201,32 @@ export default async function SkillDetailPage({
               {skill.tagline}
             </p>
 
-            {/* Free during beta + CTA */}
+            {/* Free during beta badge */}
             <div className="flex items-center gap-3 mt-3 flex-wrap">
               <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded-full bg-green-500/15 text-green-500">
                 <Sparkles size={11} />
                 Free during beta
               </span>
-              <Link
-                href={isSignedIn ? `/api/skills/${skill.slug}/install` : `/sign-in?redirect_url=/skills/${skill.slug}`}
+              <a
+                href="#install"
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs transition-colors"
               >
-                {isSignedIn ? "Install skill" : "Sign in to install"} <ArrowRight size={12} />
-              </Link>
+                <Download size={12} /> See install instructions
+              </a>
             </div>
           </div>
         </header>
 
         {/* ---------------------------------------------------------------- */}
-        {/* INSTALL COMMAND CARD                                              */}
+        {/* INSTALL METHODS — beginner-friendly, 3 tabs                      */}
         {/* ---------------------------------------------------------------- */}
-        {/* Client island handles the copy interaction */}
+        <div id="install" className="mb-4 scroll-mt-20">
+          <InstallMethods slug={skill.slug} isSignedIn={isSignedIn} />
+        </div>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* SKILL CONTENT TABS (Steps / Preview / Overview)                   */}
+        {/* ---------------------------------------------------------------- */}
         <SkillDetailTabs
           skill={skill}
           installCommand={installCommand}

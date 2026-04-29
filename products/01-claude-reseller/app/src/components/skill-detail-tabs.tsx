@@ -493,9 +493,6 @@ export function SkillDetailTabs({
 
   return (
     <>
-      {/* Install command card */}
-      <InstallCommand command={installCommand} />
-
       {/* Tab bar */}
       <div
         className="rounded-2xl border mb-0 overflow-hidden"
