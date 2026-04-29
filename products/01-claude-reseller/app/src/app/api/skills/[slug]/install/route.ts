@@ -2,15 +2,16 @@
  * GET /api/skills/:slug/install
  *
  * Returns the Claude Code skill definition as a downloadable .md file.
- * The installer CLI fetches JSON via /api/skills/:slug — this endpoint
- * is for browsers/tools that want the file directly.
  *
- * Content-Type:        text/markdown
- * Content-Disposition: attachment; filename="<slug>.md"
+ * During public beta:
+ *   - All skills free
+ *   - Sign-in required (Clerk) so we capture the user before unlocking the file
+ *   - Each install logged to skill_installs for analytics
  */
 
 import type { NextRequest } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { auth } from "@clerk/nextjs/server";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import type { Skill, SkillStep } from "@/lib/database.types";
 
 function buildSkillMarkdown(skill: Skill): string {
@@ -55,10 +56,17 @@ function buildSkillMarkdown(skill: Skill): string {
 }
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
+
+  const { userId } = await auth();
+  if (userId === null) {
+    const url = new URL(req.url);
+    const redirect = `/sign-in?redirect_url=${encodeURIComponent(`/skills/${slug}`)}`;
+    return Response.redirect(new URL(redirect, url.origin), 302);
+  }
 
   const { data, error } = await supabase
     .from("skills")
@@ -74,14 +82,28 @@ export async function GET(
     );
   }
 
-  const markdown = buildSkillMarkdown(data as Skill);
+  const skill = data as Skill;
+  const markdown = buildSkillMarkdown(skill);
+
+  // Best-effort: log install + bump counter. Never block the download on failure.
+  void supabaseAdmin
+    .from("skill_installs")
+    .insert({
+      skill_id: skill.id,
+      slug: skill.slug,
+      user_id: userId,
+      source: "web",
+    })
+    .then(() => undefined);
+
+  void supabaseAdmin.rpc("increment_skill_install", { skill_slug: skill.slug });
 
   return new Response(markdown, {
     status: 200,
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
       "Content-Disposition": `attachment; filename="${slug}.md"`,
-      "Cache-Control": "public, max-age=300, stale-while-revalidate=3600",
+      "Cache-Control": "no-store",
     },
   });
 }

@@ -214,8 +214,8 @@ function SkillGridCard({ skill, index }: SkillGridCardProps) {
             </span>
           </div>
           <div className="flex items-center gap-2.5">
-            <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-              {skill.is_free ? "Free" : `₹${skill.price_inr.toLocaleString("en-IN")}`}
+            <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-green-500/15 text-green-500">
+              Free
             </span>
             <Link
               href={`/skills/${skill.slug}`}
@@ -261,7 +261,6 @@ function SkillsPage() {
   const [query, setQuery]                   = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [difficulty, setDifficulty]         = useState<DifficultyOption>("All");
-  const [freeOnly, setFreeOnly]             = useState(false);
   const [sort, setSort]                     = useState<SortOption>("trending");
   const [page, setPage]                     = useState(1);
 
@@ -277,7 +276,7 @@ function SkillsPage() {
   // Reset to page 1 whenever filters change
   useEffect(() => {
     setPage(1);
-  }, [debouncedQuery, activeCategory, difficulty, freeOnly, sort]);
+  }, [debouncedQuery, activeCategory, difficulty, sort]);
 
   const fetchSkills = useCallback(async () => {
     setLoading(true);
@@ -287,7 +286,6 @@ function SkillsPage() {
       if (debouncedQuery)             params.set("q",         debouncedQuery);
       if (activeCategory !== "all")   params.set("category",  activeCategory);
       if (difficulty !== "All")       params.set("difficulty", difficulty);
-      if (freeOnly)                   params.set("free",       "true");
       params.set("sort",     sort);
       params.set("page",     String(page));
       params.set("pageSize", String(PAGE_SIZE));
@@ -303,7 +301,7 @@ function SkillsPage() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, activeCategory, difficulty, freeOnly, sort, page]);
+  }, [debouncedQuery, activeCategory, difficulty, sort, page]);
 
   useEffect(() => {
     void fetchSkills();
@@ -324,7 +322,6 @@ function SkillsPage() {
     debouncedQuery !== "" ||
     activeCategory !== "all" ||
     difficulty !== "All" ||
-    freeOnly ||
     sort !== "trending";
 
   const trendingSkills = skills.filter((s) => s.is_trending).slice(0, 6);
@@ -345,6 +342,15 @@ function SkillsPage() {
     >
       <div className="max-w-5xl mx-auto px-5 py-8">
 
+        {/* Beta banner */}
+        <div className="mb-5 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 flex items-center gap-3 text-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+          <span className="font-semibold text-green-500 uppercase tracking-wider text-xs">Public beta</span>
+          <span style={{ color: "var(--text-secondary)" }}>
+            All 130+ skills are free during beta. <Link href="/sign-up" className="text-violet-400 hover:text-violet-300 underline">Sign up</Link> to install.
+          </span>
+        </div>
+
         {/* Page header */}
         <div className="mb-7">
           <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1.5">
@@ -356,7 +362,7 @@ function SkillsPage() {
               : "Skills Marketplace"}
           </h1>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            New skills added daily. Browse, preview, and run in seconds.
+            New skills added daily. Browse, preview, and install in seconds.
           </p>
         </div>
 
@@ -472,29 +478,6 @@ function SkillsPage() {
               style={{ color: "var(--text-muted)" }}
             />
           </div>
-
-          {/* Free toggle */}
-          <button
-            onClick={() => setFreeOnly((v) => !v)}
-            aria-pressed={freeOnly}
-            className={cn(
-              "h-8 px-3.5 rounded-lg text-xs font-medium transition-all border",
-              freeOnly
-                ? "bg-green-500/15 border-green-500/40 text-green-500"
-                : ""
-            )}
-            style={
-              !freeOnly
-                ? {
-                    backgroundColor: "var(--bg-surface)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-secondary)",
-                  }
-                : {}
-            }
-          >
-            Free only
-          </button>
 
           {/* Sort */}
           <div className="relative ml-auto">
@@ -635,24 +618,24 @@ function SkillsPage() {
           </div>
         )}
 
-        {/* All-Access upsell */}
-        <div className="mt-14 rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-pink-900/10 p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        {/* Beta sign-up CTA */}
+        <div className="mt-14 rounded-xl border border-green-500/20 bg-gradient-to-r from-green-900/20 to-violet-900/10 p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
           <div>
-            <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">
-              All-Access
+            <p className="text-xs text-green-500 font-medium uppercase tracking-widest mb-1">
+              Public beta · Free
             </p>
             <h2 className="text-base font-bold mb-1">
-              Get every skill for ₹2,407/mo
+              Sign up to install any skill
             </h2>
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              All current + future skills. API access included. Cancel anytime.
+              No credit card. All 130+ skills free during beta. Early users keep beta benefits.
             </p>
           </div>
           <Link
             href="/sign-up"
             className="shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
           >
-            Start All-Access
+            Create free account
           </Link>
         </div>
       </div>

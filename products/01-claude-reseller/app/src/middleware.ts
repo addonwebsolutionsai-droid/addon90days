@@ -1,8 +1,16 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Only protect /dashboard and everything under it.
-// All marketplace pages (/, /skills, /skills/[id]) are public.
+// Public marketplace: /, /skills, /skills/[slug], /legal/* are open.
+// Everything below requires sign-in:
+//   - /account/*           — user profile, my skills, billing
+//   - /dashboard(.*)       — legacy redirect
+//   - /api/skills/.../install — beta install (capture user before download)
+//   - /api/skills/run(.*)  — paid skill execution
+//   - /api/checkout(.*)    — payment
+// Note: /api/skills/[slug]/install handles its own auth + redirect inline,
+// because we want a 302 redirect (not 401 JSON) when a browser hits it logged-out.
 const isProtectedRoute = createRouteMatcher([
+  "/account(.*)",
   "/dashboard(.*)",
   "/api/skills/run(.*)",
   "/api/checkout(.*)",

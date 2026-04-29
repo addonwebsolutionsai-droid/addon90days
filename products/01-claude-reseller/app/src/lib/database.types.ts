@@ -77,6 +77,24 @@ export type SkillInsertRow = {
   published?: boolean;
 };
 
+export type SkillInstall = {
+  id: string;
+  skill_id: string;
+  slug: string;
+  user_id: string;
+  source: "web" | "cli" | "mcp";
+  created_at: string;
+};
+
+export type SkillInstallInsertRow = {
+  id?: string;
+  skill_id: string;
+  slug: string;
+  user_id: string;
+  source?: "web" | "cli" | "mcp";
+  created_at?: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -86,9 +104,20 @@ export type Database = {
         Update: Partial<SkillInsertRow>;
         Relationships: [];
       };
+      skill_installs: {
+        Row: SkillInstall;
+        Insert: SkillInstallInsertRow;
+        Update: Partial<SkillInstallInsertRow>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      increment_skill_install: {
+        Args: { skill_slug: string };
+        Returns: void;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

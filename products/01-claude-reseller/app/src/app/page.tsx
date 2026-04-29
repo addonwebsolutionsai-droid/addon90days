@@ -8,7 +8,7 @@ import { ArrowRight, Terminal, Zap, Shield, Package, ExternalLink } from "lucide
 const STATS = [
   { value: "130+", label: "Skills" },
   { value: "11",   label: "Categories" },
-  { value: "Free", label: "Starter tier" },
+  { value: "Free", label: "All skills (beta)" },
   { value: "Daily", label: "New skills" },
 ];
 
@@ -33,36 +33,6 @@ const FEATURED_SKILLS = [
   { slug: "stock-screener-ai",         title: "AI Stock Screener",          tagline: "Scan BSE/NSE with technical + fundamental filters. Exports to Google Sheets.",        category: "Trading & Finance",color: "#eab308", free: false, steps: 5 },
   { slug: "pr-description",            title: "PR Description Writer",      tagline: "Auto-generates structured PR descriptions from git diff. Markdown-ready.",            category: "Developer Tools", color: "#f59e0b", free: true,  steps: 2 },
   { slug: "product-roadmap-generator", title: "Product Roadmap Generator",  tagline: "RICE-scored roadmap from problem statement + user goals. Exports to Notion.",         category: "Startup & Product",color: "#ec4899", free: false, steps: 4 },
-];
-
-const PACKS = [
-  {
-    id: "iot-developer-pack",
-    accentHex: "#06b6d4",
-    name: "IoT Developer Pack",
-    price: "₹4,067",
-    tag: "Hardware engineers",
-    skills: ["esp32-firmware-scaffold", "mqtt-iot-setup", "coap-iot-protocol", "modbus-rtu-tcp"],
-    desc: "ESP32 FreeRTOS firmware, MQTT broker, CoAP, Modbus for industrial IoT.",
-  },
-  {
-    id: "developer-productivity-pack",
-    accentHex: "#8b5cf6",
-    name: "Developer Productivity Pack",
-    price: "₹2,407",
-    tag: "Most popular",
-    skills: ["sql-query-builder", "data-schema-designer", "wireframe-spec-to-code", "product-roadmap-generator"],
-    desc: "NL→SQL, schema design, wireframe-to-React, and RICE-scored product roadmaps.",
-  },
-  {
-    id: "trading-pack",
-    accentHex: "#eab308",
-    name: "Trading & Finance Pack",
-    price: "₹5,999",
-    tag: "Traders & quants",
-    skills: ["stock-screener-ai", "options-strategy-builder", "algo-trading-scaffold", "backtesting-framework"],
-    desc: "AI stock screener, options strategy builder, Zerodha Kite algo scaffold, and backtesting.",
-  },
 ];
 
 const CODE_SNIPPET = `import { invoiceGenerator, runSkill } from "@addonweb/claude-toolkit"
@@ -96,15 +66,11 @@ export default function HomePage() {
       {/* ------------------------------------------------------------------ */}
       <section className="max-w-4xl mx-auto px-6 pt-14 pb-12 text-center">
         <div
-          className="inline-flex items-center gap-2 border rounded-full px-4 py-1.5 text-xs mb-8"
-          style={{
-            backgroundColor: "var(--bg-s2)",
-            borderColor: "var(--border-subtle)",
-            color: "var(--text-muted)",
-          }}
+          className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs mb-8 border border-green-500/30 bg-green-500/10"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          New skills added daily · 130+ production-ready skills live now
+          <span className="font-semibold text-green-500 uppercase tracking-wider">Free during beta</span>
+          <span style={{ color: "var(--text-muted)" }}>· 130+ skills · sign-in required</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-5 leading-tight">
@@ -120,6 +86,7 @@ export default function HomePage() {
         >
           130+ skills across IoT, trading, developer tools, Indian business, and more.
           Step-by-step guides. Copy-paste code. Runs in Claude Code, your API, or the MCP server.
+          <span className="block mt-2 text-green-500 font-medium">All skills free during public beta.</span>
         </p>
 
         <div className="flex items-center justify-center gap-3 mb-10 flex-wrap">
@@ -153,7 +120,7 @@ export default function HomePage() {
           }}
         >
           <span style={{ color: "var(--text-muted)" }}>$</span>
-          <span className="text-green-500">npm install @addonweb/claude-toolkit</span>
+          <span className="text-green-500">npx addonweb-claude-skills install &lt;skill-slug&gt;</span>
         </div>
       </section>
 
@@ -264,11 +231,6 @@ export default function HomePage() {
                     >
                       {skill.steps}s
                     </span>
-                    {skill.free && (
-                      <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-green-500/15 text-green-500">
-                        Free
-                      </span>
-                    )}
                   </div>
                 </div>
                 <h3 className="font-semibold text-sm mb-1" style={{ color: "var(--text-primary)" }}>
@@ -361,80 +323,50 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* PRICING / PACKS                                                     */}
+      {/* BETA CTA                                                            */}
       {/* ------------------------------------------------------------------ */}
       <section
-        id="pricing"
-        className="py-12 border-t"
+        id="get-started"
+        className="py-14 border-t"
         style={{ borderColor: "var(--border-subtle)" }}
       >
-        <div className="max-w-4xl mx-auto px-6">
-          <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-2 text-center">
-            Pricing
-          </p>
-          <h2 className="text-2xl font-bold text-center mb-8">Pick what you need</h2>
-
-          <div className="grid md:grid-cols-3 gap-4 mb-4">
-            {PACKS.map((pack) => (
-              <div
-                key={pack.id}
-                className="rounded-xl border p-5 flex flex-col"
-                style={{
-                  backgroundColor: "var(--bg-surface)",
-                  borderColor: "var(--border-subtle)",
-                }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span
-                    className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded"
-                    style={{ color: pack.accentHex, backgroundColor: `${pack.accentHex}15` }}
-                  >
-                    {pack.tag}
-                  </span>
-                  <span className="text-base font-bold">{pack.price}</span>
-                </div>
-                <h3 className="font-semibold text-sm mb-1.5">{pack.name}</h3>
-                <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: "var(--text-muted)" }}>
-                  {pack.desc}
-                </p>
-                <div className="space-y-1 mb-5">
-                  {pack.skills.map((s) => (
-                    <div key={s} className="flex items-center gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
-                      <span style={{ color: pack.accentHex }}>›</span>
-                      <code>{s}</code>
-                    </div>
-                  ))}
-                </div>
-                <Link
-                  href="/skills"
-                  className="text-center py-2 rounded-lg text-sm font-medium transition-colors border"
-                  style={{ borderColor: `${pack.accentHex}40`, color: pack.accentHex }}
-                >
-                  Buy pack
-                </Link>
-              </div>
-            ))}
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] mb-5 border border-green-500/30 bg-green-500/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            <span className="font-semibold text-green-500 uppercase tracking-wider">Public beta</span>
           </div>
 
-          {/* All-Access banner */}
-          <div className="rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 via-yellow-900/5 to-pink-900/15 p-7 flex flex-col sm:flex-row items-center justify-between gap-5">
-            <div>
-              <div className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">
-                Best value · Most popular
-              </div>
-              <h3 className="text-lg font-bold mb-1">All-Access — ₹2,407/mo</h3>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                130+ skills and growing. Trading strategies, IoT, GST, AI — everything.
-                New skills added daily, no extra charge.
-              </p>
-            </div>
+          <h2 className="text-3xl font-bold mb-4">
+            All 130+ skills.<br />Free for everyone — for now.
+          </h2>
+          <p className="text-base mb-8 max-w-xl mx-auto" style={{ color: "var(--text-secondary)" }}>
+            We&apos;re onboarding the first 1,000 builders before turning on pricing.
+            Sign up, install any skill in 30 seconds, lock in early-builder benefits.
+          </p>
+
+          <div className="flex items-center justify-center gap-3 flex-wrap">
             <Link
               href="/sign-up"
-              className="shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
+              className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
             >
-              Start All-Access
+              Create free account <ArrowRight size={14} />
+            </Link>
+            <Link
+              href="/skills"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors text-sm border"
+              style={{
+                backgroundColor: "var(--bg-surface)",
+                borderColor: "var(--border)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              Browse skills first
             </Link>
           </div>
+
+          <p className="text-xs mt-6" style={{ color: "var(--text-muted)" }}>
+            No credit card. No paywall. Sign in once, install any skill any time.
+          </p>
         </div>
       </section>
 
