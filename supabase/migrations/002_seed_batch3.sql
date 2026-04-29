@@ -433,4 +433,5 @@ INSERT INTO skills (slug, title, tagline, description, category, difficulty, is_
    {"step":1,"title":"Define an experiment","language":"typescript","code":"const experiment = await runSkill(''growth-experiment'', {\n  hypothesis: \"Adding a ''Start Free — No Credit Card'' CTA on the pricing page will increase trial signups by 20%\",\n  metric: \"trial_signup_rate\",\n  baseline: 0.03,\n  minimumDetectableEffect: 0.20,\n  weeklyTraffic: 500\n})"},
    {"step":2,"title":"Experiment plan","language":"json","code":"{\n  \"id\": \"EXP-2026-012\",\n  \"hypothesis\": \"Adding no-CC CTA increases trial signups by 20%\",\n  \"primaryMetric\": \"trial_signup_rate\",\n  \"baselineRate\": 0.03,\n  \"targetRate\": 0.036,\n  \"sampleSizePerVariant\": 2847,\n  \"estimatedRuntime\": \"11.4 days at 500 visitors/week\",\n  \"guardrailMetrics\": [\"paid_conversion_rate\", \"revenue_per_visitor\"],\n  \"decisionCriteria\": {\n    \"ship\": \"p < 0.05 AND primary metric improved AND no guardrail regression\",\n    \"kill\": \"p < 0.05 AND primary metric declined\",\n    \"iterate\": \"not significant after 2x expected runtime\"\n  }\n}"}
  ]'::jsonb,
- null, 810, false, true);
+ null, 810, false, true)
+ON CONFLICT (slug) DO NOTHING;
