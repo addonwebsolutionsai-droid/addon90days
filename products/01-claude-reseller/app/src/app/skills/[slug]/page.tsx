@@ -1,25 +1,24 @@
 /**
  * Skill Detail Page — /skills/[slug]
  *
- * Server component. Fetches from /api/skills/[slug].
- *
  * Component tree:
  *   SkillDetailPage (server)
- *     ├── Header (back, category badge, title, tagline, tags, stats, price/buy)
- *     ├── VideoSection (YouTube embed or placeholder)
- *     ├── DescriptionSection
- *     ├── StepsSection (step-by-step guide with copy-able code blocks)
- *     ├── RelatedSkillsSection (4 skills, same category)
- *     └── CTASection
+ *     ├── Back link
+ *     ├── HeaderCard (icon square, title, category/difficulty badges, view count)
+ *     ├── InstallCommandCard (copy-able npx command) — client island
+ *     ├── TabBar (Steps | Preview | Overview) — client island
+ *     └── RelatedSkillsGrid
+ *
+ * Design reference: aitmpl.com skill detail layout
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Eye, ShoppingBag, Flame, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download } from "lucide-react";
 import type { Skill } from "@/lib/database.types";
-import { CopyCodeButton } from "@/components/copy-code-button";
 import { BuyButton } from "@/components/buy-button";
+import { SkillDetailTabs } from "@/components/skill-detail-tabs";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -36,36 +35,10 @@ const CATEGORY_META = {
   "devops-infra":            { label: "DevOps & Infra",      color: "#6366f1", emoji: "🛠" },
   "communication-protocols": { label: "Protocols",           color: "#14b8a6", emoji: "🔗" },
   "marketing-growth":        { label: "Marketing & Growth",  color: "#f43f5e", emoji: "📈" },
+  "trading-finance":         { label: "Trading & Finance",   color: "#eab308", emoji: "📉" },
 } as const;
 
 type CategoryKey = keyof typeof CATEGORY_META;
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function extractYouTubeId(url: string): string | null {
-  try {
-    const u = new URL(url);
-    if (u.hostname === "youtu.be") return u.pathname.slice(1).split("?")[0] ?? null;
-    if (u.searchParams.has("v")) return u.searchParams.get("v");
-    // /embed/VIDEO_ID
-    const embedMatch = u.pathname.match(/\/embed\/([^/?]+)/);
-    if (embedMatch) return embedMatch[1] ?? null;
-  } catch {
-    // not a valid URL
-  }
-  return null;
-}
-
-function getDifficultyColor(difficulty: string): string {
-  const map: Record<string, string> = {
-    beginner:     "#10b981",
-    intermediate: "#f59e0b",
-    advanced:     "#ef4444",
-  };
-  return map[difficulty] ?? "#8b5cf6";
-}
 
 // ---------------------------------------------------------------------------
 // Metadata
@@ -89,6 +62,19 @@ export async function generateMetadata({
   } catch {
     return { title: "Claude Toolkit Skills" };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Difficulty helpers
+// ---------------------------------------------------------------------------
+
+function getDifficultyColor(difficulty: string): string {
+  const map: Record<string, string> = {
+    beginner:     "#10b981",
+    intermediate: "#f59e0b",
+    advanced:     "#ef4444",
+  };
+  return map[difficulty] ?? "#8b5cf6";
 }
 
 // ---------------------------------------------------------------------------
@@ -131,327 +117,127 @@ export default async function SkillDetailPage({
     // Related skills are non-critical — swallow error
   }
 
-  const meta      = CATEGORY_META[skill.category as CategoryKey];
-  const color     = meta?.color ?? "#8b5cf6";
-  const label     = meta?.label ?? skill.category;
-  const emoji     = meta?.emoji ?? "";
-  const videoId   = skill.video_url ? extractYouTubeId(skill.video_url) : null;
+  const meta  = CATEGORY_META[skill.category as CategoryKey];
+  const color = meta?.color ?? "#8b5cf6";
+  const label = meta?.label ?? skill.category;
+  const emoji = meta?.emoji ?? "";
+
+  const installCommand = `npx @addonweb/claude-toolkit@latest install ${skill.slug}`;
 
   return (
-    <main className="min-h-screen bg-[#07070a] text-white">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
+    >
+      <div className="max-w-3xl mx-auto px-5 py-8">
 
-      {/* ------------------------------------------------------------------ */}
-      {/* NAV                                                                 */}
-      {/* ------------------------------------------------------------------ */}
-      <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#07070a]/90 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/skills" className="flex items-center gap-2 group text-sm text-white/50 hover:text-white transition-colors">
-            <ArrowLeft size={14} />
-            Skills
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
-              <Zap size={12} />
-            </div>
-            <span className="font-semibold text-sm">Claude Toolkit</span>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-4xl mx-auto px-6 py-12">
+        {/* Back link */}
+        <Link
+          href="/skills"
+          className="inline-flex items-center gap-1.5 text-xs font-medium mb-7 transition-colors hover:text-violet-400"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <ArrowLeft size={13} />
+          Back to Skills
+        </Link>
 
         {/* ---------------------------------------------------------------- */}
-        {/* HEADER                                                            */}
+        {/* HEADER CARD                                                       */}
         {/* ---------------------------------------------------------------- */}
-        <header className="mb-10">
-          {/* Category + badges */}
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span
-              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full"
-              style={{ color, background: `${color}18` }}
-            >
-              <span aria-hidden>{emoji}</span>
-              {label}
-            </span>
-            {skill.is_trending && (
-              <span className="flex items-center gap-1 text-xs font-semibold text-orange-400 bg-orange-500/10 px-2.5 py-1 rounded-full">
-                <Flame size={11} className="fill-orange-400" /> Trending
-              </span>
-            )}
-            {skill.is_new && (
-              <span className="text-xs font-semibold text-green-400 bg-green-500/10 px-2.5 py-1 rounded-full">
-                NEW
-              </span>
-            )}
+        <header
+          className="rounded-2xl border p-5 mb-4 flex items-start gap-4"
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            borderColor: "var(--border-subtle)",
+          }}
+        >
+          {/* Icon square with category gradient */}
+          <div
+            className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
+            style={{
+              background: `linear-gradient(135deg, ${color}40 0%, ${color}18 100%)`,
+              border: `1px solid ${color}30`,
+            }}
+            aria-hidden
+          >
+            {emoji}
           </div>
 
-          {/* Title */}
-          <h1 className="text-4xl font-bold tracking-tight mb-3 leading-tight">
-            {skill.title}
-          </h1>
-
-          {/* Tagline */}
-          <p className="text-white/50 text-lg mb-5">{skill.tagline}</p>
-
-          {/* Tags */}
-          {skill.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {skill.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/40 text-xs font-mono"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Stats row */}
-          <div className="flex flex-wrap items-center gap-5 text-sm text-white/40 mb-8">
-            <span className="flex items-center gap-1.5">
-              <Eye size={13} />
-              {skill.view_count.toLocaleString()} views
-            </span>
-            <span className="flex items-center gap-1.5">
-              <ShoppingBag size={13} />
-              {skill.purchase_count.toLocaleString()} purchases
-            </span>
-            <span
-              className="flex items-center gap-1.5 font-medium capitalize"
-              style={{ color: getDifficultyColor(skill.difficulty) }}
-            >
+          <div className="flex-1 min-w-0">
+            {/* Badges row */}
+            <div className="flex flex-wrap items-center gap-2 mb-2">
               <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: getDifficultyColor(skill.difficulty) }}
-              />
-              {skill.difficulty}
-            </span>
-          </div>
+                className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                style={{ color, backgroundColor: `${color}18` }}
+              >
+                {label}
+              </span>
+              <span
+                className="text-[10px] font-semibold capitalize px-2 py-0.5 rounded-full"
+                style={{
+                  color: getDifficultyColor(skill.difficulty),
+                  backgroundColor: `${getDifficultyColor(skill.difficulty)}18`,
+                }}
+              >
+                {skill.difficulty}
+              </span>
+              <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-500/15 text-green-500 ml-auto">
+                <Download size={10} />
+                {skill.view_count.toLocaleString()} views
+              </span>
+            </div>
 
-          {/* Price + CTA */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <div>
-              <span className="text-3xl font-bold">
+            {/* Title */}
+            <h1 className="text-xl font-bold leading-snug mb-1" style={{ color: "var(--text-primary)" }}>
+              {skill.title}
+            </h1>
+
+            {/* Tagline */}
+            <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              {skill.tagline}
+            </p>
+
+            {/* Price + CTA */}
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
+              <span className="text-lg font-bold">
                 {skill.is_free ? "Free" : `₹${skill.price_inr.toLocaleString("en-IN")}`}
               </span>
               {!skill.is_free && (
-                <span className="text-xs text-white/30 ml-2">
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                   (${skill.price_usd} USD) · one-time
                 </span>
               )}
-            </div>
-            {skill.pack_id ? (
-              <BuyButton
-                packId={skill.pack_id}
-                packLabel={skill.title}
-                priceDisplay={
-                  skill.is_free
-                    ? "Free"
-                    : `₹${skill.price_inr.toLocaleString("en-IN")}`
-                }
-              />
-            ) : (
-              <Link
-                href="/sign-in"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 font-medium text-sm transition-colors"
-              >
-                Free — Copy Steps <ArrowRight size={14} />
-              </Link>
-            )}
-          </div>
-        </header>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* VIDEO TRAILER                                                     */}
-        {/* ---------------------------------------------------------------- */}
-        <section className="mb-12" aria-label="Video trailer">
-          {videoId ? (
-            <div className="relative w-full rounded-xl overflow-hidden border border-white/10" style={{ paddingBottom: "56.25%" }}>
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}?rel=0`}
-                title={`${skill.title} — video tutorial`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed border-white/10 bg-[#0f0f12] py-16 text-white/30">
-              <span className="text-4xl mb-3">▶</span>
-              <p className="text-sm">Video tutorial coming soon</p>
-            </div>
-          )}
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* DESCRIPTION                                                       */}
-        {/* ---------------------------------------------------------------- */}
-        <section className="mb-12" aria-label="Skill description">
-          <h2 className="text-xl font-bold mb-4">About this skill</h2>
-          <div className="text-white/60 text-sm leading-relaxed space-y-4">
-            {skill.description.split("\n\n").map((paragraph, i) => (
-              // Using index is safe here — description paragraphs are static
-              // eslint-disable-next-line react/no-array-index-key
-              <p key={i}>{paragraph}</p>
-            ))}
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* STEPS GUIDE                                                       */}
-        {/* ---------------------------------------------------------------- */}
-        {skill.steps.length > 0 && (
-          <section className="mb-12" aria-label="Step-by-step guide">
-            <h2 className="text-xl font-bold mb-1">Step-by-Step Guide — Copy &amp; Execute</h2>
-            <p className="text-white/40 text-sm mb-8">
-              Follow these steps exactly. Each step is self-contained and copy-paste ready.
-            </p>
-
-            <ol className="space-y-8" role="list">
-              {skill.steps.map((step) => (
-                <li key={step.number} className="flex gap-5">
-                  {/* Step number circle */}
-                  <div
-                    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5"
-                    style={{ background: color }}
-                    aria-hidden
-                  >
-                    {step.number}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    {/* Step title */}
-                    <h3 className="font-semibold text-white mb-1">{step.title}</h3>
-
-                    {/* Step description */}
-                    <p className="text-white/50 text-sm leading-relaxed mb-4">
-                      {step.description}
-                    </p>
-
-                    {/* Code block */}
-                    {step.code && (
-                      <div className="rounded-xl border border-white/10 overflow-hidden">
-                        {/* Code header */}
-                        <div className="flex items-center justify-between px-4 py-2.5 bg-[#0f0f12] border-b border-white/10">
-                          <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">
-                            {step.language ?? "code"}
-                          </span>
-                          {/* Copy button — client component */}
-                          <CopyCodeButton code={step.code} />
-                        </div>
-                        {/* Code body */}
-                        <pre
-                          className="bg-[#080809] p-5 overflow-x-auto text-xs font-mono text-white/80 leading-relaxed"
-                          aria-label={`Code for step ${step.number}`}
-                        >
-                          <code>{step.code}</code>
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-
-        {/* ---------------------------------------------------------------- */}
-        {/* RELATED SKILLS                                                    */}
-        {/* ---------------------------------------------------------------- */}
-        {relatedSkills.length > 0 && (
-          <section className="mb-12" aria-label="Related skills">
-            <h2 className="text-xl font-bold mb-6">More in {label}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {relatedSkills.map((rel) => {
-                const relMeta  = CATEGORY_META[rel.category as CategoryKey];
-                const relColor = relMeta?.color ?? "#8b5cf6";
-                return (
-                  <Link
-                    key={rel.id}
-                    href={`/skills/${rel.slug}`}
-                    className="flex items-start gap-4 p-4 rounded-xl border border-white/5 bg-[#0f0f12] hover:border-white/15 transition-all group"
-                  >
-                    <div
-                      className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm"
-                      style={{ background: `${relColor}20` }}
-                    >
-                      {relMeta?.emoji}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium text-sm text-white group-hover:text-violet-300 transition-colors leading-snug">
-                          {rel.title}
-                        </p>
-                        <span className="shrink-0 text-sm font-bold text-white/70">
-                          {rel.is_free ? "Free" : `₹${rel.price_inr.toLocaleString("en-IN")}`}
-                        </span>
-                      </div>
-                      <p className="text-xs text-white/40 mt-0.5 line-clamp-1">{rel.tagline}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {/* ---------------------------------------------------------------- */}
-        {/* BOTTOM CTA                                                        */}
-        {/* ---------------------------------------------------------------- */}
-        <section
-          className="rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-pink-900/10 p-8 text-center"
-          aria-label="Get started"
-        >
-          {skill.is_free ? (
-            <>
-              <p className="text-white/50 text-sm mb-1">This skill is free.</p>
-              <h2 className="text-xl font-bold mb-4">Start using it now</h2>
-              <Link
-                href="/sign-in"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm"
-              >
-                Sign in to access <ArrowRight size={14} />
-              </Link>
-            </>
-          ) : (
-            <>
-              <p className="text-white/50 text-sm mb-1">One-time purchase.</p>
-              <h2 className="text-xl font-bold mb-1">{skill.title}</h2>
-              <p className="text-3xl font-bold mb-5">
-                ₹{skill.price_inr.toLocaleString("en-IN")}
-              </p>
               {skill.pack_id ? (
                 <BuyButton
                   packId={skill.pack_id}
                   packLabel={skill.title}
-                  priceDisplay={`₹${skill.price_inr.toLocaleString("en-IN")}`}
+                  priceDisplay={skill.is_free ? "Free" : `₹${skill.price_inr.toLocaleString("en-IN")}`}
                 />
               ) : (
                 <Link
-                  href="/sign-up"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm"
+                  href="/sign-in"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs transition-colors"
                 >
-                  Get started <ArrowRight size={14} />
+                  {skill.is_free ? "Get for free" : "Buy now"} <ArrowRight size={12} />
                 </Link>
               )}
-            </>
-          )}
-          <p className="text-white/25 text-xs mt-6">
-            Questions?{" "}
-            <a href="mailto:support@addonweb.io" className="hover:text-white/50 transition-colors">
-              support@addonweb.io
-            </a>
-          </p>
-        </section>
-      </div>
+            </div>
+          </div>
+        </header>
 
-      <footer className="border-t border-white/5 py-8 text-center text-xs text-white/20">
-        © 2026 AddonWeb Solutions · Ahmedabad, India ·{" "}
-        <a href="mailto:support@addonweb.io" className="hover:text-white/50 transition-colors">
-          support@addonweb.io
-        </a>
-      </footer>
-    </main>
+        {/* ---------------------------------------------------------------- */}
+        {/* INSTALL COMMAND CARD                                              */}
+        {/* ---------------------------------------------------------------- */}
+        {/* Client island handles the copy interaction */}
+        <SkillDetailTabs
+          skill={skill}
+          installCommand={installCommand}
+          categoryColor={color}
+          relatedSkills={relatedSkills}
+          categoryLabel={label}
+        />
+
+      </div>
+    </div>
   );
 }

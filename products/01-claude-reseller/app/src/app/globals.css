@@ -61,6 +61,71 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+ * Animations
+ * --------------------------------------------------------------------------- */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-4px); }
+  40%       { transform: translateX(4px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+@keyframes spin-icon {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Skill cards — stagger fade-in-up */
+.skill-card {
+  animation: fade-in-up 300ms ease both;
+}
+
+/* Step items in detail page */
+.step-item {
+  animation: fade-in-up 300ms ease both;
+}
+
+/* Shake on failed copy */
+.animate-shake {
+  animation: shake 0.5s ease;
+}
+
+/* Sidebar category link — left border slide-in on hover */
+.sidebar-category-link {
+  position: relative;
+}
+
+.sidebar-category-link::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 2px;
+  border-radius: 1px;
+  background-color: #8b5cf6;
+  transform: scaleY(0);
+  transition: transform 150ms ease;
+}
+
+.sidebar-category-link:hover::before {
+  transform: scaleY(1);
+}
+
 @layer utilities {
   /* Gradient text — violet to pink */
   .text-gradient-violet {

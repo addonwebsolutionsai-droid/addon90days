@@ -1,0 +1,23 @@
+{
+  "name": "@addonweb/claude-toolkit-installer",
+  "version": "1.0.0",
+  "description": "Install Claude skills from the AddonWeb Claude Toolkit marketplace",
+  "main": "install.js",
+  "bin": {
+    "@addonweb/claude-toolkit": "./install.js",
+    "claude-toolkit": "./install.js"
+  },
+  "scripts": {
+    "start": "node install.js"
+  },
+  "keywords": ["claude", "claude-code", "mcp", "ai-skills", "addonweb"],
+  "author": "AddonWeb Solutions <support@addonweb.io>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/addonwebsolutionsai-droid/addon90days"
+  }
+}

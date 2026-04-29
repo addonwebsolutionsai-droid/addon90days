@@ -5,19 +5,20 @@
  *
  * Component tree:
  *   SkillsPage (client, owns all filter state)
- *     ├── Nav
  *     ├── SearchBar
- *     ├── CategoryPills
- *     ├── FilterBar
+ *     ├── CategoryPills (horizontal scroll, synced with sidebar selection via URL)
+ *     ├── FilterBar (difficulty, free toggle, sort)
  *     ├── TrendingSection  (only when no active filter)
  *     ├── SkillsGrid / SkillSkeleton / EmptyState
  *     └── Pagination
  *
- * Data flow: all fetch calls go to /api/skills with URLSearchParams.
+ * No Nav rendered here — the root layout sidebar provides navigation.
+ * Category filter is also controlled from the sidebar via ?category= URL param.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Search,
   Flame,
@@ -27,7 +28,6 @@ import {
 } from "lucide-react";
 import type { Skill } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
-import { Nav } from "@/components/nav";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -68,24 +68,23 @@ const PAGE_SIZE = 12;
 function SkillSkeleton() {
   return (
     <div
-      className="rounded-xl border p-5 flex flex-col gap-3 animate-pulse"
+      className="rounded-xl border p-4 flex flex-col gap-3 animate-pulse"
       style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
     >
-      <div className="h-4 w-24 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
-      <div className="h-5 w-3/4 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+      <div className="h-3.5 w-20 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+      <div className="h-4 w-3/4 rounded"  style={{ backgroundColor: "var(--bg-s2)" }} />
       <div className="h-3 w-full rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
       <div className="h-3 w-5/6 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
       <div className="flex gap-1.5 mt-1">
-        <div className="h-5 w-12 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
-        <div className="h-5 w-14 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
-        <div className="h-5 w-10 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+        <div className="h-4 w-10 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+        <div className="h-4 w-12 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
       </div>
       <div
         className="flex items-center justify-between mt-auto pt-2 border-t"
         style={{ borderColor: "var(--border-subtle)" }}
       >
-        <div className="h-4 w-16 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
-        <div className="h-4 w-12 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+        <div className="h-3.5 w-14 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
+        <div className="h-3.5 w-10 rounded" style={{ backgroundColor: "var(--bg-s2)" }} />
       </div>
     </div>
   );
@@ -97,10 +96,11 @@ function SkillSkeleton() {
 
 interface SkillGridCardProps {
   skill: Skill;
+  index: number;
 }
 
-function SkillGridCard({ skill }: SkillGridCardProps) {
-  const meta = CATEGORY_META[skill.category as CategoryKey];
+function SkillGridCard({ skill, index }: SkillGridCardProps) {
+  const meta  = CATEGORY_META[skill.category as CategoryKey];
   const color = meta?.color ?? "#8b5cf6";
   const label = meta?.label ?? skill.category;
 
@@ -114,36 +114,38 @@ function SkillGridCard({ skill }: SkillGridCardProps) {
 
   return (
     <article
-      className="group relative flex flex-col rounded-xl border transition-all duration-200 hover:shadow-lg"
+      className="skill-card group relative flex flex-col rounded-xl border transition-all duration-150"
       style={{
         backgroundColor: "var(--bg-surface)",
         borderColor: "var(--border-subtle)",
         borderLeftColor: color,
         borderLeftWidth: "3px",
+        // Stagger fade-in via CSS custom property
+        animationDelay: `${index * 50}ms`,
       }}
     >
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-4 flex flex-col flex-1">
         {/* Trending badge */}
         {skill.is_trending && (
           <span
             aria-label="Trending"
             className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-semibold text-orange-400"
           >
-            <Flame size={11} className="fill-orange-400" />
+            <Flame size={10} className="fill-orange-400" />
             TRENDING
           </span>
         )}
 
         {/* Category + NEW badge */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-1.5 mb-2.5">
           <span
-            className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded"
+            className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded"
             style={{ color, backgroundColor: `${color}18` }}
           >
             {label}
           </span>
           {skill.is_new && (
-            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-green-500/15 text-green-500">
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-green-500/15 text-green-500">
               NEW
             </span>
           )}
@@ -152,7 +154,7 @@ function SkillGridCard({ skill }: SkillGridCardProps) {
               className="text-[10px] font-mono px-1.5 py-0.5 rounded ml-auto"
               style={{ color: "var(--text-muted)", backgroundColor: "var(--bg-s2)" }}
             >
-              {stepCount} steps
+              {stepCount}s
             </span>
           )}
         </div>
@@ -175,11 +177,11 @@ function SkillGridCard({ skill }: SkillGridCardProps) {
 
         {/* Tags */}
         {skill.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4" aria-label="Skill tags">
+          <div className="flex flex-wrap gap-1 mb-3" aria-label="Skill tags">
             {skill.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 rounded text-[10px] font-mono border"
+                className="px-1.5 py-0.5 rounded text-[10px] font-mono border"
                 style={{
                   backgroundColor: "var(--bg-s2)",
                   borderColor: "var(--border-subtle)",
@@ -211,7 +213,7 @@ function SkillGridCard({ skill }: SkillGridCardProps) {
               {skill.difficulty}
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
               {skill.is_free ? "Free" : `₹${skill.price_inr.toLocaleString("en-IN")}`}
             </span>
@@ -232,22 +234,41 @@ function SkillGridCard({ skill }: SkillGridCardProps) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function SkillsPage() {
+// Wrap in Suspense so useSearchParams doesn't break static generation
+export default function SkillsPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-base)" }}>
+        <div className="w-8 h-8 rounded-full border-2 border-t-violet-500 animate-spin"
+          style={{ borderColor: "var(--border)", borderTopColor: "#8b5cf6" }} />
+      </div>
+    }>
+      <SkillsPage />
+    </Suspense>
+  );
+}
+
+function SkillsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [skills, setSkills]                 = useState<Skill[]>([]);
   const [total, setTotal]                   = useState(0);
   const [loading, setLoading]               = useState(true);
   const [error, setError]                   = useState<string | null>(null);
 
-  // Filters
+  // Filters — category comes from URL so sidebar stays in sync
   const [query, setQuery]                   = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string>("all");
   const [difficulty, setDifficulty]         = useState<DifficultyOption>("All");
   const [freeOnly, setFreeOnly]             = useState(false);
   const [sort, setSort]                     = useState<SortOption>("trending");
   const [page, setPage]                     = useState(1);
 
-  // Debounce search input — 300ms
+  // Read category from URL param (sidebar writes this)
+  const activeCategory = searchParams.get("category") ?? "all";
+
+  // Debounce search input
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), 300);
     return () => clearTimeout(t);
@@ -263,10 +284,10 @@ export default function SkillsPage() {
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (debouncedQuery)           params.set("q", debouncedQuery);
-      if (activeCategory !== "all") params.set("category", activeCategory);
-      if (difficulty !== "All")     params.set("difficulty", difficulty);
-      if (freeOnly)                 params.set("free", "true");
+      if (debouncedQuery)             params.set("q",         debouncedQuery);
+      if (activeCategory !== "all")   params.set("category",  activeCategory);
+      if (difficulty !== "All")       params.set("difficulty", difficulty);
+      if (freeOnly)                   params.set("free",       "true");
       params.set("sort",     sort);
       params.set("page",     String(page));
       params.set("pageSize", String(PAGE_SIZE));
@@ -288,6 +309,17 @@ export default function SkillsPage() {
     void fetchSkills();
   }, [fetchSkills]);
 
+  // Helper to update category in URL
+  function setCategory(cat: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (cat === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", cat);
+    }
+    router.push(`/skills?${params.toString()}`);
+  }
+
   const isFiltered =
     debouncedQuery !== "" ||
     activeCategory !== "all" ||
@@ -302,33 +334,37 @@ export default function SkillsPage() {
   const startIndex = (page - 1) * PAGE_SIZE + 1;
   const endIndex   = Math.min(page * PAGE_SIZE, total);
 
+  const activeCategoryMeta = activeCategory !== "all"
+    ? CATEGORY_META[activeCategory as CategoryKey]
+    : null;
+
   return (
-    <main
+    <div
       className="min-h-screen"
       style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
     >
-      <Nav />
-
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-5 py-8">
 
         {/* Page header */}
-        <div className="mb-10">
-          <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-2">
+        <div className="mb-7">
+          <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1.5">
             Marketplace
           </p>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">
-            Skills Marketplace
+          <h1 className="text-2xl font-bold tracking-tight mb-1.5">
+            {activeCategoryMeta
+              ? `${activeCategoryMeta.emoji} ${activeCategoryMeta.label}`
+              : "Skills Marketplace"}
           </h1>
-          <p className="text-sm max-w-lg" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
             New skills added daily. Browse, preview, and run in seconds.
           </p>
         </div>
 
         {/* Search */}
-        <div className="relative mb-6">
+        <div className="relative mb-5">
           <Search
-            size={14}
-            className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+            size={13}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
             style={{ color: "var(--text-muted)" }}
           />
           <input
@@ -338,7 +374,7 @@ export default function SkillsPage() {
             placeholder="Search skills by name, tag, or category..."
             aria-label="Search skills"
             className={cn(
-              "w-full h-11 pl-10 pr-4 rounded-xl border text-sm",
+              "w-full h-10 pl-9 pr-4 rounded-xl border text-sm",
               "focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent",
               "transition-colors"
             )}
@@ -350,22 +386,20 @@ export default function SkillsPage() {
           />
         </div>
 
-        {/* Category pills */}
+        {/* Category pills — synced with sidebar */}
         <div
           role="tablist"
           aria-label="Filter by category"
-          className="flex items-center gap-2 overflow-x-auto pb-2 mb-5"
+          className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4"
           style={{ scrollbarWidth: "none" }}
         >
           <button
             role="tab"
             aria-selected={activeCategory === "all"}
-            onClick={() => setActiveCategory("all")}
+            onClick={() => setCategory("all")}
             className={cn(
-              "shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all",
-              activeCategory === "all"
-                ? "bg-violet-600 text-white"
-                : "border"
+              "shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+              activeCategory === "all" ? "bg-violet-600 text-white" : "border"
             )}
             style={
               activeCategory !== "all"
@@ -385,9 +419,9 @@ export default function SkillsPage() {
                 key={key}
                 role="tab"
                 aria-selected={activeCategory === key}
-                onClick={() => setActiveCategory(key)}
+                onClick={() => setCategory(key)}
                 className={cn(
-                  "shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border",
+                  "shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
                   activeCategory === key ? "text-white border-transparent" : ""
                 )}
                 style={
@@ -408,7 +442,7 @@ export default function SkillsPage() {
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-wrap items-center gap-3 mb-8">
+        <div className="flex flex-wrap items-center gap-2.5 mb-7">
           {/* Difficulty */}
           <div className="relative">
             <select
@@ -416,7 +450,7 @@ export default function SkillsPage() {
               onChange={(e) => setDifficulty(e.target.value as DifficultyOption)}
               aria-label="Filter by difficulty"
               className={cn(
-                "appearance-none h-9 pl-3 pr-8 rounded-lg border",
+                "appearance-none h-8 pl-3 pr-7 rounded-lg border",
                 "text-xs focus:outline-none focus:ring-2 focus:ring-violet-500",
                 "cursor-pointer transition-colors"
               )}
@@ -433,8 +467,8 @@ export default function SkillsPage() {
               ))}
             </select>
             <ChevronDown
-              size={12}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              size={11}
+              className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
               style={{ color: "var(--text-muted)" }}
             />
           </div>
@@ -444,7 +478,7 @@ export default function SkillsPage() {
             onClick={() => setFreeOnly((v) => !v)}
             aria-pressed={freeOnly}
             className={cn(
-              "h-9 px-4 rounded-lg text-xs font-medium transition-all border",
+              "h-8 px-3.5 rounded-lg text-xs font-medium transition-all border",
               freeOnly
                 ? "bg-green-500/15 border-green-500/40 text-green-500"
                 : ""
@@ -469,7 +503,7 @@ export default function SkillsPage() {
               onChange={(e) => setSort(e.target.value as SortOption)}
               aria-label="Sort skills"
               className={cn(
-                "appearance-none h-9 pl-3 pr-8 rounded-lg border",
+                "appearance-none h-8 pl-3 pr-7 rounded-lg border",
                 "text-xs focus:outline-none focus:ring-2 focus:ring-violet-500",
                 "cursor-pointer transition-colors"
               )}
@@ -486,8 +520,8 @@ export default function SkillsPage() {
               ))}
             </select>
             <ChevronDown
-              size={12}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              size={11}
+              className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
               style={{ color: "var(--text-muted)" }}
             />
           </div>
@@ -495,21 +529,21 @@ export default function SkillsPage() {
 
         {/* Trending section */}
         {showTrending && (
-          <section className="mb-12" aria-label="Trending skills">
-            <div className="flex items-center gap-2 mb-5">
-              <Flame size={15} className="text-orange-400 fill-orange-400" />
+          <section className="mb-10" aria-label="Trending skills">
+            <div className="flex items-center gap-2 mb-4">
+              <Flame size={14} className="text-orange-400 fill-orange-400" />
               <h2 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
                 Trending right now
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {trendingSkills.map((skill) => (
-                <SkillGridCard key={skill.id} skill={skill} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {trendingSkills.map((skill, i) => (
+                <SkillGridCard key={skill.id} skill={skill} index={i} />
               ))}
             </div>
-            <div className="mt-8 border-b" style={{ borderColor: "var(--border-subtle)" }} />
+            <div className="mt-7 border-b" style={{ borderColor: "var(--border-subtle)" }} />
             <h2
-              className="font-semibold text-sm mt-8 mb-5"
+              className="font-semibold text-sm mt-7 mb-4"
               style={{ color: "var(--text-primary)" }}
             >
               All Skills
@@ -519,17 +553,16 @@ export default function SkillsPage() {
 
         {/* Skills grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
             {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              // Index key is fine for static skeleton rows
               // eslint-disable-next-line react/no-array-index-key
               <SkillSkeleton key={i} />
             ))}
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>
-              {error}
-            </p>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>{error}</p>
             <button
               onClick={() => void fetchSkills()}
               className="text-violet-400 text-sm hover:text-violet-300 transition-colors"
@@ -538,28 +571,27 @@ export default function SkillsPage() {
             </button>
           </div>
         ) : skills.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-12 h-12 rounded-full border-2 border-t-violet-500 animate-spin mb-6"
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div
+              className="w-10 h-10 rounded-full border-2 border-t-violet-500 animate-spin mb-5"
               style={{ borderColor: "var(--border)", borderTopColor: "#8b5cf6" }}
             />
             <p className="text-sm mb-1" style={{ color: "var(--text-secondary)" }}>
               Skills are loading...
             </p>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Check back shortly
-            </p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Check back shortly</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {skills.map((skill) => (
-              <SkillGridCard key={skill.id} skill={skill} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {skills.map((skill, i) => (
+              <SkillGridCard key={skill.id} skill={skill} index={i} />
             ))}
           </div>
         )}
 
         {/* Pagination */}
         {!loading && total > PAGE_SIZE && (
-          <div className="flex items-center justify-between mt-10">
+          <div className="flex items-center justify-between mt-8">
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
               Showing {startIndex}–{endIndex} of {total} skills
             </span>
@@ -578,7 +610,7 @@ export default function SkillsPage() {
                   color: "var(--text-secondary)",
                 }}
               >
-                <ArrowLeft size={12} /> Prev
+                <ArrowLeft size={11} /> Prev
               </button>
               <span className="text-xs px-2" style={{ color: "var(--text-muted)" }}>
                 {page} / {totalPages}
@@ -597,19 +629,19 @@ export default function SkillsPage() {
                   color: "var(--text-secondary)",
                 }}
               >
-                Next <ArrowRight size={12} />
+                Next <ArrowRight size={11} />
               </button>
             </div>
           </div>
         )}
 
         {/* All-Access upsell */}
-        <div className="mt-16 rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-pink-900/10 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="mt-14 rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-pink-900/10 p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
           <div>
             <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">
               All-Access
             </p>
-            <h2 className="text-lg font-bold mb-1">
+            <h2 className="text-base font-bold mb-1">
               Get every skill for ₹2,407/mo
             </h2>
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
@@ -618,7 +650,7 @@ export default function SkillsPage() {
           </div>
           <Link
             href="/sign-up"
-            className="shrink-0 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
+            className="shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
           >
             Start All-Access
           </Link>
@@ -627,7 +659,7 @@ export default function SkillsPage() {
 
       {/* Footer */}
       <footer
-        className="border-t py-8 text-center text-xs"
+        className="border-t py-7 text-center text-xs"
         style={{ borderColor: "var(--border-subtle)", color: "var(--text-muted)" }}
       >
         © 2026 AddonWeb Solutions · Ahmedabad, India ·{" "}
@@ -635,6 +667,6 @@ export default function SkillsPage() {
           support@addonweb.io
         </a>
       </footer>
-    </main>
+    </div>
   );
 }

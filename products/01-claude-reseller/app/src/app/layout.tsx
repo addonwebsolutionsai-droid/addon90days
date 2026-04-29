@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
+import { Suspense } from "react";
+import { ConditionalSidebar } from "@/components/conditional-sidebar";
+import { MobileSpacer } from "@/components/mobile-spacer";
 import "./globals.css";
 
 const inter = Inter({
@@ -69,12 +72,31 @@ export default function RootLayout({ children }: RootLayoutProps) {
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            {/*
+             * Sidebar layout:
+             * - ConditionalSidebar renders the 220px fixed sidebar on marketplace
+             *   pages (/,/skills) and hides itself on /account, /sign-in, /sign-up.
+             * - The flex wrapper + mobile spacer are always present so the layout
+             *   is consistent, but on account pages the sidebar is absent and
+             *   account/layout.tsx provides its own full-page flex layout.
+             */}
+            <div className="flex min-h-screen">
+              <Suspense fallback={null}>
+                <ConditionalSidebar />
+              </Suspense>
+              <div className="flex-1 min-w-0 flex flex-col">
+                {/* Mobile top bar spacer — hidden on account/auth pages */}
+                <Suspense fallback={null}>
+                  <MobileSpacer />
+                </Suspense>
+                <main className="flex-1">
+                  {children}
+                </main>
+              </div>
+            </div>
           </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
   );
 }
-
-
