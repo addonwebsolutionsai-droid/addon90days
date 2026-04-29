@@ -2,10 +2,10 @@ import Link from "next/link";
 import { ArrowRight, Terminal, Zap, Shield, Package } from "lucide-react";
 
 const STATS = [
-  { value: "10", label: "Skills" },
-  { value: "3", label: "Packs" },
-  { value: "Free", label: "Gemini tier" },
-  { value: "1-line", label: "Install" },
+  { value: "120+", label: "Skills" },
+  { value: "11", label: "Categories" },
+  { value: "Free", label: "Starter tier" },
+  { value: "Daily", label: "New skills" },
 ];
 
 const PACKS = [
@@ -15,8 +15,8 @@ const PACKS = [
     name: "IoT Developer Pack",
     price: "₹4,067",
     tag: "Hardware engineers",
-    skills: ["iot-firmware-scaffold", "iot-device-registry-schema", "iot-ota-pipeline"],
-    desc: "ESP32/STM32 firmware scaffold, TimescaleDB fleet schema, atomic OTA with staged rollout.",
+    skills: ["esp32-firmware-scaffold", "mqtt-iot-setup", "coap-iot-protocol", "modbus-rtu-tcp"],
+    desc: "ESP32 FreeRTOS firmware, MQTT broker, CoAP, Modbus for industrial IoT.",
   },
   {
     id: "developer-productivity-pack",
@@ -24,17 +24,17 @@ const PACKS = [
     name: "Developer Productivity Pack",
     price: "₹2,407",
     tag: "Most popular",
-    skills: ["code-reviewer", "sql-query-builder", "test-generator", "pr-description"],
-    desc: "Security-focused code review, NL→SQL, test generation, and PR descriptions from git diffs.",
+    skills: ["sql-query-builder", "data-schema-designer", "wireframe-spec-to-code", "product-roadmap-generator"],
+    desc: "NL→SQL, schema design, wireframe-to-React, and RICE-scored product roadmaps.",
   },
   {
-    id: "smb-operations-pack",
-    accentHex: "#22c55e",
-    name: "SMB Operations Pack",
-    price: "₹2,407",
-    tag: "Indian businesses",
-    skills: ["invoice-generator", "gst-calculator", "email-drafter"],
-    desc: "GST-compliant invoices, CGST/SGST/IGST calculator, professional email drafting.",
+    id: "trading-pack",
+    accentHex: "#eab308",
+    name: "Trading & Finance Pack",
+    price: "₹5,999",
+    tag: "Traders & quants",
+    skills: ["stock-screener-ai", "options-strategy-builder", "algo-trading-scaffold", "backtesting-framework"],
+    desc: "AI stock screener, options strategy builder, Zerodha Kite algo scaffold, and backtesting.",
   },
 ];
 
@@ -80,25 +80,24 @@ export default function HomePage() {
       <section className="max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
         <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs text-white/60 mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          Built by practitioners who run a 13-agent AI company
+          New skills added daily · 120+ production-ready skills live now
         </div>
 
         <h1 className="text-5xl sm:text-6xl font-bold tracking-tight mb-6 leading-tight">
-          Production-ready{" "}
-          <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-violet-400 bg-clip-text text-transparent">
-            Claude Skills
+          The AI skills marketplace{" "}
+          <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">
+            that ships real work
           </span>
-          <br />for real work
         </h1>
 
         <p className="text-lg text-white/50 max-w-2xl mx-auto mb-10">
-          10 skills across IoT, developer tooling, and Indian business ops.
-          One npm install. Runs in Claude Code, your API, or the MCP server.
+          120+ skills across IoT, trading, developer tools, Indian business, and more.
+          Step-by-step guides. Copy-paste code. Runs in Claude Code, your API, or the MCP server.
         </p>
 
         <div className="flex items-center justify-center gap-4 mb-16 flex-wrap">
           <Link href="/skills" className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors">
-            Browse skill packs <ArrowRight size={15} />
+            Browse Marketplace <ArrowRight size={15} />
           </Link>
           <a href="https://github.com/addonwebsolutionsai-droid/addon90days" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-medium transition-colors text-sm">
@@ -122,6 +121,9 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+        <p className="text-center text-xs text-white/25 mt-4">
+          11 categories · AI/LLM · IoT · Trading · DevOps · Indian Business · and more · New skills every day
+        </p>
       </section>
 
       {/* Code + explainer */}
@@ -181,7 +183,7 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              <Link href={`/skills?buy=${pack.id}`}
+              <Link href="/skills"
                 className="text-center py-2.5 rounded-lg text-sm font-medium transition-colors border"
                 style={{ borderColor: `${pack.accentHex}40`, color: pack.accentHex }}>
                 Buy pack
@@ -190,11 +192,11 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className="mt-5 bg-gradient-to-r from-violet-900/30 to-pink-900/20 rounded-xl border border-violet-500/20 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="mt-5 bg-gradient-to-r from-violet-900/30 via-yellow-900/10 to-pink-900/20 rounded-xl border border-violet-500/20 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
-            <div className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">Best value</div>
+            <div className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">Best value · Most popular</div>
             <h3 className="text-xl font-bold mb-1">All-Access — ₹2,407/mo</h3>
-            <p className="text-white/40 text-sm">Every skill, current and future. API access included.</p>
+            <p className="text-white/40 text-sm">120+ skills and growing. Trading strategies, IoT, GST, AI — everything. New skills added daily, no extra charge.</p>
           </div>
           <Link href="/sign-up"
             className="shrink-0 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm">
