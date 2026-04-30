@@ -222,8 +222,108 @@ function checkGeneratedMarkdown(skill) {
 // Main
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// MCP protocol checks — verify /api/skills/mcp speaks JSON-RPC 2.0
+// ---------------------------------------------------------------------------
+
+function postJson(url, payload) {
+  return new Promise((resolve, reject) => {
+    const u    = new URL(url);
+    const body = JSON.stringify(payload);
+    const req  = require("https").request({
+      hostname: u.hostname,
+      path:     u.pathname + u.search,
+      method:   "POST",
+      headers:  {
+        "Content-Type":   "application/json",
+        "Content-Length": Buffer.byteLength(body),
+        "user-agent":     "addonweb-verify/1.0",
+      },
+    }, (res) => {
+      let b = ""; res.on("data", c => b += c);
+      res.on("end", () => {
+        try { resolve({ status: res.statusCode, body: JSON.parse(b) }); }
+        catch { resolve({ status: res.statusCode, body: b }); }
+      });
+    });
+    req.on("error", reject);
+    req.write(body); req.end();
+  });
+}
+
+async function checkMcpProtocol() {
+  const issues = [];
+  const url    = `${API_BASE}/api/skills/mcp`;
+
+  // 1. GET probe
+  try {
+    const probe = await get(url);
+    if (probe?.transport !== "streamable-http") issues.push(`GET probe missing transport=streamable-http (got ${probe?.transport})`);
+    if (!probe?.protocolVersion)                issues.push("GET probe missing protocolVersion");
+  } catch (e) { issues.push(`GET probe failed: ${e.message}`); }
+
+  // 2. initialize
+  try {
+    const init = await postJson(url, { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "verifier", version: "1.0" } } });
+    if (init.status !== 200)                                          issues.push(`initialize HTTP ${init.status}`);
+    if (init.body?.error)                                             issues.push(`initialize returned error: ${JSON.stringify(init.body.error)}`);
+    if (!init.body?.result?.serverInfo?.name)                         issues.push("initialize missing result.serverInfo.name");
+    if (!init.body?.result?.capabilities?.tools)                      issues.push("initialize missing tools capability");
+  } catch (e) { issues.push(`initialize failed: ${e.message}`); }
+
+  // 3. tools/list — should return all 130 skills
+  try {
+    const list = await postJson(url, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+    if (!Array.isArray(list.body?.result?.tools)) {
+      issues.push("tools/list missing result.tools array");
+    } else {
+      const n = list.body.result.tools.length;
+      if (n < 100) issues.push(`tools/list returned ${n} tools — expected 100+`);
+      const t = list.body.result.tools[0];
+      if (!t.name)        issues.push("tools/list first tool missing name");
+      if (!t.description) issues.push("tools/list first tool missing description");
+      if (!t.inputSchema) issues.push("tools/list first tool missing inputSchema");
+    }
+  } catch (e) { issues.push(`tools/list failed: ${e.message}`); }
+
+  // 4. tools/call — pick a skill known to exist
+  try {
+    const call = await postJson(url, { jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "stock-screener-ai", arguments: { input: "test" } } });
+    if (call.body?.error)                                                 issues.push(`tools/call returned error: ${JSON.stringify(call.body.error)}`);
+    const text = call.body?.result?.content?.[0]?.text;
+    if (typeof text !== "string" || text.length < 100)                     issues.push(`tools/call returned suspiciously short content (${text?.length} chars)`);
+    if (text && !text.includes("Workflow"))                                 issues.push("tools/call content missing 'Workflow' section");
+  } catch (e) { issues.push(`tools/call failed: ${e.message}`); }
+
+  // 5. resources/list
+  try {
+    const res = await postJson(url, { jsonrpc: "2.0", id: 4, method: "resources/list" });
+    if (!Array.isArray(res.body?.result?.resources)) issues.push("resources/list missing result.resources");
+    else if (res.body.result.resources.length < 100)  issues.push(`resources/list returned ${res.body.result.resources.length} — expected 100+`);
+  } catch (e) { issues.push(`resources/list failed: ${e.message}`); }
+
+  // 6. unknown method → must return JSON-RPC error, not crash
+  try {
+    const unk = await postJson(url, { jsonrpc: "2.0", id: 5, method: "this/method/does/not/exist" });
+    if (!unk.body?.error || unk.body.error.code !== -32601) issues.push("unknown method should return -32601 method-not-found");
+  } catch (e) { issues.push(`unknown method probe failed: ${e.message}`); }
+
+  return issues;
+}
+
 async function main() {
   console.log(`\nVerifying skills against ${API_BASE}...\n`);
+
+  // Step 0: MCP protocol checks (top-level — failing means EVERY MCP user is broken)
+  console.log("  MCP protocol checks:");
+  const mcpIssues = await checkMcpProtocol();
+  if (mcpIssues.length === 0) {
+    console.log("    ✓ MCP server speaks JSON-RPC 2.0 correctly\n");
+  } else {
+    console.log("    ✗ MCP server has issues:");
+    mcpIssues.forEach(x => console.log(`      - ${x}`));
+    console.log("");
+  }
 
   // Step 1: list all skills
   const listed = [];
