@@ -112,11 +112,21 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
 
   const cliCommand = `npx addonweb-claude-skills install ${slug}`;
   const mcpUrl = `https://addon90days.vercel.app/api/skills/mcp`;
-  const mcpJson = `{
+  // Native HTTP transport — newest Claude Desktop supports this directly.
+  const mcpJsonHttp = `{
   "mcpServers": {
     "addonweb-skills": {
-      "url": "${mcpUrl}",
-      "transport": "sse"
+      "type": "http",
+      "url": "${mcpUrl}"
+    }
+  }
+}`;
+  // mcp-remote proxy fallback — works on all Claude Desktop versions and Claude Code.
+  const mcpJsonProxy = `{
+  "mcpServers": {
+    "addonweb-skills": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "${mcpUrl}"]
     }
   }
 }`;
@@ -238,29 +248,55 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
               </Step>
 
               <Step n={2}>
-                Copy the snippet below and paste it inside the config file. If the file already has
+                <strong>Try this first</strong> — if the existing file already has
                 an <span className="font-mono text-xs">mcpServers</span> section, just add the{" "}
-                <span className="font-mono text-xs">addonweb-skills</span> entry to it:
-                <CopyBlock text={mcpJson} />
+                <span className="font-mono text-xs">addonweb-skills</span> entry inside it.
+                The whole file should be a single valid JSON object — don&apos;t paste the snippet
+                twice.
+                <CopyBlock label="claude_desktop_config.json (recommended)" text={mcpJsonHttp} />
+                <span className="text-xs block mt-1" style={{ color: "var(--text-muted)" }}>
+                  Uses Claude Desktop&apos;s built-in HTTP transport — no extra software needed.
+                </span>
               </Step>
 
               <Step n={3}>
                 Save the file (<kbd className="px-1.5 py-0.5 rounded text-[10px] border" style={{ borderColor: "var(--border)" }}>Cmd+S</kbd> /
                 {" "}<kbd className="px-1.5 py-0.5 rounded text-[10px] border" style={{ borderColor: "var(--border)" }}>Ctrl+S</kbd>) and{" "}
-                <strong>fully quit</strong> Claude Desktop (not just close — quit). Reopen it.
+                <strong>fully quit</strong> Claude Desktop (right-click tray icon → Quit, not just
+                close the window). Reopen it.
               </Step>
 
               <Step n={4}>
-                In any chat, type <span className="font-mono text-xs">@</span> — you&apos;ll see all
-                AddonWeb skills listed as available tools. Pick <span className="font-mono text-xs">{slug}</span>{" "}
-                or any other skill, fill in the inputs Claude asks for, and hit send.
+                In any chat, type <span className="font-mono text-xs">@</span> or
+                {" "}<span className="font-mono text-xs">/</span> — you&apos;ll see{" "}
+                <span className="font-mono text-xs">addonweb-skills</span> listed with all 130 tools.
+                Pick <span className="font-mono text-xs">{slug}</span> or any other skill, fill in
+                the inputs Claude asks for, and hit send.
               </Step>
             </div>
 
+            <details className="rounded-lg border p-3 mt-4" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--bg-s2)" }}>
+              <summary className="text-xs font-medium cursor-pointer" style={{ color: "var(--text-secondary)" }}>
+                Older Claude Desktop (or Claude Code)? Use this config instead ↓
+              </summary>
+              <p className="text-xs mt-2 mb-2" style={{ color: "var(--text-muted)" }}>
+                If the HTTP config above shows &quot;server failed to start&quot;, your Claude Desktop
+                version may not support the <code className="font-mono">type: http</code> field yet.
+                Use this proxy-based config — works on every version and on Claude Code:
+              </p>
+              <CopyBlock label="claude_desktop_config.json (proxy via npx)" text={mcpJsonProxy} />
+              <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+                Requires Node.js installed locally (download from{" "}
+                <a href="https://nodejs.org" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300 underline">nodejs.org</a>).
+                The first launch downloads <code className="font-mono">mcp-remote</code> via npx automatically.
+              </p>
+            </details>
+
             <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 mt-4">
               <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                <strong className="text-cyan-400">Why this is the best option:</strong> you do this <em>once</em>{" "}
-                and every skill we add (we ship new ones daily) is instantly available — no re-install required.
+                <strong className="text-cyan-400">Why this option is the best:</strong> set up{" "}
+                <em>once</em>, all 130 skills (and every new one we ship) instantly available.
+                No per-skill install ever.
               </p>
             </div>
           </div>
