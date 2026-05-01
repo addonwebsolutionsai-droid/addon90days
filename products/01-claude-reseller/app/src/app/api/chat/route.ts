@@ -84,23 +84,52 @@ export async function POST(req: NextRequest) {
   }));
   const lastUserMessage = messages[messages.length - 1]!.content;
 
-  const systemInstruction = await buildSystemPrompt();
-
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: MODEL,
-    systemInstruction,
-    generationConfig: {
-      temperature:     0.5,
-      maxOutputTokens: MAX_REPLY_TOKENS,
-    },
-  });
-
-  const chat = model.startChat({ history });
-
+  // Build everything that can fail before the stream starts INSIDE a try/catch.
+  // If anything goes wrong (Supabase slow, cold start, key issue), we return
+  // a graceful streamed error to the client instead of a bare HTTP 500 — the
+  // widget knows how to render this as a friendly fallback.
   const stream = new ReadableStream({
     async start(controller) {
       const enc = new TextEncoder();
+
+      const sendError = (errMsg: string) => {
+        try {
+          controller.enqueue(enc.encode(JSON.stringify({
+            delta: `Sorry — I had trouble fetching that just now (${errMsg}). Please try again, or click "Talk to founder" to forward your question directly.`,
+          }) + "\n"));
+          controller.enqueue(enc.encode(JSON.stringify({ done: true, escalated: false }) + "\n"));
+        } catch { /* controller may already be closed */ }
+      };
+
+      let systemInstruction: string;
+      try { systemInstruction = await buildSystemPrompt(); }
+      catch (err) {
+        sendError("knowledge base load failed");
+        controller.close();
+        // Fire-and-forget escalation so we know about systemic failures
+        void escalateToTelegram(messages, `[SYSTEM ERROR — buildSystemPrompt failed] ${String(err)}`).catch(() => undefined);
+        return;
+      }
+
+      let chat;
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: MODEL,
+          systemInstruction,
+          generationConfig: {
+            temperature:     0.5,
+            maxOutputTokens: MAX_REPLY_TOKENS,
+          },
+        });
+        chat = model.startChat({ history });
+      } catch (err) {
+        sendError("model init failed");
+        controller.close();
+        void escalateToTelegram(messages, `[SYSTEM ERROR — model init failed] ${String(err)}`).catch(() => undefined);
+        return;
+      }
+
       let fullText = "";
       try {
         const result = await chat.sendMessageStream(lastUserMessage);
@@ -119,9 +148,17 @@ export async function POST(req: NextRequest) {
         controller.enqueue(enc.encode(JSON.stringify({ done: true, escalated }) + "\n"));
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        controller.enqueue(enc.encode(JSON.stringify({ error: msg, done: true }) + "\n"));
+        // If we already streamed some text, surface what we got so the user
+        // sees a partial answer instead of nothing.
+        if (fullText.length === 0) {
+          sendError(msg.slice(0, 80));
+          // Auto-escalate so we see this happening
+          void escalateToTelegram(messages, `[STREAM ERROR] ${msg.slice(0, 200)}`).catch(() => undefined);
+        } else {
+          controller.enqueue(enc.encode(JSON.stringify({ done: true, escalated: false, partial: true }) + "\n"));
+        }
       } finally {
-        controller.close();
+        try { controller.close(); } catch { /* may be already closed */ }
       }
     },
   });

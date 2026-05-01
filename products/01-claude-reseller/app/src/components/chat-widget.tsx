@@ -152,10 +152,13 @@ export function ChatWidget() {
       setStreaming("");
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
-      const msg = err instanceof Error ? err.message : "Network error";
+      const isHttpError = err instanceof Error && /^HTTP \d+/.test(err.message);
+      const friendly = isHttpError
+        ? "Network blip — the server didn't respond. This is usually transient (deploy or cold start). Try sending again in 5 seconds."
+        : "Couldn't reach the support service right now. Try again, or click \"Talk to founder\" below — I'll forward your question directly.";
       setMessages((prev) => [...prev, {
         role:    "assistant",
-        content: `Something went wrong: ${msg}. Try again, or click "Talk to founder" below — I'll forward your question directly.`,
+        content: friendly,
       }]);
       setStreaming("");
     } finally {
