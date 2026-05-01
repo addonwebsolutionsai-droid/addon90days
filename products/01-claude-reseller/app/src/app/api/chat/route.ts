@@ -163,57 +163,67 @@ export async function POST(req: NextRequest) {
         return;
       }
 
-      let chat;
-      try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: MODEL,
-          systemInstruction,
-          generationConfig: {
-            temperature:     0.5,
-            maxOutputTokens: MAX_REPLY_TOKENS,
-          },
-        });
-        chat = model.startChat({ history });
-      } catch (err) {
-        const errStr = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
-        sendError("model init failed — usually transient");
-        controller.close();
-        // Full error goes to Telegram so founder can diagnose without leaking to user
-        void escalateToTelegram(messages, `[SYSTEM ERROR — model init failed] ${errStr} | history.length=${history.length} | sysInstr.length=${systemInstruction.length}`).catch(() => undefined);
-        return;
+      // Gemini's streaming endpoint occasionally fails with transient
+      // network errors (~20% of the time observed in production).
+      // Retry up to MAX_RETRIES times before giving up. Each retry
+      // creates a fresh chat session — same systemInstruction + history.
+      const MAX_RETRIES = 2;
+      let fullText = "";
+      let succeeded = false;
+      let lastError: unknown = null;
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: MODEL,
+        systemInstruction,
+        generationConfig: {
+          temperature:     0.5,
+          maxOutputTokens: MAX_REPLY_TOKENS,
+        },
+      });
+
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        if (attempt > 0) {
+          // Small backoff between retries — 200ms, 600ms
+          await new Promise((r) => setTimeout(r, 200 * 3 ** (attempt - 1)));
+        }
+        fullText = "";
+        try {
+          const chat   = model.startChat({ history });
+          const result = await chat.sendMessageStream(lastUserMessage);
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            if (text) {
+              fullText += text;
+              controller.enqueue(enc.encode(JSON.stringify({ delta: text }) + "\n"));
+            }
+          }
+          succeeded = true;
+          break;
+        } catch (err) {
+          lastError = err;
+          // If we already streamed text on this attempt, don't retry —
+          // resending would produce duplicate output. Mark as partial.
+          if (fullText.length > 0) break;
+        }
       }
 
-      let fullText = "";
-      try {
-        const result = await chat.sendMessageStream(lastUserMessage);
-        for await (const chunk of result.stream) {
-          const text = chunk.text();
-          if (text) {
-            fullText += text;
-            controller.enqueue(enc.encode(JSON.stringify({ delta: text }) + "\n"));
-          }
-        }
+      if (succeeded) {
         const escalated = /\[ESCALATE\]/.test(fullText);
         if (escalated) {
-          // Fire-and-forget Telegram escalation — never block the user.
           void escalateToTelegram(messages, fullText).catch(() => undefined);
         }
         controller.enqueue(enc.encode(JSON.stringify({ done: true, escalated }) + "\n"));
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        // If we already streamed some text, surface what we got so the user
-        // sees a partial answer instead of nothing.
-        if (fullText.length === 0) {
-          sendError(msg.slice(0, 80));
-          // Auto-escalate so we see this happening
-          void escalateToTelegram(messages, `[STREAM ERROR] ${msg.slice(0, 200)}`).catch(() => undefined);
-        } else {
-          controller.enqueue(enc.encode(JSON.stringify({ done: true, escalated: false, partial: true }) + "\n"));
-        }
-      } finally {
-        try { controller.close(); } catch { /* may be already closed */ }
+      } else if (fullText.length > 0) {
+        // Stream errored mid-reply on a non-first attempt
+        controller.enqueue(enc.encode(JSON.stringify({ done: true, escalated: false, partial: true }) + "\n"));
+      } else {
+        // All retries failed — surface friendly error + escalate to founder
+        const msg = lastError instanceof Error ? lastError.message : String(lastError);
+        sendError("Gemini API is having a moment — please retry in a few seconds");
+        void escalateToTelegram(messages, `[STREAM ERROR after ${MAX_RETRIES + 1} attempts] ${msg.slice(0, 300)}`).catch(() => undefined);
       }
+      try { controller.close(); } catch { /* may already be closed */ }
     },
   });
 
