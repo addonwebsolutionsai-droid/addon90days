@@ -57,9 +57,25 @@ export async function generateMetadata({
     const res = await fetch(`${baseUrl}/api/skills/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return { title: "Skill not found" };
     const skill = await res.json() as Skill;
+    const canonicalUrl = `${baseUrl}/skills/${skill.slug}`;
+    const title       = `${skill.title} — Claude Toolkit`;
+    const description = skill.tagline;
     return {
-      title:       `${skill.title} — Claude Toolkit`,
-      description: skill.tagline,
+      title,
+      description,
+      alternates: { canonical: canonicalUrl },
+      openGraph: {
+        type: "article",
+        url: canonicalUrl,
+        title,
+        description,
+        siteName: "Claude Toolkit",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+      },
     };
   } catch {
     return { title: "Claude Toolkit Skills" };
@@ -129,11 +145,55 @@ export default async function SkillDetailPage({
   const { userId } = await auth();
   const isSignedIn = userId !== null;
 
+  // ---------------------------------------------------------------------- //
+  // JSON-LD structured data (schema.org SoftwareApplication)               //
+  // Helps Google surface skill cards in rich results / sidebar.            //
+  // Kept as a server-rendered <script> tag — no client bundle cost.        //
+  // ---------------------------------------------------------------------- //
+  const appUrl = process.env["NEXT_PUBLIC_APP_URL"] ?? "https://addon90days.vercel.app";
+  const skillJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": skill.title,
+    "description": skill.tagline,
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Cross-platform (Claude Code, Claude.ai, MCP)",
+    "url": `${appUrl}/skills/${skill.slug}`,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "AddonWeb Solutions",
+      "url": "https://addonweb.io",
+    },
+    ...(skill.view_count > 0
+      ? {
+          "interactionStatistic": {
+            "@type": "InteractionCounter",
+            "interactionType": "https://schema.org/ViewAction",
+            "userInteractionCount": skill.view_count,
+          },
+        }
+      : {}),
+  };
+
   return (
     <div
       className="min-h-screen"
       style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
     >
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        // Server-rendered only; safe payload built from validated DB fields.
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(skillJsonLd) }}
+      />
+
       <div className="max-w-3xl mx-auto px-5 py-8">
 
         {/* Back link */}
