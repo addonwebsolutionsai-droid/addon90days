@@ -20,6 +20,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { Skill } from "@/lib/database.types";
 import { SkillDetailTabs } from "@/components/skill-detail-tabs";
 import { InstallMethods } from "@/components/install-methods";
+import { TrySkillLive } from "@/components/try-skill-live";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -216,6 +217,11 @@ export default async function SkillDetailPage({
             </div>
           </div>
         </header>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* TRY LIVE — top-of-funnel demo, in-browser execution              */}
+        {/* ---------------------------------------------------------------- */}
+        <TrySkillLive slug={skill.slug} title={skill.title} isSignedIn={isSignedIn} />
 
         {/* ---------------------------------------------------------------- */}
         {/* INSTALL METHODS — beginner-friendly, 3 tabs                      */}

@@ -83,14 +83,12 @@ export async function POST(req: Request) {
   const startedAt = Date.now();
 
   // ---------------------------------------------------------------- TYPED PATH
+  // Only used when caller explicitly passes a structured object — typed
+  // skills demand that for Zod validation. String input falls through to
+  // catalog path so the website "Try Live" form (textarea) works on
+  // every skill regardless of whether it has a Zod schema.
   const typedSkill = TYPED_SKILLS[skillId];
-  if (typedSkill !== undefined) {
-    if (typeof input === "string") {
-      return NextResponse.json(
-        { error: `Skill "${skillId}" requires structured object input, not a string` },
-        { status: 400 }
-      );
-    }
+  if (typedSkill !== undefined && typeof input !== "string") {
     const result = await runSkill(typedSkill, input);
     if (!result.success) {
       return NextResponse.json({ error: result.error, code: result.code }, { status: 422 });
