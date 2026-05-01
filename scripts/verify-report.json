@@ -1,6 +1,6 @@
 {
   "api": "https://addon90days.vercel.app",
-  "timestamp": "2026-04-29T13:08:48.806Z",
+  "timestamp": "2026-04-30T11:59:23.130Z",
   "total": 130,
   "pass": 130,
   "fail": 0,
@@ -606,9 +606,14 @@
       "mdSize": 2.57
     },
     {
-      "slug": "digital-twin-schema",
+      "slug": "investor-update-writer",
       "status": "pass",
-      "mdSize": 2.57
+      "mdSize": 1.25
+    },
+    {
+      "slug": "micro-interaction-specifier",
+      "status": "pass",
+      "mdSize": 1.26
     },
     {
       "slug": "vendor-agreement-drafter",
@@ -616,9 +621,9 @@
       "mdSize": 1.39
     },
     {
-      "slug": "investor-update-writer",
+      "slug": "lorawan-device-setup",
       "status": "pass",
-      "mdSize": 1.25
+      "mdSize": 2
     },
     {
       "slug": "load-test-script-generator",
@@ -629,11 +634,6 @@
       "slug": "shop-act-compliance",
       "status": "pass",
       "mdSize": 1.41
-    },
-    {
-      "slug": "lorawan-device-setup",
-      "status": "pass",
-      "mdSize": 2
     },
     {
       "slug": "component-naming-guide",
