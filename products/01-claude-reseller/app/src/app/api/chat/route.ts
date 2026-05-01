@@ -21,6 +21,7 @@
 
 import type { NextRequest } from "next/server";
 import { buildSystemPrompt } from "@/lib/chat-knowledge-base";
+import { checkRateLimit, clientIdentifier, rateLimitedResponse } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,6 +57,17 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env["GROQ_API_KEY"];
   if (!apiKey) {
     return Response.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
+  }
+
+  // Rate limit: 30 chat turns per IP per hour. Protects shared Groq quota
+  // from scrapers / bots / runaway scripts. Real users won't notice.
+  const ip   = clientIdentifier(req);
+  const rate = await checkRateLimit({ key: `chat:ip:${ip}`, limit: 30, windowSeconds: 3600 });
+  if (!rate.allowed) {
+    return rateLimitedResponse(
+      rate.retryAfterSec,
+      "Too many messages — try again in a few minutes, or click \"Talk to founder\" below to forward your question now."
+    );
   }
 
   let body: unknown;

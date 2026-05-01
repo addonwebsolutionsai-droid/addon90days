@@ -20,10 +20,11 @@
  *   401 unauthenticated · 404 unknown skill · 422 runner failure · 500 internal
  */
 
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
+import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import {
   runSkill,
   invoiceGenerator,
@@ -64,10 +65,21 @@ const RequestSchema = z.object({
   input:   z.union([z.string().max(8000), z.record(z.unknown())]),
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (userId === null) {
     return NextResponse.json({ error: "Sign in to run skills" }, { status: 401 });
+  }
+
+  // Rate limit: 60 skill runs per Clerk user per hour. Tighter than /api/chat
+  // because each run consumes ~1500 output tokens vs ~800 for chat — 2× more
+  // expensive on the shared Groq quota.
+  const rate = await checkRateLimit({ key: `skills_run:user:${userId}`, limit: 60, windowSeconds: 3600 });
+  if (!rate.allowed) {
+    return rateLimitedResponse(
+      rate.retryAfterSec,
+      `Too many runs this hour. Try again in ${Math.ceil(rate.retryAfterSec / 60)} min.`
+    );
   }
 
   let body: unknown;
