@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
         const errStr = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
         const dbgInfo = debug.join(" | ");
         // Surface real error in the user response (TEMP for debugging)
-        sendError(`${errStr.slice(0, 150)} [dbg: ${dbgInfo.slice(0, 200)}]`);
+        sendError(`FULL_ERR=${errStr.slice(0, 600)} | DEBUG=${dbgInfo.slice(0, 400)}`);
         controller.close();
         void escalateToTelegram(messages, `[SYSTEM ERROR — model init failed] ${errStr} | dbg: ${dbgInfo}`).catch(() => undefined);
         return;
