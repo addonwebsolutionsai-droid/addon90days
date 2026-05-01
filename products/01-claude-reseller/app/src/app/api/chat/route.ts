@@ -22,10 +22,15 @@ import { buildSystemPrompt } from "@/lib/chat-knowledge-base";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_HISTORY        = 24;       // last 24 turns; older trimmed
-const MAX_REPLY_TOKENS   = 800;      // ~600 words max
+const MAX_HISTORY        = 24;        // last 24 turns; older trimmed
+const MAX_REPLY_TOKENS   = 800;       // ~600 words max
 const MAX_USER_MSG_CHARS = 4000;
-const MODEL              = "gemini-2.5-flash";
+// Gemini free-tier daily quotas (per Google docs, Apr 2026):
+//   2.5 Flash:      250 RPD   ← exhausted in normal use, do not pick
+//   2.0 Flash:    1,500 RPD   ← chosen — 6× headroom for support chat
+//   2.5 Flash-Lite: 1,000 RPD
+// If you upgrade to a paid plan later, switch back to 2.5 Flash.
+const MODEL              = "gemini-2.0-flash";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -184,7 +189,6 @@ export async function POST(req: NextRequest) {
 
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         if (attempt > 0) {
-          // Small backoff between retries — 200ms, 600ms
           await new Promise((r) => setTimeout(r, 200 * 3 ** (attempt - 1)));
         }
         fullText = "";
@@ -202,8 +206,11 @@ export async function POST(req: NextRequest) {
           break;
         } catch (err) {
           lastError = err;
-          // If we already streamed text on this attempt, don't retry —
-          // resending would produce duplicate output. Mark as partial.
+          // 429 = rate limit. Retrying just burns more quota; bail
+          // immediately so the user gets a useful "try again soon" message.
+          const errMsg = err instanceof Error ? err.message : String(err);
+          if (/\b429\b|Too Many Requests|exceeded your current quota/i.test(errMsg)) break;
+          // If partial text was already streamed, don't retry — would dupe content.
           if (fullText.length > 0) break;
         }
       }
@@ -220,8 +227,12 @@ export async function POST(req: NextRequest) {
       } else {
         // All retries failed — surface friendly error + escalate to founder
         const msg = lastError instanceof Error ? lastError.message : String(lastError);
-        sendError("Gemini API is having a moment — please retry in a few seconds");
-        void escalateToTelegram(messages, `[STREAM ERROR after ${MAX_RETRIES + 1} attempts] ${msg.slice(0, 300)}`).catch(() => undefined);
+        const isRateLimit = /\b429\b|Too Many Requests|exceeded your current quota/i.test(msg);
+        const userMessage = isRateLimit
+          ? "We're at our daily AI quota — please try again tomorrow, or click \"Talk to founder\" below to forward your question now."
+          : "Gemini API is having a moment — please retry in a few seconds";
+        sendError(userMessage);
+        void escalateToTelegram(messages, `[STREAM ERROR${isRateLimit ? " — RATE LIMITED" : ""} after ${MAX_RETRIES + 1} attempts] ${msg.slice(0, 300)}`).catch(() => undefined);
       }
       try { controller.close(); } catch { /* may already be closed */ }
     },
