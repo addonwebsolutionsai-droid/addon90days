@@ -1,4 +1,4 @@
-> DRAFT — needs founder approval before publishing
+> APPROVED — ready to publish on Day 15 (2026-05-06)
 
 # Reddit Posts — P01 Launch
 

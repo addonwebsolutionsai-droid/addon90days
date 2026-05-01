@@ -1,13 +1,16 @@
-> DRAFT — needs founder approval before publishing
+> APPROVED — ready to publish on Day 15 (2026-05-06)
 
 # X / Twitter Thread — P01 Launch
 
 ---
 
-1/ We just shipped 130 production-ready skills for Claude Code and Claude Desktop.
-Free. No card. One command to install.
+1/ Claude Code + Claude Desktop now have 130 production-ready skills.
 
-Here's what's in it and why we built it:
+GST invoices. ESP32 firmware. NSE stock screening. SQL from plain English. Every category, ready in one command.
+
+Free. No card. Sign in once.
+
+Here's what's in it ↓
 
 ---
 

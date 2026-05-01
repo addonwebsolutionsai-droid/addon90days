@@ -1,4 +1,4 @@
-> DRAFT — needs founder approval before publishing
+> APPROVED — ready to publish on Day 15 (2026-05-06)
 
 # We Built 130 Claude Skills in 15 Days. Here's the Full Technical Story.
 
