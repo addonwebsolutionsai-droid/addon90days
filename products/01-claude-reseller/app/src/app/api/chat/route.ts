@@ -32,6 +32,52 @@ interface ChatMessage {
   content: string;
 }
 
+interface GeminiContent {
+  role: "user" | "model";
+  parts: Array<{ text: string }>;
+}
+
+/**
+ * Convert our chat history to Gemini's required shape, enforcing:
+ *   - first turn is "user"
+ *   - strict user/model/user/model alternation (consecutive same-role
+ *     turns are merged with a blank line between them)
+ *   - all turns have non-empty content
+ *
+ * The widget injects a synthetic greeting as the first assistant message
+ * — this drops it cleanly because the loop only starts once a user turn
+ * is seen.
+ */
+function sanitizeHistoryForGemini(messages: ChatMessage[]): GeminiContent[] {
+  const result: GeminiContent[] = [];
+  let started = false;
+  for (const m of messages) {
+    const text = (m.content ?? "").trim();
+    if (text.length === 0) continue;
+    const geminiRole: "user" | "model" = m.role === "assistant" ? "model" : "user";
+    // Don't start with a model turn — drop until we see the first user.
+    if (!started) {
+      if (geminiRole !== "user") continue;
+      started = true;
+    }
+    const last = result[result.length - 1];
+    if (last && last.role === geminiRole) {
+      // Merge consecutive same-role turns (Gemini rejects them).
+      last.parts[0]!.text = `${last.parts[0]!.text}\n\n${text}`;
+    } else {
+      result.push({ role: geminiRole, parts: [{ text }] });
+    }
+  }
+  // History must END with a model turn — sendMessage(userText) appends a
+  // user turn next, so a trailing user turn would create two-user-in-a-row.
+  // (Common case: previous attempt failed mid-reply, so history ends with
+  // the user's retry.)
+  while (result.length > 0 && result[result.length - 1]!.role === "user") {
+    result.pop();
+  }
+  return result;
+}
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin":  "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -77,12 +123,18 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "Last message must be from user" }, { status: 400 });
   }
 
-  // Build Gemini chat history. Gemini uses { role: "user"|"model", parts: [{ text }] }
-  const history = messages.slice(0, -1).map((m) => ({
-    role:  m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
-  }));
+  // Build Gemini chat history. Three Gemini constraints we must satisfy:
+  //   1. History must START with a user turn (the bot's synthetic greeting
+  //      is an assistant message — it MUST be dropped from history).
+  //   2. Roles must strictly alternate user/model/user/model — consecutive
+  //      same-role turns must be merged or dropped.
+  //   3. Content must be non-empty.
+  //
+  // Sending raw history (without sanitisation) caused "model init failed"
+  // for the customer who tried "How can I create Algo Trading System Scaffold"
+  // because the widget's greeting was the first item.
   const lastUserMessage = messages[messages.length - 1]!.content;
+  const history = sanitizeHistoryForGemini(messages.slice(0, -1));
 
   // Build everything that can fail before the stream starts INSIDE a try/catch.
   // If anything goes wrong (Supabase slow, cold start, key issue), we return
@@ -187,12 +239,21 @@ async function escalateToTelegram(messages: ChatMessage[], finalReply: string): 
     .map((m) => `${m.role === "user" ? "👤" : "🤖"} ${m.content.slice(0, 600)}`)
     .join("\n\n");
 
-  const escalateNote = (finalReply.split("[ESCALATE]")[1] ?? "").trim().slice(0, 300);
+  // Two flavours of escalation:
+  //   1. Bot decided to escalate — finalReply contains "[ESCALATE] <summary>"
+  //   2. System error — finalReply starts with "[SYSTEM ERROR" or "[STREAM ERROR"
+  // Surface both clearly so the founder sees what actually happened.
+  let header = "🚨 *Support escalation*";
+  let note   = "";
+  if (finalReply.startsWith("[SYSTEM ERROR") || finalReply.startsWith("[STREAM ERROR")) {
+    header = "⚠️ *Chat system error — auto-escalated*";
+    note   = `\n\n_Error: ${finalReply.slice(0, 400)}_`;
+  } else {
+    const m = /\[ESCALATE\][\s\S]*$/.exec(finalReply);
+    if (m) note = `\n\n_Bot summary: ${m[0].replace("[ESCALATE]", "").trim().slice(0, 300)}_`;
+  }
 
-  const text =
-    `🚨 *Support escalation*\n\n` +
-    (escalateNote ? `_Bot summary: ${escalateNote}_\n\n` : "") +
-    `*Last ${messages.length} messages:*\n\n${transcript.slice(0, 3500)}`;
+  const text = `${header}${note}\n\n*Last ${messages.length} messages:*\n\n${transcript.slice(0, 3500)}`;
 
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method:  "POST",
