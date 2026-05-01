@@ -164,14 +164,8 @@ export async function POST(req: NextRequest) {
       }
 
       let chat;
-      const debug: string[] = [];
       try {
-        debug.push(`apiKey=${apiKey ? `${apiKey.slice(0,8)}...(${apiKey.length}c)` : "MISSING"}`);
-        debug.push(`MODEL=${MODEL}`);
-        debug.push(`historyLen=${history.length}`);
-        debug.push(`sysInstrLen=${systemInstruction.length}`);
         const genAI = new GoogleGenerativeAI(apiKey);
-        debug.push("genAI ok");
         const model = genAI.getGenerativeModel({
           model: MODEL,
           systemInstruction,
@@ -180,16 +174,13 @@ export async function POST(req: NextRequest) {
             maxOutputTokens: MAX_REPLY_TOKENS,
           },
         });
-        debug.push("model ok");
         chat = model.startChat({ history });
-        debug.push("chat ok");
       } catch (err) {
         const errStr = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
-        const dbgInfo = debug.join(" | ");
-        // Surface real error in the user response (TEMP for debugging)
-        sendError(`FULL_ERR=${errStr.slice(0, 600)} | DEBUG=${dbgInfo.slice(0, 400)}`);
+        sendError("model init failed — usually transient");
         controller.close();
-        void escalateToTelegram(messages, `[SYSTEM ERROR — model init failed] ${errStr} | dbg: ${dbgInfo}`).catch(() => undefined);
+        // Full error goes to Telegram so founder can diagnose without leaking to user
+        void escalateToTelegram(messages, `[SYSTEM ERROR — model init failed] ${errStr} | history.length=${history.length} | sysInstr.length=${systemInstruction.length}`).catch(() => undefined);
         return;
       }
 
