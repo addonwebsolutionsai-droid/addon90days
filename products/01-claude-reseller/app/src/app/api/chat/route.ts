@@ -1,14 +1,18 @@
 /**
  * POST /api/chat
  *
- * Streaming chat endpoint backed by Gemini 2.5 Flash. Used by the
- * floating support widget. Returns Server-Sent-Event style chunks
- * (one JSON line per chunk).
+ * Streaming chat endpoint backed by Groq (Llama 3.3 70B Versatile).
+ * Used by the floating support widget. Returns ndjson chunks.
+ *
+ * Why Groq: 14,400 RPD on the free tier (10× Gemini), no card required,
+ * fastest inference of any major provider, OpenAI-compatible API so we
+ * can swap providers later (OpenAI / OpenRouter / Together) by just
+ * changing the URL + key.
  *
  * Request body:
  *   { messages: [{ role: "user"|"assistant", content: string }, ...] }
  *
- * Response (text/plain stream):
+ * Response (text/x-ndjson stream):
  *   {"delta": "..."}
  *   {"delta": "..."}
  *   ...
@@ -16,71 +20,26 @@
  */
 
 import type { NextRequest } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildSystemPrompt } from "@/lib/chat-knowledge-base";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_HISTORY        = 24;        // last 24 turns; older trimmed
-const MAX_REPLY_TOKENS   = 800;       // ~600 words max
+const MAX_HISTORY        = 24;
+const MAX_REPLY_TOKENS   = 800;
 const MAX_USER_MSG_CHARS = 4000;
-// Gemini free-tier daily quotas (per Google docs, Apr 2026):
-//   2.5 Flash:      250 RPD   ← exhausted in normal use, do not pick
-//   2.0 Flash:    1,500 RPD   ← chosen — 6× headroom for support chat
-//   2.5 Flash-Lite: 1,000 RPD
-// If you upgrade to a paid plan later, switch back to 2.5 Flash.
-const MODEL              = "gemini-2.0-flash";
+const MAX_RETRIES        = 2;
+
+const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";
+// Groq free-tier limits (Apr 2026):
+//   llama-3.3-70b-versatile : 30 RPM, 14,400 RPD ← chosen, best quality/quota
+//   llama-3.1-8b-instant    : 30 RPM, 14,400 RPD, faster but worse
+//   mixtral-8x7b-32768      : 30 RPM, 14,400 RPD, good for long context
+const MODEL = "llama-3.3-70b-versatile";
 
 interface ChatMessage {
-  role: "user" | "assistant";
+  role:    "user" | "assistant";
   content: string;
-}
-
-interface GeminiContent {
-  role: "user" | "model";
-  parts: Array<{ text: string }>;
-}
-
-/**
- * Convert our chat history to Gemini's required shape, enforcing:
- *   - first turn is "user"
- *   - strict user/model/user/model alternation (consecutive same-role
- *     turns are merged with a blank line between them)
- *   - all turns have non-empty content
- *
- * The widget injects a synthetic greeting as the first assistant message
- * — this drops it cleanly because the loop only starts once a user turn
- * is seen.
- */
-function sanitizeHistoryForGemini(messages: ChatMessage[]): GeminiContent[] {
-  const result: GeminiContent[] = [];
-  let started = false;
-  for (const m of messages) {
-    const text = (m.content ?? "").trim();
-    if (text.length === 0) continue;
-    const geminiRole: "user" | "model" = m.role === "assistant" ? "model" : "user";
-    // Don't start with a model turn — drop until we see the first user.
-    if (!started) {
-      if (geminiRole !== "user") continue;
-      started = true;
-    }
-    const last = result[result.length - 1];
-    if (last && last.role === geminiRole) {
-      // Merge consecutive same-role turns (Gemini rejects them).
-      last.parts[0]!.text = `${last.parts[0]!.text}\n\n${text}`;
-    } else {
-      result.push({ role: geminiRole, parts: [{ text }] });
-    }
-  }
-  // History must END with a model turn — sendMessage(userText) appends a
-  // user turn next, so a trailing user turn would create two-user-in-a-row.
-  // (Common case: previous attempt failed mid-reply, so history ends with
-  // the user's retry.)
-  while (result.length > 0 && result[result.length - 1]!.role === "user") {
-    result.pop();
-  }
-  return result;
 }
 
 const CORS_HEADERS = {
@@ -94,9 +53,9 @@ export function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env["GEMINI_API_KEY"];
+  const apiKey = process.env["GROQ_API_KEY"];
   if (!apiKey) {
-    return Response.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
+    return Response.json({ error: "GROQ_API_KEY not configured" }, { status: 500 });
   }
 
   let body: unknown;
@@ -111,7 +70,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "messages must be a non-empty array" }, { status: 400 });
   }
 
-  // Validate + sanitize
+  // Validate + sanitize incoming messages
   const messages: ChatMessage[] = [];
   for (const m of incoming.slice(-MAX_HISTORY)) {
     if (!m || typeof m !== "object") continue;
@@ -128,23 +87,6 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "Last message must be from user" }, { status: 400 });
   }
 
-  // Build Gemini chat history. Three Gemini constraints we must satisfy:
-  //   1. History must START with a user turn (the bot's synthetic greeting
-  //      is an assistant message — it MUST be dropped from history).
-  //   2. Roles must strictly alternate user/model/user/model — consecutive
-  //      same-role turns must be merged or dropped.
-  //   3. Content must be non-empty.
-  //
-  // Sending raw history (without sanitisation) caused "model init failed"
-  // for the customer who tried "How can I create Algo Trading System Scaffold"
-  // because the widget's greeting was the first item.
-  const lastUserMessage = messages[messages.length - 1]!.content;
-  const history = sanitizeHistoryForGemini(messages.slice(0, -1));
-
-  // Build everything that can fail before the stream starts INSIDE a try/catch.
-  // If anything goes wrong (Supabase slow, cold start, key issue), we return
-  // a graceful streamed error to the client instead of a bare HTTP 500 — the
-  // widget knows how to render this as a friendly fallback.
   const stream = new ReadableStream({
     async start(controller) {
       const enc = new TextEncoder();
@@ -158,34 +100,25 @@ export async function POST(req: NextRequest) {
         } catch { /* controller may already be closed */ }
       };
 
-      let systemInstruction: string;
-      try { systemInstruction = await buildSystemPrompt(); }
+      // ---- Build system prompt + OpenAI-shape messages ----
+      let systemPrompt: string;
+      try { systemPrompt = await buildSystemPrompt(); }
       catch (err) {
         sendError("knowledge base load failed");
         controller.close();
-        // Fire-and-forget escalation so we know about systemic failures
         void escalateToTelegram(messages, `[SYSTEM ERROR — buildSystemPrompt failed] ${String(err)}`).catch(() => undefined);
         return;
       }
 
-      // Gemini's streaming endpoint occasionally fails with transient
-      // network errors (~20% of the time observed in production).
-      // Retry up to MAX_RETRIES times before giving up. Each retry
-      // creates a fresh chat session — same systemInstruction + history.
-      const MAX_RETRIES = 2;
+      const groqMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+        { role: "system", content: systemPrompt },
+        ...messages.map((m) => ({ role: m.role, content: m.content })),
+      ];
+
+      // ---- Retry loop ----
       let fullText = "";
       let succeeded = false;
       let lastError: unknown = null;
-
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: MODEL,
-        systemInstruction,
-        generationConfig: {
-          temperature:     0.5,
-          maxOutputTokens: MAX_REPLY_TOKENS,
-        },
-      });
 
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         if (attempt > 0) {
@@ -193,28 +126,67 @@ export async function POST(req: NextRequest) {
         }
         fullText = "";
         try {
-          const chat   = model.startChat({ history });
-          const result = await chat.sendMessageStream(lastUserMessage);
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            if (text) {
-              fullText += text;
-              controller.enqueue(enc.encode(JSON.stringify({ delta: text }) + "\n"));
+          const groqRes = await fetch(GROQ_API, {
+            method:  "POST",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type":  "application/json",
+            },
+            body: JSON.stringify({
+              model:       MODEL,
+              messages:    groqMessages,
+              stream:      true,
+              max_tokens:  MAX_REPLY_TOKENS,
+              temperature: 0.5,
+            }),
+          });
+
+          if (!groqRes.ok || groqRes.body === null) {
+            const text = await groqRes.text().catch(() => "");
+            throw new Error(`Groq HTTP ${groqRes.status} ${groqRes.statusText} — ${text.slice(0, 300)}`);
+          }
+
+          const reader = groqRes.body.getReader();
+          const dec    = new TextDecoder();
+          let buf      = "";
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            // SSE: lines separated by \n, each event prefixed with "data: "
+            const lines = buf.split("\n");
+            buf = lines.pop() ?? "";
+            for (const line of lines) {
+              const t = line.trim();
+              if (!t.startsWith("data:")) continue;
+              const payload = t.slice(5).trim();
+              if (payload === "" || payload === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(payload) as {
+                  choices?: Array<{ delta?: { content?: string } }>;
+                };
+                const delta = parsed.choices?.[0]?.delta?.content;
+                if (delta) {
+                  fullText += delta;
+                  controller.enqueue(enc.encode(JSON.stringify({ delta }) + "\n"));
+                }
+              } catch { /* skip malformed SSE chunk */ }
             }
           }
           succeeded = true;
           break;
         } catch (err) {
           lastError = err;
-          // 429 = rate limit. Retrying just burns more quota; bail
-          // immediately so the user gets a useful "try again soon" message.
           const errMsg = err instanceof Error ? err.message : String(err);
-          if (/\b429\b|Too Many Requests|exceeded your current quota/i.test(errMsg)) break;
-          // If partial text was already streamed, don't retry — would dupe content.
+          // 429 = rate limit. Retrying just burns more quota; bail out.
+          if (/\b429\b|Too Many Requests|rate.?limit/i.test(errMsg)) break;
+          // If we already streamed any text, don't retry — would dupe content.
           if (fullText.length > 0) break;
         }
       }
 
+      // ---- Final state ----
       if (succeeded) {
         const escalated = /\[ESCALATE\]/.test(fullText);
         if (escalated) {
@@ -222,15 +194,13 @@ export async function POST(req: NextRequest) {
         }
         controller.enqueue(enc.encode(JSON.stringify({ done: true, escalated }) + "\n"));
       } else if (fullText.length > 0) {
-        // Stream errored mid-reply on a non-first attempt
         controller.enqueue(enc.encode(JSON.stringify({ done: true, escalated: false, partial: true }) + "\n"));
       } else {
-        // All retries failed — surface friendly error + escalate to founder
         const msg = lastError instanceof Error ? lastError.message : String(lastError);
-        const isRateLimit = /\b429\b|Too Many Requests|exceeded your current quota/i.test(msg);
+        const isRateLimit = /\b429\b|Too Many Requests|rate.?limit/i.test(msg);
         const userMessage = isRateLimit
-          ? "We're at our daily AI quota — please try again tomorrow, or click \"Talk to founder\" below to forward your question now."
-          : "Gemini API is having a moment — please retry in a few seconds";
+          ? "We're being rate-limited briefly — try again in 30 seconds, or click \"Talk to founder\" below."
+          : "Couldn't reach the AI service right now. Try again, or click \"Talk to founder\" below.";
         sendError(userMessage);
         void escalateToTelegram(messages, `[STREAM ERROR${isRateLimit ? " — RATE LIMITED" : ""} after ${MAX_RETRIES + 1} attempts] ${msg.slice(0, 300)}`).catch(() => undefined);
       }
@@ -242,8 +212,8 @@ export async function POST(req: NextRequest) {
     status: 200,
     headers: {
       ...CORS_HEADERS,
-      "Content-Type":   "application/x-ndjson; charset=utf-8",
-      "Cache-Control":  "no-store",
+      "Content-Type":      "application/x-ndjson; charset=utf-8",
+      "Cache-Control":     "no-store",
       "X-Accel-Buffering": "no",
     },
   });
@@ -262,10 +232,6 @@ async function escalateToTelegram(messages: ChatMessage[], finalReply: string): 
     .map((m) => `${m.role === "user" ? "👤" : "🤖"} ${m.content.slice(0, 600)}`)
     .join("\n\n");
 
-  // Two flavours of escalation:
-  //   1. Bot decided to escalate — finalReply contains "[ESCALATE] <summary>"
-  //   2. System error — finalReply starts with "[SYSTEM ERROR" or "[STREAM ERROR"
-  // Surface both clearly so the founder sees what actually happened.
   let header = "🚨 *Support escalation*";
   let note   = "";
   if (finalReply.startsWith("[SYSTEM ERROR") || finalReply.startsWith("[STREAM ERROR")) {
