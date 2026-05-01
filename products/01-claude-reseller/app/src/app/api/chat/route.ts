@@ -164,8 +164,14 @@ export async function POST(req: NextRequest) {
       }
 
       let chat;
+      const debug: string[] = [];
       try {
+        debug.push(`apiKey=${apiKey ? `${apiKey.slice(0,8)}...(${apiKey.length}c)` : "MISSING"}`);
+        debug.push(`MODEL=${MODEL}`);
+        debug.push(`historyLen=${history.length}`);
+        debug.push(`sysInstrLen=${systemInstruction.length}`);
         const genAI = new GoogleGenerativeAI(apiKey);
+        debug.push("genAI ok");
         const model = genAI.getGenerativeModel({
           model: MODEL,
           systemInstruction,
@@ -174,11 +180,16 @@ export async function POST(req: NextRequest) {
             maxOutputTokens: MAX_REPLY_TOKENS,
           },
         });
+        debug.push("model ok");
         chat = model.startChat({ history });
+        debug.push("chat ok");
       } catch (err) {
-        sendError("model init failed");
+        const errStr = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+        const dbgInfo = debug.join(" | ");
+        // Surface real error in the user response (TEMP for debugging)
+        sendError(`${errStr.slice(0, 150)} [dbg: ${dbgInfo.slice(0, 200)}]`);
         controller.close();
-        void escalateToTelegram(messages, `[SYSTEM ERROR — model init failed] ${String(err)}`).catch(() => undefined);
+        void escalateToTelegram(messages, `[SYSTEM ERROR — model init failed] ${errStr} | dbg: ${dbgInfo}`).catch(() => undefined);
         return;
       }
 
