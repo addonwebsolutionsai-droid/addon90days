@@ -67,3 +67,4 @@ When walking the queue, process in this order:
 **If an item has been pending >72h:** `@orchestrator` re-pings founder with context in daily briefing.
 
 **If founder is unavailable for >3 days:** agents pause outbound comms and proposal sends automatically. Build/design/content work continues; only external-facing items queue up.
+- [ ] 2026-05-02 · Content draft ready: content/queue/2026-05-02-reddit.md (CMO)
