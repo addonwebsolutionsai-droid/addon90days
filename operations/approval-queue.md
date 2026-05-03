@@ -70,3 +70,4 @@ When walking the queue, process in this order:
 - [ ] 2026-05-02 · Content draft ready: content/queue/2026-05-02-reddit.md (CMO)
 - [ ] 2026-05-02 · 30 outbound drafts ready: sales/drafts/2026-05-02.md (Outbound)
 - [ ] 2026-05-03 · Content draft ready: content/queue/2026-05-03-reddit.md (CMO)
+- [ ] 2026-05-03 · 30 outbound drafts ready: sales/drafts/2026-05-03.md (Outbound)
