@@ -2,7 +2,18 @@
 
 import { usePathname } from "next/navigation";
 
-const EXCLUDED_PREFIXES = ["/account", "/sign-in", "/sign-up", "/dashboard"];
+const EXCLUDED_PREFIXES = [
+  "/account",
+  "/sign-in",
+  "/sign-up",
+  "/dashboard",
+  // Per-product brands have their own layouts
+  "/chatbase",
+  "/taxpilot",
+  "/tableflow",
+  "/connectone",
+  "/machineguard",
+];
 
 /**
  * Mobile spacer — occupies the height of the mobile top bar

@@ -11,12 +11,22 @@
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 
-// Prefixes that should NOT show the marketplace sidebar
+// Prefixes that should NOT show the marketplace sidebar.
+// Includes per-product landing pages (/chatbase, /taxpilot, etc.) — each
+// product is its own brand and should not appear inside the Claude Toolkit
+// shell. This matters for the exit-strategy goal: each product becomes a
+// transferable asset only when it stands alone visually.
 const SIDEBAR_EXCLUDED_PREFIXES = [
   "/account",
   "/sign-in",
   "/sign-up",
   "/dashboard",
+  // Per-product brands
+  "/chatbase",
+  "/taxpilot",
+  "/tableflow",
+  "/connectone",
+  "/machineguard",
 ];
 
 export function ConditionalSidebar() {
