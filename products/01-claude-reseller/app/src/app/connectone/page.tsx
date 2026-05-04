@@ -261,7 +261,7 @@ function WaitlistForm() {
 // Page
 // ---------------------------------------------------------------------------
 
-export function ConnectOnePage() {
+function ConnectOnePage() {
   return (
     <div
       className="min-h-screen"

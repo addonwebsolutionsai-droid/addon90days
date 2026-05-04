@@ -253,7 +253,7 @@ function WaitlistForm() {
 // Page
 // ---------------------------------------------------------------------------
 
-export function MachineGuardPage() {
+function MachineGuardPage() {
   return (
     <div
       className="min-h-screen"
