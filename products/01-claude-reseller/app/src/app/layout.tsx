@@ -5,7 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { Suspense } from "react";
 import { ConditionalSidebar } from "@/components/conditional-sidebar";
 import { MobileSpacer } from "@/components/mobile-spacer";
-import { ChatWidget } from "@/components/chat-widget";
+import { ConditionalChatWidget } from "@/components/conditional-chat-widget";
 import "./globals.css";
 
 const inter = Inter({
@@ -95,8 +95,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 </main>
               </div>
             </div>
-            {/* Floating support bot — every page */}
-            <ChatWidget />
+            {/* Floating support bot — toolkit pages only.
+                Per-product brand pages render no widget so the toolkit's
+                bot doesn't answer questions on /chatbase, /taxpilot, etc. */}
+            <Suspense fallback={null}>
+              <ConditionalChatWidget />
+            </Suspense>
           </ThemeProvider>
         </body>
       </html>
