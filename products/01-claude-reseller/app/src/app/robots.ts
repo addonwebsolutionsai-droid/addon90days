@@ -21,7 +21,17 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/skills", "/skills/", "/chatbase", "/legal/"],
+        allow: [
+          "/",
+          "/skills",
+          "/skills/",
+          "/chatbase",
+          "/taxpilot",
+          "/tableflow",
+          "/connectone",
+          "/machineguard",
+          "/legal/",
+        ],
         disallow: ["/account", "/account/", "/api/", "/sign-in", "/sign-up", "/dashboard"],
       },
     ],

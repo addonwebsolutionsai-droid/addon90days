@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { ConditionalSidebar } from "@/components/conditional-sidebar";
 import { MobileSpacer } from "@/components/mobile-spacer";
 import { ConditionalChatWidget } from "@/components/conditional-chat-widget";
+import { PostHogProvider } from "@/components/posthog-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -73,6 +74,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
             enableSystem
             disableTransitionOnChange
           >
+            {/* Analytics tracker — no-op when NEXT_PUBLIC_POSTHOG_KEY is unset */}
+            <Suspense fallback={null}>
+              <PostHogProvider />
+            </Suspense>
             {/*
              * Sidebar layout:
              * - ConditionalSidebar renders the 220px fixed sidebar on marketplace
