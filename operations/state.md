@@ -1,8 +1,4 @@
 # Operations state
-last_security_rotation: 2026-05-04
-notes: Supabase keys rotated to sb_secret/sb_publishable format after the leaked legacy JWT incident. Old service_role JWT is now functionally dead once founder revokes it in dashboard.
-
-# State
 
 **Claude's single source of truth between sessions.** Read this at the start of every session. Update it at the end.
 
@@ -11,17 +7,24 @@ notes: Supabase keys rotated to sb_secret/sb_publishable format after the leaked
 ## Project status
 
 **Start date:** 2026-04-22
-**Current day:** 7
-**Current phase:** 1 — Sprint 1 (P01 Launch)
-**Last session:** 2026-04-28
+**Current day:** ~12 (2026-05-04)
+**Current phase:** Sprint 1 — Day 15 launch armed, P02 build started
+**Last session:** 2026-05-04
 
 ---
 
+## Strategic direction (founder-confirmed 2026-05-04)
+
+- **Free for first 1 year** — every product, no paywall, no Razorpay UI, no card required.
+- **Goal:** 100k users on EACH platform by Day 365 (= 600k total across 6 products).
+- **Stay on `*.vercel.app` domains** for now. Custom domains deferred.
+- **Per-product brand isolation** for exit-strategy goal (each product becomes a transferable asset). Sidebar + chat widget already conditional on path.
+
 ## Next action
 
-> Sprint 1 execution. P01 must be live by Day 15 (2026-05-06).
-> Sequence: Razorpay keys → checkout flow → /dashboard → /api/skills/run → npm publish → Vercel deploy → launch.
-> Read `roadmap/sprint-plan.md` for full sprint breakdown.
+P02 ChatBase backend MVP is being built right now by @api-engineer (background agent, started 2026-05-04 ~14:35 IST). When it lands, spawn @frontend-architect for the owner dashboard UI. Target P02 launch: Day 30 (~2026-05-22).
+
+P01 Day 15 launch (2026-05-06) is armed — Telegram launch-day reminder routine `trig_01Vr97KYBaoG2CjfDsHmyHpF` fires at 2026-05-06T06:00:00Z (11:30 IST).
 
 ---
 
@@ -29,63 +32,67 @@ notes: Supabase keys rotated to sb_secret/sb_publishable format after the leaked
 
 | Task | Status | Pointer |
 |---|---|---|
-| Razorpay test keys | **waiting on founder** — get from dashboard.razorpay.com | `.env` |
-| `/api/skills/run` route | building now | `products/01-claude-reseller/app/src/app/api/` |
-| `/dashboard` page | building now | `products/01-claude-reseller/app/src/app/dashboard/` |
-| Razorpay checkout UI | blocked on keys | `products/01-claude-reseller/app/src/` |
-| npm publish prep | Day 11–12 | `products/01-claude-reseller/packages/toolkit/` |
-| Vercel deploy | Day 13–14 | — |
-| Meta WhatsApp API application | **start NOW** (3–7 day approval) | `products/02-whatsapp-ai-suite/` |
+| P02 ChatBase backend MVP | **building (api-engineer in background)** | `products/02-whatsapp-ai-suite/` |
+| P02 dashboard UI | queued — start after backend ADR + first commit lands | — |
+| Cloud-routine commit_repo_file backport | queued — tomorrow morning batch | `operations/diagnostic-routines-2026-05-01.md` |
+| P01 Day 15 launch | **armed** — Telegram reminder set | `content/launch/` |
 
 ---
 
 ## Products — build status
 
-| Product | Status | Pointer |
+| Product | Status | Live URL |
 |---|---|---|
-| 01-claude-reseller | **Sprint 1** — Razorpay + dashboard + deploy | `products/01-claude-reseller/.claude/memory/context.md` |
-| 02-whatsapp-ai-suite | apply for Meta API now, build Day 15–30 | `products/02-whatsapp-ai-suite/PRD.md` |
-| 03-gst-invoicing | Day 31+ (pending GSTN GSP reg) | `products/03-gst-invoicing/PRD.md` |
-| 04-restaurant-os | on hold — Day 28 kill/keep | `products/04-restaurant-os/PRD.md` |
-| 05-iot-platform | Day 30–35 | `products/05-iot-platform/PRD.md` |
-| 06-predictive-maintenance | Day 47+ (after P05) | `products/06-predictive-maintenance/PRD.md` |
+| 01-claude-reseller (Claude Toolkit) | **launching Day 15 = 2026-05-06** — all infra green | https://addon90days.vercel.app/ |
+| 02-whatsapp-ai-suite (ChatBase) | backend build started 2026-05-04 — target launch Day 30 ~2026-05-22 | https://addon90days.vercel.app/chatbase (waitlist) |
+| 03-gst-invoicing (TaxPilot) | landing + waitlist live; build queued post-P02 | https://addon90days.vercel.app/taxpilot |
+| 04-restaurant-os (TableFlow) | landing + waitlist live | https://addon90days.vercel.app/tableflow |
+| 05-iot-platform (ConnectOne) | landing + waitlist live | https://addon90days.vercel.app/connectone |
+| 06-predictive-maintenance (MachineGuard) | landing + waitlist live | https://addon90days.vercel.app/machineguard |
 
 ---
 
 ## KPI snapshot
 
-- **MRR:** $0
-- **Paying customers:** 0
-- **Day 15 target:** P01 live on npm + Vercel, first Razorpay payment working
-- **Day 30 target:** P02 live, $500–$2k MRR, 5–20 customers
+- **MRR:** $0 (free tier, by design — no revenue gate until 100k users)
+- **Users:** 0 paid (the metric we track now is signups + waitlist)
+- **Day 15 target:** P01 launches publicly; first 100 GitHub stars + 50 sign-ups
+- **Day 30 target:** P02 live with first WhatsApp business connected
+- **Day 365 target:** 100k users on each of the 6 platforms
 
 ---
 
-## Blockers requiring founder action
+## Open founder actions
 
-| Blocker | Action |
-|---|---|
-| Razorpay test keys | dashboard.razorpay.com → Settings → API Keys → Test Mode |
-| Meta WhatsApp Business API | developers.facebook.com → apply now (takes 3–7 days) |
-| GSTN GSP registration | start application now (takes 2–4 weeks) |
+| Item | Action | Deadline |
+|---|---|---|
+| ProductHunt account | Confirm `addonwebsolutions.ai@gmail.com` has a PH account; if not, create today | 2026-05-05 21:00 IST |
+| PostHog API key | Sign up posthog.com (free tier 1M events/mo); add `NEXT_PUBLIC_POSTHOG_KEY` to Vercel | Before launch traffic 2026-05-06 |
+| Meta Business Manager verification | Apply at business.facebook.com for WhatsApp API access (3-7 day review) | Start TODAY to unblock P02 real-mode by Day 30 |
+
+P02 is being built in MOCK_MODE — it works without Meta, but real customer WhatsApp messages can't flow through until the verification clears.
 
 ---
 
-## Last session notes
+## Per-product social accounts (founder action)
 
-### Session: 2026-04-28
+For exit-strategy each product needs its own X/LinkedIn/PH/Reddit/YouTube. All using `addonwebsolutions.ai@gmail.com`. Defer until P01 launches and we see traction signals.
+
+---
+
+## Last session — 2026-05-04 (this one)
 
 **Completed:**
-- Swapped Anthropic SDK → Gemini (free, 1.5 Flash + 1.5 Pro)
-- Swapped Stripe → Razorpay (India-compatible)
-- Built /api/checkout + /api/razorpay-webhook routes
-- Built sprint-plan.md (full 90-day sprint breakdown)
-- GitHub push: all commits live at addon90days/main
+- Per-product brand isolation: sidebar + chat widget hidden on /chatbase, /taxpilot, /tableflow, /connectone, /machineguard (commits 822716f, c7e5ae2)
+- All 5 waitlist endpoints (p02–p06) smoke-tested, all 200
+- All 5 per-product OG images verified live
+- PostHog wired client-side, gated on `NEXT_PUBLIC_POSTHOG_KEY` env (commit 7894d7c)
+- Sitemap + robots.txt expanded to include 4 new product pages
+- `/llms.txt` published per llmstxt.org spec
+- Day 15 launch approved by founder; one-time Telegram reminder routine scheduled (`trig_01Vr97KYBaoG2CjfDsHmyHpF` fires 2026-05-06T06:00:00Z)
+- P02 ChatBase backend build started — api-engineer in background
 
-**Next (continuing this session):**
-- Build /api/skills/run route
-- Build /dashboard page
-- Build Razorpay checkout UI component
-
-**Day number at next session:** 8
-ops: trigger fresh build to pick up rotated production env vars (post-legacy-disable)
+**Next session priorities:**
+1. Verify P02 api-engineer landed cleanly; spawn frontend-architect for dashboard UI
+2. Backport hardened `commit_repo_file` helper to the 6 existing cloud routines (per `operations/diagnostic-routines-2026-05-01.md`)
+3. Watch Day 15 launch metrics if PostHog is wired
