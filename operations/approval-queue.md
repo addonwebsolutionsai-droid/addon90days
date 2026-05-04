@@ -10,9 +10,53 @@ Items awaiting founder approval. Agents append here; founder clears via `/approv
 
 ---
 
-## Pending (0)
+## Pending (1)
 
-*No items pending. Agents will add here.*
+### #001 — Day 15 Launch (P01 Claude Toolkit) — Go / No-Go
+
+- **Category:** strategic-decision
+- **Urgency:** 24h
+- **Submitted by:** @cto
+- **Submitted at:** 2026-05-04 (Day 7)
+- **Related product:** P01 Claude Toolkit
+- **Decision needed by:** 2026-05-05 21:00 IST (T-15h before launch window opens)
+
+**What's ready:**
+- 5/5 product landing pages live + brand-isolated (sidebar + chat widget no longer leak across products — fixed in 822716f, c7e5ae2)
+- 5/5 waitlist endpoints returning 200 (p02–p06)
+- 5/5 per-product OG images rendering with distinct accents
+- npm package `addonweb-claude-skills@1.1.0` published
+- MCP server live at `/api/skills/mcp` (verified initialize handshake)
+- 130 skills in catalog · 4 featured (stock-screener-ai, gst-invoice-generator, esp32-firmware-scaffold, sql-query-builder) all 200
+- Sign-in flow + Try Live endpoint Clerk-protected as designed
+- 7-piece launch kit drafted, all marked APPROVED in `content/launch/`:
+  01-producthunt · 02-hackernews · 03-twitter-thread · 04-linkedin
+  05-reddit (3 subs) · 06-newsletter · 07-blog
+
+**Founder action timeline (~90 min total over launch day Tue 2026-05-06):**
+
+| Time IST | Action | Est. |
+|---|---|---|
+| 12:30 | Submit ProductHunt at midnight PST (copy from 01-producthunt.md) | 15 min |
+| 12:35 | Tweet thread from @addonwebsolutions (copy 03-twitter-thread.md) | 10 min |
+| 13:00 | Show HN post (02-hackernews.md) | 5 min |
+| 13:30 | LinkedIn post from founder profile (04-linkedin.md) | 10 min |
+| 14:00 | r/ClaudeAI post #1 from 05-reddit.md | 10 min |
+| 16:00 | r/LocalLLaMA post #2 from 05-reddit.md | 5 min |
+| 18:00 | r/programming post #3 from 05-reddit.md | 5 min |
+| 20:00 | Newsletter blast (06-newsletter.md) — ONLY if mailing list ≥ 50 | 10 min |
+| Throughout | Reply to PH/HN/Reddit/X comments | 20 min |
+
+**Risks / mitigations:**
+- ProductHunt account: confirm `addonwebsolutions.ai@gmail.com` has a PH account today. If not, create now — PH won't allow same-day signups to launch.
+- Newsletter: skip if no mailing list yet (conditional, not blocking).
+- Reddit r/programming: has self-promo karma threshold. If founder account is fresh, swap for r/SideProject or r/EntrepreneurRideAlong.
+
+**Recommended action:** approve. All technical readiness gates are green; remaining work is only founder-side execution.
+
+**If approved, I will:** schedule a Telegram reminder at 11:30 IST on 2026-05-06 with one-tap links to each piece + paste-ready copy.
+
+**If rejected, options are:** push to Day 16/17 if PH account isn't ready; or split launch (PH + HN on Day 15, social cascade on Day 16).
 
 ---
 
