@@ -1,3 +1,7 @@
+# Operations state
+last_security_rotation: 2026-05-04
+notes: Supabase keys rotated to sb_secret/sb_publishable format after the leaked legacy JWT incident. Old service_role JWT is now functionally dead once founder revokes it in dashboard.
+
 # State
 
 **Claude's single source of truth between sessions.** Read this at the start of every session. Update it at the end.
