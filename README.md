@@ -1,8 +1,12 @@
 # AddonWeb AI Factory
 
-**A self-running software product company powered by 13 Claude Code subagents.**
+**A self-running software product company powered by Claude Code subagents.**
 
-This repository turns AddonWebSolutions from a dying custom dev shop into a multi-product AI-native company. It contains the agent definitions, slash commands, product briefs, 90-day runbook, and playbooks — all as plain markdown files that Claude Code reads and executes.
+> Building 6 SaaS products in public — from a dying custom dev shop to a multi-product AI-native company.
+>
+> Live: [addon90days.vercel.app](https://addon90days.vercel.app) · Status: Day 7 of 90 · 130 skills shipped · Free during beta until 10K users.
+
+This repository contains the entire stack: 15 specialist subagent definitions, slash commands, product PRDs, 90-day runbook, cloud-routine prompts, and the Next.js codebase that ships every day. Built in public — fork it, study it, copy it.
 
 ## What's in this repo
 
