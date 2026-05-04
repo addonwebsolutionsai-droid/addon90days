@@ -10,9 +10,43 @@ Items awaiting founder approval. Agents append here; founder clears via `/approv
 
 ---
 
-## Pending (0)
+## Pending (1)
 
-*No items pending.*
+### #002 — P02 ChatBase backend MVP shipped — needs 3 founder actions to activate
+
+- **Category:** strategic-decision (founder credentials only — agent cannot self-serve)
+- **Urgency:** 48h (P02 launch is Day 30 = 2026-05-22)
+- **Submitted by:** @cto on behalf of @api-engineer
+- **Submitted at:** 2026-05-04
+- **Related product:** P02 ChatBase
+- **Related commit:** `1a0ff95` — 19 new files, 0 breaking changes to P01
+
+**What shipped:** complete WhatsApp AI backend — Meta webhook handler, AES-256-GCM token encryption, Groq-powered intent classifier (6 intents, 70% confidence threshold), keyword-Jaccard KB retrieval, reply engine, 8 API routes, mock-mode for dev without Meta access. ADR at `operations/decisions/2026-05-04-p02-mvp-architecture.md`.
+
+**Founder action 1 — Apply Supabase migration (5 min)**
+
+Open Supabase Dashboard → Project → SQL Editor → New Query → paste contents of `supabase/migrations/010_p02_chatbase.sql` (229 lines) → Run. Creates 5 tables (`p02_workspaces`, `p02_kb_docs`, `p02_intents`, `p02_conversations`, `p02_messages`) and seeds 6 default intents. Idempotent — safe to re-run.
+
+**Founder action 2 — Add `P02_ENCRYPTION_KEY` to Vercel (3 min)**
+
+```bash
+openssl rand -hex 32
+```
+
+Copy the 64-char output. Vercel Dashboard → Project → Settings → Environment Variables → Add:
+- Name: `P02_ENCRYPTION_KEY`
+- Value: (paste)
+- Environments: **all** (production + preview + development) — encryption keys MUST be identical across envs or stored tokens won't decrypt
+
+**Founder action 3 (optional, defer) — Meta Business Manager verification**
+
+Apply at business.facebook.com for WhatsApp Cloud API access. 3-7 day review. Until this lands the backend runs in `MOCK_MODE=true` (default) which lets the dashboard demo work without real WhatsApp.
+
+**Note on the agent's "Supabase API key broken" claim:** I checked production. `/api/p02-waitlist` returned 200 just now — the production Supabase key is healthy. The agent's local `.env.local` has the old JWT-format key from before today's rotation; that's a local-dev issue only, not blocking the Vercel deploy or anything user-facing. Will fix `.env.local` next time we have the new `sb_secret_*` value handy.
+
+**Recommended action:** approve founder actions 1 and 2 today (8 min total). Action 3 can wait.
+
+**If approved, I will:** apply the migration after founder confirms it ran, run the smoke test, and continue the dashboard UI build (already kicked off in parallel — see todo).
 
 **What's ready:**
 - 5/5 product landing pages live + brand-isolated (sidebar + chat widget no longer leak across products — fixed in 822716f, c7e5ae2)
