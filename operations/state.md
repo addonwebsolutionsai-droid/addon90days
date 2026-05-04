@@ -88,3 +88,4 @@ notes: Supabase keys rotated to sb_secret/sb_publishable format after the leaked
 - Build Razorpay checkout UI component
 
 **Day number at next session:** 8
+ops: trigger fresh build to pick up rotated production env vars (post-legacy-disable)
