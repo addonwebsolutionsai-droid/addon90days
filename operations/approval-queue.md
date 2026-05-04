@@ -10,16 +10,9 @@ Items awaiting founder approval. Agents append here; founder clears via `/approv
 
 ---
 
-## Pending (1)
+## Pending (0)
 
-### #001 — Day 15 Launch (P01 Claude Toolkit) — Go / No-Go
-
-- **Category:** strategic-decision
-- **Urgency:** 24h
-- **Submitted by:** @cto
-- **Submitted at:** 2026-05-04 (Day 7)
-- **Related product:** P01 Claude Toolkit
-- **Decision needed by:** 2026-05-05 21:00 IST (T-15h before launch window opens)
+*No items pending.*
 
 **What's ready:**
 - 5/5 product landing pages live + brand-isolated (sidebar + chat widget no longer leak across products — fixed in 822716f, c7e5ae2)
@@ -62,7 +55,19 @@ Items awaiting founder approval. Agents append here; founder clears via `/approv
 
 ---
 
-## Approved today (0)
+## Approved today (1)
+
+### #001 — Day 15 Launch (P01 Claude Toolkit) — APPROVED 2026-05-04 by founder
+
+Founder said: *"approved from my end go ahead"*. Launch goes Tue 2026-05-06.
+
+**Done by @cto on approval:**
+- Telegram launch-day reminder routine scheduled (one-time at 2026-05-06 06:00 UTC = 11:30 IST). Will post a checklist message with one-tap links to all 7 launch content files.
+- All 7 launch pieces confirmed APPROVED in `content/launch/` frontmatter.
+
+**Still on founder's plate (none blocking the deploy):**
+- Confirm `addonwebsolutions.ai@gmail.com` has a ProductHunt account by 2026-05-05 21:00 IST. If not, create today.
+- (Optional, recommended) Add `NEXT_PUBLIC_POSTHOG_KEY` to Vercel env so analytics turns on for the launch traffic. Without it we ship blind on funnel data.
 
 ---
 
