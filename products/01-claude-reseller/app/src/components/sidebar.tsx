@@ -26,6 +26,9 @@ import {
   FileText,
   ChevronLeft,
   Download,
+  Eye,
+  Sparkles,
+  Heart,
 } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -69,7 +72,11 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
   const { isSignedIn, isLoaded } = useUser();
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
+    // Outer column: NO overflow on this layer. Brand stays pinned top,
+    // bottom auth bar stays pinned bottom, only the middle nav scrolls.
+    // Previously had nested overflow-y-auto on both this and the middle
+    // div — they fought each other and bottom items got cut off.
+    <div className="flex flex-col h-full">
       {/* Brand — entire group is the home link, not just the text */}
       <Link
         href="/"
@@ -84,7 +91,7 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
         <span className="font-semibold text-sm leading-none tracking-wide">SKILON</span>
       </Link>
 
-      <div className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+      <div className="flex-1 px-3 py-4 space-y-6 overflow-y-auto subtle-scrollbar min-h-0">
 
         {/* WORKPLACE */}
         <section aria-label="Workplace">
@@ -103,6 +110,35 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
             <Download size={13} />
             My Skills
           </Link>
+        </section>
+
+        {/* DISCOVER — quick filters across the catalog. Sit above Browse so
+            users land on a curated view (trending / new / etc.) before they
+            commit to a specific category. */}
+        <section aria-label="Discover">
+          <p
+            className="text-[10px] font-semibold uppercase tracking-widest px-2 mb-1.5"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Discover
+          </p>
+          {[
+            { href: "/skills?sort=trending", icon: TrendingUp, label: "Trending"   },
+            { href: "/skills?sort=newest",   icon: Sparkles,   label: "Newest"     },
+            { href: "/skills?sort=views",    icon: Eye,        label: "Most viewed" },
+            { href: "/skills?free=true",     icon: Heart,      label: "Free picks" },
+          ].map(({ href, icon: Icon, label }) => (
+            <Link
+              key={label}
+              href={href}
+              onClick={onNavigate}
+              className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 hover:bg-violet-500/10 hover:text-violet-400"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <Icon size={13} />
+              {label}
+            </Link>
+          ))}
         </section>
 
         {/* BROWSE */}
@@ -297,16 +333,29 @@ export function Sidebar() {
 
     void (async () => {
       try {
-        const res = await fetch("/api/skills?limit=1000");
-        if (!res.ok) return;
-        const data = await res.json() as { skills: Array<{ category: string }>; total: number };
+        // /api/skills caps `limit` server-side at 100 — paginate until exhausted
+        // so per-category counts match the actual catalog size. Without this
+        // loop the sidebar undercounted any category whose skills landed past
+        // the first 100 rows.
         const c: CategoryCounts = {};
-        for (const s of data.skills) {
-          c[s.category] = (c[s.category] ?? 0) + 1;
+        let total = 0;
+        for (let page = 1; page <= 20; page++) {
+          const res = await fetch(`/api/skills?limit=100&page=${page}`);
+          if (!res.ok) break;
+          const data = await res.json() as {
+            skills:  Array<{ category: string }>;
+            total?:  number;
+            hasMore?: boolean;
+          };
+          if (typeof data.total === "number") total = data.total;
+          for (const s of data.skills) {
+            c[s.category] = (c[s.category] ?? 0) + 1;
+          }
+          if (data.hasMore === false || data.skills.length < 100) break;
         }
         setCounts(c);
-        setTotal(data.total ?? data.skills.length);
-        sessionStorage.setItem("sidebar_counts", JSON.stringify({ counts: c, total: data.total ?? data.skills.length, ts: Date.now() }));
+        setTotal(total > 0 ? total : Object.values(c).reduce((a, b) => a + b, 0));
+        sessionStorage.setItem("sidebar_counts", JSON.stringify({ counts: c, total, ts: Date.now() }));
       } catch {
         // non-critical
       }

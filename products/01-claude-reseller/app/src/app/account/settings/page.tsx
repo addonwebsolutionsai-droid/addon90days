@@ -3,7 +3,7 @@
 // metadata cannot be exported from "use client" pages — title set in account layout
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { User, Bell, Key, Copy, Check, RefreshCw } from "lucide-react";
+import { User, Bell, Check } from "lucide-react";
 
 export default function SettingsPage() {
   const { user } = useUser();
@@ -11,13 +11,8 @@ export default function SettingsPage() {
     user?.fullName ?? user?.firstName ?? ""
   );
   const [emailNotifs, setEmailNotifs] = useState(true);
-  const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-
-  const apiKey =
-    (user?.publicMetadata?.["apiKey"] as string | undefined) ??
-    "ct_live_placeholder_key_00000000";
 
   async function handleSaveName() {
     if (!user) return;
@@ -35,18 +30,12 @@ export default function SettingsPage() {
     }
   }
 
-  async function handleCopyKey() {
-    await navigator.clipboard.writeText(apiKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-1">Settings</h1>
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          Manage your profile, notifications, and API key.
+          Manage your profile and notification preferences.
         </p>
       </div>
 
@@ -121,70 +110,6 @@ export default function SettingsPage() {
         </label>
       </section>
 
-      {/* API Key */}
-      <section
-        className="rounded-xl border p-5"
-        style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <Key size={15} className="text-violet-400" />
-          <span className="text-sm font-semibold">API key</span>
-        </div>
-        <div className="flex items-center gap-2 mb-2">
-          <code
-            className="flex-1 h-10 px-3 rounded-lg text-sm font-mono flex items-center border truncate"
-            style={{
-              backgroundColor: "var(--bg-s2)",
-              borderColor: "var(--border)",
-              color: "#22c55e",
-            }}
-          >
-            {apiKey}
-          </code>
-          <button
-            onClick={() => void handleCopyKey()}
-            aria-label="Copy API key"
-            className="h-10 px-3 rounded-lg border text-xs transition-colors flex items-center gap-1.5"
-            style={{
-              backgroundColor: "var(--bg-s2)",
-              borderColor: "var(--border)",
-              color: "var(--text-secondary)",
-            }}
-          >
-            {copied ? <Check size={13} className="text-green-500" /> : <Copy size={13} />}
-            {copied ? "Copied" : "Copy"}
-          </button>
-          <button
-            aria-label="Regenerate API key"
-            title="Regenerate API key (coming soon)"
-            className="h-10 px-3 rounded-lg border text-xs transition-colors flex items-center gap-1.5"
-            style={{
-              backgroundColor: "var(--bg-s2)",
-              borderColor: "var(--border)",
-              color: "var(--text-muted)",
-            }}
-          >
-            <RefreshCw size={13} />
-          </button>
-        </div>
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          Use as{" "}
-          <code
-            className="px-1 rounded text-xs"
-            style={{ backgroundColor: "var(--bg-s2)", color: "var(--text-secondary)" }}
-          >
-            Authorization: Bearer &lt;key&gt;
-          </code>{" "}
-          or set the{" "}
-          <code
-            className="px-1 rounded text-xs"
-            style={{ backgroundColor: "var(--bg-s2)", color: "var(--text-secondary)" }}
-          >
-            CLAUDE_TOOLKIT_API_KEY
-          </code>{" "}
-          env var.
-        </p>
-      </section>
     </div>
   );
 }

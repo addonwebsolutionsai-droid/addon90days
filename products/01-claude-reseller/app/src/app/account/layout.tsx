@@ -26,9 +26,13 @@ export default async function AccountLayout({ children }: AccountLayoutProps) {
       className="min-h-screen flex"
       style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
     >
-      {/* Sidebar */}
+      {/* Sidebar — sticky so the brand + nav + user button stay in view
+          while the main content scrolls. Previously the aside scrolled
+          along with main, so on /account#invite the user lost the rail
+          mid-scroll. Each section inside also gets the subtle scrollbar
+          if its content overflows. */}
       <aside
-        className="hidden md:flex flex-col w-60 shrink-0 border-r"
+        className="hidden md:flex flex-col w-60 shrink-0 border-r sticky top-0 h-screen"
         style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
       >
         {/* Brand — entire group is the home link */}
@@ -44,8 +48,9 @@ export default async function AccountLayout({ children }: AccountLayoutProps) {
           <span className="font-semibold text-sm tracking-wide">SKILON</span>
         </Link>
 
-        {/* Nav items */}
-        <nav className="flex-1 py-4 px-3 space-y-0.5" aria-label="Account navigation">
+        {/* Nav items — flex-1 takes remaining height, overflow-y-auto kicks
+            in only on short viewports (rare; we have 6 nav items). */}
+        <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto subtle-scrollbar min-h-0" aria-label="Account navigation">
           {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
             <Link
               key={href}
