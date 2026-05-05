@@ -16,7 +16,7 @@ import { Copy, Check, Twitter, Linkedin, MessageCircle } from "lucide-react";
 const APP_ORIGIN = "https://addon90days.vercel.app";
 
 const SHARE_COPY =
-  "I'm building with the AddonWeb Claude Toolkit — 130+ free Claude skills, MCP servers, and agent bundles. 1-line install. Try it:";
+  "I'm building with SKILOON — 130+ free Claude skills, MCP servers, and agent bundles. 1-line install. Try it:";
 
 interface InviteFriendsProps {
   userId: string;
@@ -29,7 +29,7 @@ export function InviteFriends({ userId }: InviteFriendsProps) {
   const liUrl = encodeURIComponent(link);
   const waText = encodeURIComponent(`${SHARE_COPY} ${link}`);
   const redditUrl = encodeURIComponent(link);
-  const redditTitle = encodeURIComponent("AddonWeb Claude Toolkit — 130+ free Claude skills, MCP & agents");
+  const redditTitle = encodeURIComponent("SKILOON — 130+ free Claude skills, MCP & agents (by AddonWeb)");
 
   async function copyLink() {
     try {

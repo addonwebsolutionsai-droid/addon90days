@@ -200,7 +200,7 @@ async function handleRpc(req: JsonRpcRequest, baseUrl: string): Promise<JsonRpcR
               logging:   {},
             },
             serverInfo: { name: SERVER_NAME, version: SERVER_VERSION },
-            instructions: "This server exposes the AddonWeb Claude Toolkit catalog (130+ skills) as MCP tools. Each tool returns a step-by-step workflow Claude follows to do the work. Tool name = skill slug (kebab-case).",
+            instructions: "This server exposes the SKILOON catalog (130+ Claude skills, by AddonWeb) as MCP tools. Each tool returns a step-by-step workflow Claude follows to do the work. Tool name = skill slug (kebab-case).",
           },
         };
       }
@@ -356,7 +356,7 @@ export async function GET() {
       version:         SERVER_VERSION,
       protocolVersion: PROTOCOL_VERSION,
       transport:       "streamable-http",
-      description:     "AddonWeb Claude Toolkit MCP server. POST JSON-RPC 2.0 messages to this URL.",
+      description:     "SKILOON MCP server (by AddonWeb). POST JSON-RPC 2.0 messages to this URL.",
       docs:            "https://addon90days.vercel.app/skills",
     },
     { headers: { ...CORS_HEADERS, "Cache-Control": "public, max-age=60" } }

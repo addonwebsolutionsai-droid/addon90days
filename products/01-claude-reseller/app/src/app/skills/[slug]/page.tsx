@@ -60,7 +60,7 @@ export async function generateMetadata({
     if (!res.ok) return { title: "Skill not found" };
     const skill = await res.json() as Skill;
     const canonicalUrl = `${baseUrl}/skills/${skill.slug}`;
-    const title       = `${skill.title} — Claude Toolkit`;
+    const title       = `${skill.title} — SKILOON`;
     const description = skill.tagline;
     return {
       title,
@@ -71,7 +71,7 @@ export async function generateMetadata({
         url: canonicalUrl,
         title,
         description,
-        siteName: "Claude Toolkit",
+        siteName: "SKILOON",
       },
       twitter: {
         card: "summary_large_image",
@@ -80,7 +80,7 @@ export async function generateMetadata({
       },
     };
   } catch {
-    return { title: "Claude Toolkit Skills" };
+    return { title: "SKILOON Skills" };
   }
 }
 

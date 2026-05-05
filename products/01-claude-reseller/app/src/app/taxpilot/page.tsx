@@ -325,7 +325,7 @@ export default function TaxPilotPage() {
               color: "var(--text-secondary)",
             }}
           >
-            Browse Claude Toolkit
+            Browse SKILOON
           </Link>
         </div>
 
@@ -632,7 +632,7 @@ export default function TaxPilotPage() {
                 Privacy
               </Link>
               <Link href="/" className="transition-colors" style={{ color: "inherit" }}>
-                Claude Toolkit
+                SKILOON
               </Link>
               <a
                 href="mailto:support@addonweb.io"

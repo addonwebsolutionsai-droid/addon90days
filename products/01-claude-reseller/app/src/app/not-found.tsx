@@ -11,7 +11,7 @@ import { ArrowLeft, Search } from "lucide-react";
 
 export const metadata = {
   title: "Page not found",
-  description: "The page you're looking for doesn't exist on Claude Toolkit.",
+  description: "The page you're looking for doesn't exist on SKILOON.",
 };
 
 export default function NotFound() {

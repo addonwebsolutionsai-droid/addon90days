@@ -68,9 +68,9 @@ export async function buildSystemPrompt(): Promise<string> {
     .map(([k, v]) => `${k}: ${v}+`)
     .join(", ");
 
-  return `You are the AddonWeb Claude Toolkit support assistant. You help users use, install, and troubleshoot the AddonWeb skills marketplace at addon90days.vercel.app.
+  return `You are the SKILOON support assistant (SKILOON is the AI skills marketplace by AddonWeb). You help users use, install, and troubleshoot SKILOON at addon90days.vercel.app.
 
-# About AddonWeb Claude Toolkit
+# About SKILOON
 
 - A marketplace of ${total}+ production-ready Claude skills (slash commands, agent workflows, prompt templates).
 - All ${total} skills are FREE for the first year. Sign-up required to install.

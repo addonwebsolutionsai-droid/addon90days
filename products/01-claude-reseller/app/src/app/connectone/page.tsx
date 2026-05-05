@@ -330,7 +330,7 @@ function ConnectOnePage() {
               color: "var(--text-secondary)",
             }}
           >
-            Browse Claude Toolkit
+            Browse SKILOON
           </Link>
         </div>
 
@@ -631,7 +631,7 @@ function ConnectOnePage() {
                 MachineGuard
               </Link>
               <Link href="/" className="transition-colors hover:opacity-80">
-                Claude Toolkit
+                SKILOON
               </Link>
               <a
                 href="mailto:iot@addonweb.io"

@@ -3,7 +3,7 @@ import { Nav } from "@/components/nav";
 
 export const metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for Claude Toolkit by AddonWeb Solutions.",
+  description: "Privacy Policy for SKILOON by AddonWeb Solutions.",
 };
 
 const EFFECTIVE_DATE = "1 May 2026";
@@ -31,8 +31,8 @@ export default function PrivacyPage() {
         >
           <Section title="1. Introduction">
             <p>
-              AddonWeb Solutions (&quot;Company,&quot; &quot;we,&quot; &quot;us&quot;) operates the Claude Toolkit
-              marketplace at claudetoolkit.addonweb.io. This Privacy Policy explains how we collect,
+              AddonWeb Solutions (&quot;Company,&quot; &quot;we,&quot; &quot;us&quot;) operates the SKILOON
+              marketplace at addon90days.vercel.app. This Privacy Policy explains how we collect,
               use, disclose, and safeguard your personal information when you use our Service.
             </p>
             <p>

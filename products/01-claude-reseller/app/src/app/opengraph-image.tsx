@@ -17,7 +17,7 @@ export const runtime = "edge";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "AddonWeb Claude Toolkit — 130 production-ready Claude skills, free for the first year";
+export const alt = "SKILOON — AI Skills. Limitless Future. 130+ production-ready Claude skills. Free for the first year.";
 
 export default async function OG() {
   return new ImageResponse(
@@ -79,8 +79,8 @@ export default async function OG() {
             >
               ▲
             </div>
-            <span style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.5 }}>
-              AddonWeb Claude Toolkit
+            <span style={{ fontSize: 32, fontWeight: 800, letterSpacing: 1 }}>
+              SKILOON
             </span>
           </div>
           <div

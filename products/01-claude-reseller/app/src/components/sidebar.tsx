@@ -18,7 +18,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
-  Zap,
+  Infinity as InfinityIcon,
   Menu,
   X,
   TrendingUp,
@@ -74,14 +74,14 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
       <Link
         href="/"
         onClick={onNavigate}
-        aria-label="AddonWeb Claude Toolkit — home"
+        aria-label="SKILOON — AI Skills. Limitless Future."
         className="flex items-center gap-2.5 px-4 h-14 shrink-0 border-b transition-colors hover:bg-white/5"
         style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
       >
         <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shrink-0">
-          <Zap size={13} className="text-white" />
+          <InfinityIcon size={14} className="text-white" strokeWidth={2.5} />
         </div>
-        <span className="font-semibold text-sm leading-none">Claude Toolkit</span>
+        <span className="font-semibold text-sm leading-none tracking-wide">SKILOON</span>
       </Link>
 
       <div className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
@@ -353,10 +353,10 @@ export function Sidebar() {
       >
         <div className="flex items-center gap-2 pointer-events-auto">
           <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
-            <Zap size={11} className="text-white" />
+            <InfinityIcon size={12} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-            Claude Toolkit
+          <span className="font-semibold text-sm tracking-wide" style={{ color: "var(--text-primary)" }}>
+            SKILOON
           </span>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/admin-guard";
 import Link from "next/link";
 import { Shield, Users, ArrowLeft } from "lucide-react";
 
-export const metadata = { title: "Admin · Claude Toolkit" };
+export const metadata = { title: "Admin · SKILOON" };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const guard = await requireAdmin();

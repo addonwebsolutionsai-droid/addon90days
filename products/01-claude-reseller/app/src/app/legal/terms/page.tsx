@@ -3,7 +3,7 @@ import { Nav } from "@/components/nav";
 
 export const metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for Claude Toolkit by AddonWeb Solutions.",
+  description: "Terms of Service for SKILOON by AddonWeb Solutions.",
 };
 
 const EFFECTIVE_DATE = "1 May 2026";
@@ -31,7 +31,7 @@ export default function TermsPage() {
         >
           <Section title="1. Acceptance of Terms">
             <p>
-              By accessing or using Claude Toolkit (&quot;Service&quot;) operated by AddonWeb Solutions
+              By accessing or using SKILOON (&quot;Service&quot;) operated by AddonWeb Solutions
               (&quot;Company,&quot; &quot;we,&quot; &quot;us&quot;), you agree to be bound by these Terms of Service
               (&quot;Terms&quot;). If you do not agree to these Terms, do not use the Service.
             </p>
@@ -42,7 +42,7 @@ export default function TermsPage() {
 
           <Section title="2. Description of Service">
             <p>
-              Claude Toolkit is a digital marketplace of AI skill modules (&quot;Skills&quot;) designed to
+              SKILOON is a digital marketplace of AI skill modules (&quot;Skills&quot;) designed to
               run with Anthropic&apos;s Claude API, Claude Code, and compatible MCP servers. Skills
               are delivered as TypeScript/JavaScript packages with associated documentation.
             </p>

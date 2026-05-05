@@ -184,7 +184,7 @@ async function loadCatalogSkill(slug: string): Promise<Skill | null> {
 
 function buildSkillSystemPrompt(skill: Skill): string {
   const lines: string[] = [];
-  lines.push(`You are executing the "${skill.title}" skill from the AddonWeb Claude Toolkit.`);
+  lines.push(`You are executing the "${skill.title}" skill from SKILOON (by AddonWeb).`);
   lines.push("");
   lines.push(skill.description);
   lines.push("");

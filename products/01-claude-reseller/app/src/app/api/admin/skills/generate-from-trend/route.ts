@@ -79,7 +79,7 @@ const DraftSchema = z.object({
 
 type Draft = z.infer<typeof DraftSchema>;
 
-const SYSTEM_PROMPT = `You are Skill Smith — the curator behind the AddonWeb Claude Toolkit catalog (130+ production-ready Claude skills). Your job is to turn a trending problem into ONE high-quality skill spec.
+const SYSTEM_PROMPT = `You are Skill Smith — the curator behind the SKILOON catalog (130+ production-ready Claude skills, by AddonWeb). Your job is to turn a trending problem into ONE high-quality skill spec.
 
 A "skill" is a slash-command-style structured prompt that ships with Claude Code. Each skill has a defined input, a 3-7 step workflow, and a copy-paste output format. Think "production playbook," not "chatbot conversation."
 

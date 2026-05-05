@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Terminal, Zap, Shield, Package, ExternalLink } from "lucide-react";
+import { ArrowRight, Terminal, Zap, Infinity as InfinityIcon, Shield, Package, ExternalLink } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -383,9 +383,9 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-5">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
-                <Zap size={11} className="text-white" />
+                <InfinityIcon size={12} className="text-white" strokeWidth={2.5} />
               </div>
-              <span className="font-semibold text-sm">Claude Toolkit</span>
+              <span className="font-semibold text-sm tracking-wide">SKILOON</span>
             </div>
             <div className="flex items-center gap-5 text-xs" style={{ color: "var(--text-muted)" }}>
               <Link href="/legal/terms"    className="hover:text-violet-400 transition-colors">Terms</Link>

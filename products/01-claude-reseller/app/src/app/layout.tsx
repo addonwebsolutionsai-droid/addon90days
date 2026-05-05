@@ -23,12 +23,13 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Claude Toolkit — Skills, MCP Servers & Agent Packs",
-    template: "%s | Claude Toolkit",
+    default: "SKILOON — AI Skills. Limitless Future.",
+    template: "%s | SKILOON",
   },
   description:
-    "Production-ready Claude skills, MCP servers, and agent bundles. Built by practitioners. 1-line install. Ships in minutes.",
+    "SKILOON is the marketplace of production-ready Claude skills, MCP servers, and agent bundles. 1-line install. Ships in minutes. Free for the first year.",
   keywords: [
+    "SKILOON",
     "Claude",
     "Claude Code",
     "MCP server",
@@ -41,15 +42,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "Claude Toolkit",
-    title: "Claude Toolkit — Skills, MCP Servers & Agent Packs",
+    siteName: "SKILOON",
+    title: "SKILOON — AI Skills. Limitless Future.",
     description:
-      "Production-ready Claude skills and MCP servers. Built by practitioners who run a 13-agent AI company.",
+      "Production-ready Claude skills, MCP servers, and agent bundles. Built by practitioners who run a 13-agent AI company.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Claude Toolkit",
-    description: "Production-ready Claude skills. 1-line install.",
+    title: "SKILOON — AI Skills. Limitless Future.",
+    description: "Production-ready Claude skills. 1-line install. Free for the first year.",
   },
 };
 

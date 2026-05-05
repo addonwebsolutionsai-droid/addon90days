@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { Zap, LayoutDashboard, Sparkles, Plug, Share2, Shield, Settings } from "lucide-react";
+import { Infinity as InfinityIcon, LayoutDashboard, Sparkles, Plug, Share2, Shield, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/account",           icon: LayoutDashboard, label: "Overview"  },
@@ -34,14 +34,14 @@ export default async function AccountLayout({ children }: AccountLayoutProps) {
         {/* Brand — entire group is the home link */}
         <Link
           href="/"
-          aria-label="AddonWeb Claude Toolkit — home"
+          aria-label="SKILOON — AI Skills. Limitless Future."
           className="flex items-center gap-2 px-5 h-14 border-b transition-colors hover:bg-white/5"
           style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
         >
           <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center">
-            <Zap size={13} className="text-white" />
+            <InfinityIcon size={14} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="font-semibold text-sm">Claude Toolkit</span>
+          <span className="font-semibold text-sm tracking-wide">SKILOON</span>
         </Link>
 
         {/* Nav items */}
@@ -80,9 +80,9 @@ export default async function AccountLayout({ children }: AccountLayoutProps) {
         >
           <Link href="/" className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
-              <Zap size={11} className="text-white" />
+              <InfinityIcon size={12} className="text-white" strokeWidth={2.5} />
             </div>
-            <span className="font-semibold text-sm">Claude Toolkit</span>
+            <span className="font-semibold text-sm tracking-wide">SKILOON</span>
           </Link>
           <UserButton afterSignOutUrl="/" />
         </div>
