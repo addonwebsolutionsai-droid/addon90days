@@ -10,7 +10,37 @@ Items awaiting founder approval. Agents append here; founder clears via `/approv
 
 ---
 
-## Pending (6)
+## Pending (7)
+
+### #008 — Skill Smith routine — needs ROUTINE_API_SECRET to start firing daily
+
+- **Category:** strategic-decision (founder action: 3 min)
+- **Urgency:** within 24h to enable tomorrow's first run
+- **Submitted by:** @cto
+
+Founder asked why no daily skill additions had shipped. Honest answer was filed and fixed: a complete pipeline now exists.
+
+**What ships in this commit:**
+- `POST /api/admin/skills/generate-from-trend` (Bearer-token gated). Pipeline: Groq generates skill draft from a trend topic → second Groq call scores 1-10 → only score ≥ 7 inserts to Supabase as `published=true, is_new=true, trending_score=5, is_featured=false`.
+- Cloud routine `trig_01CbNR8dkRdJjgPyY52pH4yr` ("AddonWeb · Skill Smith (8 AM IST daily)"). Pulls latest `operations/problem-radar/*.md` from GitHub, picks the top H2 trend, calls the endpoint, Telegrams the result with a `/unpublish <slug>` reply hint.
+- Routine is currently **DISABLED** — see action below before re-enabling.
+
+**Why disabled:** The `ADMIN_API_KEY` value on Vercel was rotated this morning during the GitGuardian incident; the value in `.env.local` is the old (revoked) one. The routine prompt has the old key and would 401 every morning. Fix is one new env var so we don't have to share the rotated admin key.
+
+**Founder action — 3 min:**
+
+1. Generate a fresh secret:
+   ```bash
+   openssl rand -hex 32
+   ```
+
+2. Add to Vercel env: name `ROUTINE_API_SECRET`, value the 64-char output, environments **all** (production + preview + development).
+
+3. Tell me the value here. I'll update the routine prompt to use it (replacing the dead ADMIN_API_KEY) and re-enable the routine. First fire next morning at 8 AM IST.
+
+(The endpoint already accepts both `ADMIN_API_KEY` and `ROUTINE_API_SECRET` as Bearer tokens, so this doesn't break anything else.)
+
+---
 
 ### #006 — Make GitHub repo PRIVATE (founder revised position)
 

@@ -166,11 +166,17 @@ async function callGroq(messages: GroqMessage[], maxTokens: number): Promise<str
   return content;
 }
 
+// Accept either ADMIN_API_KEY (for the founder to curl from a terminal) or
+// ROUTINE_API_SECRET (for cloud routines). Two keys so we can rotate the
+// founder's day-to-day key without breaking the daily cron, and vice versa.
 function isAuthorized(req: Request): boolean {
-  const adminKey = process.env["ADMIN_API_KEY"];
-  if (adminKey === undefined || adminKey === "") return false;
+  const adminKey   = process.env["ADMIN_API_KEY"];
+  const routineKey = process.env["ROUTINE_API_SECRET"];
   const auth = req.headers.get("authorization") ?? "";
-  return auth === `Bearer ${adminKey}`;
+  if (auth.length === 0) return false;
+  if (adminKey !== undefined && adminKey !== "" && auth === `Bearer ${adminKey}`)   return true;
+  if (routineKey !== undefined && routineKey !== "" && auth === `Bearer ${routineKey}`) return true;
+  return false;
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
