@@ -22,6 +22,7 @@ const SKILL_CATEGORIES = [
   "devops-infra",
   "communication-protocols",
   "marketing-growth",
+  "trading-finance",
 ] as const;
 
 const InsertSkillSchema = z.object({
