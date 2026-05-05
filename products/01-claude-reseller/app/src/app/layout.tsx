@@ -23,13 +23,13 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SKILOON — AI Skills. Limitless Future.",
-    template: "%s | SKILOON",
+    default: "SKILON — AI Skills. Limitless Future.",
+    template: "%s | SKILON",
   },
   description:
-    "SKILOON is the marketplace of production-ready Claude skills, MCP servers, and agent bundles. 1-line install. Ships in minutes. Free for the first year.",
+    "SKILON is the marketplace of production-ready Claude skills, MCP servers, and agent bundles. 1-line install. Ships in minutes. Free for the first year.",
   keywords: [
-    "SKILOON",
+    "SKILON",
     "Claude",
     "Claude Code",
     "MCP server",
@@ -42,14 +42,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "SKILOON",
-    title: "SKILOON — AI Skills. Limitless Future.",
+    siteName: "SKILON",
+    title: "SKILON — AI Skills. Limitless Future.",
     description:
       "Production-ready Claude skills, MCP servers, and agent bundles. Built by practitioners who run a 13-agent AI company.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "SKILOON — AI Skills. Limitless Future.",
+    title: "SKILON — AI Skills. Limitless Future.",
     description: "Production-ready Claude skills. 1-line install. Free for the first year.",
   },
 };

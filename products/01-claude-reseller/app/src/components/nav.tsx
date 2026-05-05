@@ -18,7 +18,7 @@ export function Nav() {
         <Link
           href="/"
           className="flex items-center gap-2 shrink-0"
-          aria-label="SKILOON home"
+          aria-label="SKILON home"
         >
           <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shrink-0">
             <InfinityIcon size={14} className="text-white" strokeWidth={2.5} />
@@ -27,7 +27,7 @@ export function Nav() {
             className="font-semibold text-sm tracking-wide"
             style={{ color: "var(--text-primary)" }}
           >
-            SKILOON
+            SKILON
           </span>
           <span className="text-[10px] bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded font-mono hidden sm:inline">
             v1.0

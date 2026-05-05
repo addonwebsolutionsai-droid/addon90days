@@ -29,7 +29,7 @@ const MAX_PERSIST  = 30;
 
 const GREETING: ChatMessage = {
   role:    "assistant",
-  content: "Hi — SKILOON support here. I can help with installing skills, fixing Claude Desktop config, or anything else about the marketplace. What's up?",
+  content: "Hi — SKILON support here. I can help with installing skills, fixing Claude Desktop config, or anything else about the marketplace. What's up?",
 };
 
 export function ChatWidget() {
@@ -223,7 +223,7 @@ export function ChatWidget() {
                 <Sparkles size={14} className="text-violet-400" />
               </div>
               <div>
-                <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>SKILOON Support</div>
+                <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>SKILON Support</div>
                 <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                   AI assistant · 24/7 · escalates to founder when needed
                 </div>
@@ -291,7 +291,7 @@ export function ChatWidget() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask anything about SKILOON…"
+                placeholder="Ask anything about SKILON…"
                 disabled={sending}
                 className="flex-1 h-10 px-3 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                 style={{

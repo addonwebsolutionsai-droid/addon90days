@@ -3,7 +3,7 @@
  *
  * Anthropic / OpenAI / Perplexity crawler hint file. Lists the canonical
  * documentation surfaces in a flat plain-text format so AI assistants
- * can answer "what is SKILOON" without scraping our full marketing pages.
+ * can answer "what is SKILON" without scraping our full marketing pages.
  *
  * Spec: https://llmstxt.org/
  */
@@ -12,13 +12,13 @@ export const runtime = "edge";
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
-const CONTENT = `# SKILOON — AI Skills. Limitless Future.
+const CONTENT = `# SKILON — AI Skills. Limitless Future.
 
 > 130+ production-ready Claude skills, MCP servers, and agent bundles. Free for the first year — no credit card, no paywall, no usage cap. 1-line install. Ships in minutes.
 
 ## What it is
 
-SKILOON is a marketplace of structured prompts ("skills") for Claude Code and Claude Desktop. Each skill is a defined input schema + step-by-step workflow + copy-paste output — not a chatbot conversation, a repeatable production workflow.
+SKILON is a marketplace of structured prompts ("skills") for Claude Code and Claude Desktop. Each skill is a defined input schema + step-by-step workflow + copy-paste output — not a chatbot conversation, a repeatable production workflow.
 
 - 130 skills across 11 categories (IoT & Hardware, Indian Business, Developer Tools, Trading & Finance, Startup & Product, Data & Analytics, DevOps, UI/UX, Protocols, AI/LLM, Marketing)
 - Install via npm: \`npx addonweb-claude-skills install <slug>\`

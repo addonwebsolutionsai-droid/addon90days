@@ -626,7 +626,7 @@ function MachineGuardPage() {
                 ConnectOne
               </Link>
               <Link href="/" className="transition-colors hover:opacity-80">
-                SKILOON
+                SKILON
               </Link>
               <a
                 href="mailto:iot@addonweb.io"

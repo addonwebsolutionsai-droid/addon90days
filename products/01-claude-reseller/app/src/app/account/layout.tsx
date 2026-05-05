@@ -34,14 +34,14 @@ export default async function AccountLayout({ children }: AccountLayoutProps) {
         {/* Brand — entire group is the home link */}
         <Link
           href="/"
-          aria-label="SKILOON — AI Skills. Limitless Future."
+          aria-label="SKILON — AI Skills. Limitless Future."
           className="flex items-center gap-2 px-5 h-14 border-b transition-colors hover:bg-white/5"
           style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
         >
           <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center">
             <InfinityIcon size={14} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="font-semibold text-sm tracking-wide">SKILOON</span>
+          <span className="font-semibold text-sm tracking-wide">SKILON</span>
         </Link>
 
         {/* Nav items */}
@@ -82,7 +82,7 @@ export default async function AccountLayout({ children }: AccountLayoutProps) {
             <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
               <InfinityIcon size={12} className="text-white" strokeWidth={2.5} />
             </div>
-            <span className="font-semibold text-sm tracking-wide">SKILOON</span>
+            <span className="font-semibold text-sm tracking-wide">SKILON</span>
           </Link>
           <UserButton afterSignOutUrl="/" />
         </div>

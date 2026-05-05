@@ -74,14 +74,14 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
       <Link
         href="/"
         onClick={onNavigate}
-        aria-label="SKILOON — AI Skills. Limitless Future."
+        aria-label="SKILON — AI Skills. Limitless Future."
         className="flex items-center gap-2.5 px-4 h-14 shrink-0 border-b transition-colors hover:bg-white/5"
         style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
       >
         <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shrink-0">
           <InfinityIcon size={14} className="text-white" strokeWidth={2.5} />
         </div>
-        <span className="font-semibold text-sm leading-none tracking-wide">SKILOON</span>
+        <span className="font-semibold text-sm leading-none tracking-wide">SKILON</span>
       </Link>
 
       <div className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
@@ -356,7 +356,7 @@ export function Sidebar() {
             <InfinityIcon size={12} className="text-white" strokeWidth={2.5} />
           </div>
           <span className="font-semibold text-sm tracking-wide" style={{ color: "var(--text-primary)" }}>
-            SKILOON
+            SKILON
           </span>
         </div>
       </div>

@@ -385,7 +385,7 @@ export default function HomePage() {
               <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
                 <InfinityIcon size={12} className="text-white" strokeWidth={2.5} />
               </div>
-              <span className="font-semibold text-sm tracking-wide">SKILOON</span>
+              <span className="font-semibold text-sm tracking-wide">SKILON</span>
             </div>
             <div className="flex items-center gap-5 text-xs" style={{ color: "var(--text-muted)" }}>
               <Link href="/legal/terms"    className="hover:text-violet-400 transition-colors">Terms</Link>

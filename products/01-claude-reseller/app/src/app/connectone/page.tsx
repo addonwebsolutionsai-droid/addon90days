@@ -330,7 +330,7 @@ function ConnectOnePage() {
               color: "var(--text-secondary)",
             }}
           >
-            Browse SKILOON
+            Browse SKILON
           </Link>
         </div>
 
@@ -631,7 +631,7 @@ function ConnectOnePage() {
                 MachineGuard
               </Link>
               <Link href="/" className="transition-colors hover:opacity-80">
-                SKILOON
+                SKILON
               </Link>
               <a
                 href="mailto:iot@addonweb.io"

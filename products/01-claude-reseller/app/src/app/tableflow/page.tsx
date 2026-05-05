@@ -324,7 +324,7 @@ export default function TableFlowPage() {
               color: "var(--text-secondary)",
             }}
           >
-            Browse SKILOON
+            Browse SKILON
           </Link>
         </div>
 
@@ -623,7 +623,7 @@ export default function TableFlowPage() {
                 Privacy
               </Link>
               <Link href="/" className="transition-colors" style={{ color: "inherit" }}>
-                SKILOON
+                SKILON
               </Link>
               <a
                 href="mailto:support@addonweb.io"

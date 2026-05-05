@@ -302,7 +302,7 @@ export default function ChatBasePage() {
               color: "var(--text-secondary)",
             }}
           >
-            Browse SKILOON
+            Browse SKILON
           </Link>
         </div>
 
@@ -576,7 +576,7 @@ export default function ChatBasePage() {
                 Privacy
               </Link>
               <Link href="/" className="hover:text-green-400 transition-colors">
-                SKILOON
+                SKILON
               </Link>
               <a
                 href="mailto:support@addonweb.io"

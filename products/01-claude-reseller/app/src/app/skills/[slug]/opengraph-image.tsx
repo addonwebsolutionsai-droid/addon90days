@@ -12,7 +12,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "SKILOON — AI Skills. Limitless Future.";
+export const alt = "SKILON — AI Skills. Limitless Future.";
 
 const CATEGORY_ACCENT: Record<string, { color: string; emoji: string; label: string }> = {
   "ai-llm":                  { color: "#8b5cf6", emoji: "🤖", label: "AI & LLM" },
@@ -52,7 +52,7 @@ export default async function OG({ params }: { params: Promise<{ slug: string }>
   const skill    = await fetchSkill(slug);
   const accent   = skill ? (CATEGORY_ACCENT[skill.category] ?? CATEGORY_ACCENT["ai-llm"]!) : CATEGORY_ACCENT["ai-llm"]!;
   const title    = skill?.title   ?? slug;
-  const tagline  = skill?.tagline ?? "A production-ready Claude skill from SKILOON.";
+  const tagline  = skill?.tagline ?? "A production-ready Claude skill from SKILON.";
 
   return new ImageResponse(
     (
@@ -102,7 +102,7 @@ export default async function OG({ params }: { params: Promise<{ slug: string }>
               ▲
             </div>
             <span style={{ fontSize: 26, fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: 1 }}>
-              SKILOON
+              SKILON
             </span>
           </div>
           <div
