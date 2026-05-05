@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Terminal, Zap, Infinity as InfinityIcon, Shield, Package, ExternalLink } from "lucide-react";
+import { ArrowRight, Terminal, Zap, Infinity as InfinityIcon, Shield, Package, ExternalLink, UserPlus } from "lucide-react";
 import { SITE_BASE_URL } from "@/lib/site-config";
 
 // ---------------------------------------------------------------------------
@@ -149,7 +149,7 @@ export default function HomePage() {
               color: "var(--text-secondary)",
             }}
           >
-            <Terminal size={14} /> Create free account
+            <UserPlus size={14} /> Create free account
           </Link>
         </div>
 
@@ -314,10 +314,11 @@ export default function HomePage() {
                   </span>
                   <div className="flex items-center gap-1.5">
                     <span
-                      className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                      className="text-[10px] px-1.5 py-0.5 rounded"
                       style={{ color: "var(--text-muted)", backgroundColor: "var(--bg-s2)" }}
+                      title={`${skill.steps} step${skill.steps === 1 ? "" : "s"}`}
                     >
-                      {skill.steps}s
+                      {skill.steps} {skill.steps === 1 ? "step" : "steps"}
                     </span>
                   </div>
                 </div>

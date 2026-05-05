@@ -126,19 +126,10 @@ function SkillGridCard({ skill, index }: SkillGridCardProps) {
       }}
     >
       <div className="p-4 flex flex-col flex-1">
-        {/* Trending badge */}
-        {skill.is_trending && (
-          <span
-            aria-label="Trending"
-            className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-semibold text-orange-400"
-          >
-            <Flame size={10} className="fill-orange-400" />
-            TRENDING
-          </span>
-        )}
-
-        {/* Category + NEW badge */}
-        <div className="flex items-center gap-1.5 mb-2.5">
+        {/* Single badge row — inline, wraps if needed. Previously had
+            TRENDING as an absolute top-right badge that overlapped the
+            step count on the right side of this row. */}
+        <div className="flex items-center gap-1.5 mb-2.5 flex-wrap">
           <span
             className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded"
             style={{ color, backgroundColor: `${color}18` }}
@@ -150,12 +141,22 @@ function SkillGridCard({ skill, index }: SkillGridCardProps) {
               NEW
             </span>
           )}
+          {skill.is_trending && (
+            <span
+              aria-label="Trending"
+              className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400"
+            >
+              <Flame size={10} className="fill-orange-400" />
+              Trending
+            </span>
+          )}
           {stepCount > 0 && (
             <span
-              className="text-[10px] font-mono px-1.5 py-0.5 rounded ml-auto"
+              className="text-[10px] px-1.5 py-0.5 rounded ml-auto"
               style={{ color: "var(--text-muted)", backgroundColor: "var(--bg-s2)" }}
+              title={`${stepCount} step${stepCount === 1 ? "" : "s"} in this skill`}
             >
-              {stepCount}s
+              {stepCount} {stepCount === 1 ? "step" : "steps"}
             </span>
           )}
         </div>
