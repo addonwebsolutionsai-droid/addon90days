@@ -26,13 +26,17 @@ const CATEGORIES = [
   { key: "trading-finance",         emoji: "📉", label: "Trading & Finance",   color: "#eab308" },
 ];
 
+// Featured skills shown on the homepage. Slugs MUST exist in the live catalog
+// (Supabase `skills` table) — broken links here surface as 404s for every
+// landing-page visitor. If you add or rename, verify with:
+//   curl -o /dev/null -w "%{http_code}" https://addon90days.vercel.app/skills/<slug>
 const FEATURED_SKILLS = [
-  { slug: "invoice-generator",         title: "Invoice Generator",          tagline: "GST-compliant invoices in seconds. Supports multi-item, HSN codes, and PDF export.", category: "Indian Business", color: "#f97316", free: true,  steps: 4 },
-  { slug: "sql-query-builder",         title: "SQL Query Builder",          tagline: "Natural language to optimised SQL. Supports joins, CTEs, window functions.",           category: "Developer Tools", color: "#f59e0b", free: false, steps: 3 },
-  { slug: "esp32-firmware-scaffold",   title: "ESP32 Firmware Scaffold",    tagline: "FreeRTOS boilerplate with MQTT, OTA updates, and power management baked in.",         category: "IoT & Hardware",  color: "#06b6d4", free: false, steps: 6 },
-  { slug: "stock-screener-ai",         title: "AI Stock Screener",          tagline: "Scan BSE/NSE with technical + fundamental filters. Exports to Google Sheets.",        category: "Trading & Finance",color: "#eab308", free: false, steps: 5 },
-  { slug: "pr-description",            title: "PR Description Writer",      tagline: "Auto-generates structured PR descriptions from git diff. Markdown-ready.",            category: "Developer Tools", color: "#f59e0b", free: true,  steps: 2 },
-  { slug: "product-roadmap-generator", title: "Product Roadmap Generator",  tagline: "RICE-scored roadmap from problem statement + user goals. Exports to Notion.",         category: "Startup & Product",color: "#ec4899", free: false, steps: 4 },
+  { slug: "gst-invoice-generator",   title: "GST Invoice Generator",   tagline: "GST-compliant invoices with CGST/SGST/IGST calculations. Multi-item, HSN codes, PDF export.", category: "Indian Business",  color: "#f97316", free: true,  steps: 4 },
+  { slug: "sql-query-builder",       title: "SQL Query Builder",       tagline: "Natural language to optimised SQL. Supports joins, CTEs, window functions.",                category: "Developer Tools",  color: "#f59e0b", free: false, steps: 3 },
+  { slug: "esp32-firmware-scaffold", title: "ESP32 Firmware Scaffold", tagline: "FreeRTOS boilerplate with MQTT, OTA updates, and power management baked in.",               category: "IoT & Hardware",   color: "#06b6d4", free: false, steps: 6 },
+  { slug: "stock-screener-ai",       title: "AI Stock Screener",       tagline: "Scan BSE/NSE with technical + fundamental filters. Exports to Google Sheets.",              category: "Trading & Finance",color: "#eab308", free: false, steps: 5 },
+  { slug: "code-reviewer",           title: "Code Reviewer",           tagline: "Security-focused AI code review: OWASP top 10, type safety, performance.",                  category: "Developer Tools",  color: "#f59e0b", free: true,  steps: 3 },
+  { slug: "product-roadmap-builder", title: "Product Roadmap Builder", tagline: "RICE-scored quarterly roadmap from goals and user feedback. Exports to Notion.",            category: "Startup & Product",color: "#ec4899", free: false, steps: 4 },
 ];
 
 const CODE_SNIPPET = `import { invoiceGenerator, runSkill } from "@addonweb/claude-toolkit"
