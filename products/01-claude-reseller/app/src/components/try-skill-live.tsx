@@ -64,14 +64,16 @@ export function TrySkillLive({ slug, title, defaultInput, isSignedIn }: Props) {
         signal:  ac.signal,
       });
 
-      if (res.status === 401) {
-        // Shouldn't reach here — button checks isSignedIn first — but defend anyway.
-        setError("Please sign in to run skills.");
+      if (res.status === 401 || res.status === 404) {
+        // 401 = explicit unauthenticated. 404 = Clerk middleware blocked
+        // an unauth API request (Clerk's default behavior). Both mean
+        // "your session isn't reaching the API" — surface the same UX.
+        setError("Your session expired. Sign in again to run skills.");
         return;
       }
       if (!res.ok) {
         const body = await res.json().catch(() => ({} as { error?: string }));
-        const msg  = (body as { error?: string }).error ?? `HTTP ${res.status}`;
+        const msg  = (body as { error?: string }).error ?? `Server returned ${res.status}. Please retry in a moment.`;
         setError(msg.length > 240 ? `${msg.slice(0, 240)}…` : msg);
         return;
       }
@@ -233,7 +235,17 @@ export function TrySkillLive({ slug, title, defaultInput, isSignedIn }: Props) {
           style={{ color: "#fca5a5" }}
         >
           <div className="flex items-start justify-between gap-2">
-            <span>{error}</span>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span>{error}</span>
+              {/^Your session expired/.test(error) && (
+                <Link
+                  href={`/sign-in?redirect_url=${encodeURIComponent(`/skills/${slug}`)}`}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors"
+                >
+                  Sign in <ArrowRight size={11} />
+                </Link>
+              )}
+            </div>
             <button
               type="button"
               onClick={handleClear}

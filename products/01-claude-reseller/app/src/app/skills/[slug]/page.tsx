@@ -263,11 +263,11 @@ export default async function SkillDetailPage({
               {skill.tagline}
             </p>
 
-            {/* Free during beta badge */}
+            {/* Live status badge */}
             <div className="flex items-center gap-3 mt-3 flex-wrap">
               <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded-full bg-green-500/15 text-green-500">
                 <Sparkles size={11} />
-                Free during beta
+                Free
               </span>
               <a
                 href="#install"

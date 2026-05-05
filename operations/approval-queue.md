@@ -10,7 +10,34 @@ Items awaiting founder approval. Agents append here; founder clears via `/approv
 
 ---
 
-## Pending (3)
+## Pending (4)
+
+### #005 — Abuse prevention layers for the free-for-1-year era
+
+- **Category:** strategic-decision (mostly founder dashboard toggles)
+- **Urgency:** Day 1–7 of public traffic, not blocking launch
+- **Submitted by:** @cto
+
+**Founder asked:** "We should put some kind of restrictions otherwise free users come and misuse the product. Is it viable? do you agree?"
+
+**Yes, agree.** Real attack vector for a free product is **multi-account farming** (one bad actor creates 100 throwaway emails to bypass per-user rate limits). Existing defenses (60 runs/user/hr + Groq free tier caps + sign-in required) are decent but not enough at 100k-user scale.
+
+**Recommend 4 cheap measures, in priority order:**
+
+1. **Email verification required before first install** (Clerk one-click toggle) — kills throwaway emails. Founder action: Clerk Dashboard → User & Authentication → Email Verification → "Verify before sign-up". 2 min.
+2. **CAPTCHA on signup** (Clerk's built-in Cloudflare Turnstile, free) — kills automated signup farms. Founder action: Clerk Dashboard → User & Authentication → Bot Protection → enable. 1 min.
+3. **Daily total cap per user** (in addition to hourly 60) — defends slow-drip abuse. Code change: I can add `skills_run:daily:user:${userId}` rate limit at 200/day. ~10 min by me, no founder action.
+4. **Per-skill abuse monitoring** via PostHog events — see which skills get abused most so we can disable individual ones if needed. Code change: I can wire this once `NEXT_PUBLIC_POSTHOG_KEY` is set on Vercel (queue item still pending).
+
+**Won't recommend** (these kill the 100k goal):
+- Invite-only / waitlist
+- Credit-card-for-verification
+- Email domain allowlists
+- IP geofencing
+
+**Action requested:** approve the 4 measures. I'll implement #3 today; #4 lands when PostHog key is on Vercel; #1 and #2 are 3-min Clerk dashboard toggles.
+
+---
 
 ### #003 — Clerk PRODUCTION instance for going-live
 
