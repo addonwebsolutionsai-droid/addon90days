@@ -169,6 +169,11 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
                 key={key}
                 href={`/skills/category/${key}`}
                 onClick={onNavigate}
+                /* Native tooltip — shows full label on hover when truncated.
+                   "Marketing & Growth" was rendering as "Marketin & Gro…" in
+                   the 220px sidebar; the title attr surfaces the full text. */
+                title={label}
+                aria-label={label}
                 className={`sidebar-category-link flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
                   isActive ? "text-white" : "hover:bg-violet-500/10 hover:text-violet-400"
                 }`}

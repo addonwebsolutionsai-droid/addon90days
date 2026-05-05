@@ -250,6 +250,16 @@ export default function SkillsPageWrapper() {
   );
 }
 
+// Parse a sort param from the URL, returning a valid SortOption or the
+// default. Without this, sidebar clicks on /skills?sort=newest were
+// changing the URL but not the actual order — the page used a hardcoded
+// useState("trending") default.
+function parseSort(raw: string | null): SortOption {
+  if (raw === "newest" || raw === "new") return "newest";
+  if (raw === "most-used" || raw === "views") return "most-used";
+  return "trending";
+}
+
 function SkillsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -260,15 +270,32 @@ function SkillsPage() {
   const [loading, setLoading]               = useState(true);
   const [error, setError]                   = useState<string | null>(null);
 
-  // Filters — category comes from URL so sidebar stays in sync
+  // Filters — category + sort come from URL so sidebar/Discover stay in sync
   const [query, setQuery]                   = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [difficulty, setDifficulty]         = useState<DifficultyOption>("All");
-  const [sort, setSort]                     = useState<SortOption>("trending");
+  const [sort, setSortState]                = useState<SortOption>(() => parseSort(searchParams.get("sort")));
   const [page, setPage]                     = useState(1);
 
-  // Read category from URL param (sidebar writes this)
+  // Read category + sort from URL params (sidebar writes these)
   const activeCategory = searchParams.get("category") ?? "all";
+  const urlSort        = parseSort(searchParams.get("sort"));
+
+  // Sync local sort state when URL sort changes (e.g. user clicks Discover)
+  useEffect(() => {
+    if (urlSort !== sort) setSortState(urlSort);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSort]);
+
+  // setSort that also pushes to URL so Back button works + the change is shareable
+  const setSort = useCallback((next: SortOption) => {
+    setSortState(next);
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "trending") params.delete("sort");
+    else                     params.set("sort", next);
+    const qs = params.toString();
+    router.replace(qs.length > 0 ? `/skills?${qs}` : "/skills", { scroll: false });
+  }, [router, searchParams]);
 
   // Debounce search input
   useEffect(() => {
