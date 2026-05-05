@@ -22,6 +22,7 @@ import { SkillDetailTabs } from "@/components/skill-detail-tabs";
 import { InstallMethods } from "@/components/install-methods";
 import { TrySkillLive } from "@/components/try-skill-live";
 import { ShareSkill } from "@/components/share-skill";
+import { ViewBeacon } from "@/components/view-beacon";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -194,6 +195,9 @@ export default async function SkillDetailPage({
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(skillJsonLd) }}
       />
+
+      {/* Fires one bump per IP per skill per 24h */}
+      <ViewBeacon slug={skill.slug} />
 
       <div className="max-w-3xl mx-auto px-5 py-8">
 

@@ -15,7 +15,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, Copy, ArrowRight, Search } from "lucide-react";
+import { Check, Copy, ArrowRight, Search, Plug } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 import type { Skill, SkillStep } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
 
@@ -473,6 +474,7 @@ export function SkillDetailTabs({
   const [activeTab, setActiveTab] = useState<Tab>("steps");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { isSignedIn, isLoaded: authLoaded } = useUser();
 
   // Filter steps by search query when search is open
   const filteredSteps = searchOpen && searchQuery.trim().length > 0
@@ -599,20 +601,46 @@ export function SkillDetailTabs({
         categoryColor={categoryColor}
       />
 
-      {/* Footer CTA — every skill is free; sign-in is the only gate. */}
+      {/* Footer CTA — every skill is free. CTA copy depends on auth state.
+          During Clerk hydration we render the anon copy as a safe default;
+          it flips to the signed-in version after isLoaded. */}
       <div
         className="mt-8 rounded-2xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-pink-900/10 p-6 text-center"
       >
         <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Free to install. Free to run.</p>
         <h2 className="text-base font-bold mb-3" style={{ color: "var(--text-primary)" }}>
-          Start using {skill.title} now
+          {authLoaded && isSignedIn === true
+            ? `Run ${skill.title} now`
+            : `Start using ${skill.title} now`}
         </h2>
-        <Link
-          href="/sign-in"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm text-white"
-        >
-          Sign in to access <ArrowRight size={13} />
-        </Link>
+        {authLoaded && isSignedIn === true ? (
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <a
+              href="#install"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm text-white"
+            >
+              Install instructions <ArrowRight size={13} />
+            </a>
+            <Link
+              href="/account#connect"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-colors text-sm border"
+              style={{
+                backgroundColor: "var(--bg-surface)",
+                borderColor: "var(--border)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              <Plug size={13} /> Connect Claude Desktop
+            </Link>
+          </div>
+        ) : (
+          <Link
+            href={`/sign-in?redirect_url=${encodeURIComponent(`/skills/${skill.slug}`)}`}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm text-white"
+          >
+            Sign in to access <ArrowRight size={13} />
+          </Link>
+        )}
         <p className="text-xs mt-5" style={{ color: "rgba(255,255,255,0.2)" }}>
           Questions?{" "}
           <a href="mailto:support@addonweb.io" className="hover:text-violet-400 transition-colors">

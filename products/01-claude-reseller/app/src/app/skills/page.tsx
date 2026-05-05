@@ -19,6 +19,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import {
   Search,
   Flame,
@@ -251,6 +252,7 @@ export default function SkillsPageWrapper() {
 function SkillsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isSignedIn, isLoaded: authLoaded } = useUser();
 
   const [skills, setSkills]                 = useState<Skill[]>([]);
   const [total, setTotal]                   = useState(0);
@@ -342,14 +344,21 @@ function SkillsPage() {
     >
       <div className="max-w-5xl mx-auto px-5 py-8">
 
-        {/* Beta banner */}
-        <div className="mb-5 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 flex items-center gap-3 text-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
-          <span className="font-semibold text-green-500 uppercase tracking-wider text-xs">Live</span>
-          <span style={{ color: "var(--text-secondary)" }}>
-            All 130+ skills free for the first year. <Link href="/sign-up" className="text-violet-400 hover:text-violet-300 underline">Sign up</Link> to install.
-          </span>
-        </div>
+        {/* Live banner — copy depends on auth state. Hidden during Clerk
+            hydration so the wrong message never flashes. */}
+        {authLoaded && (
+          <div className="mb-5 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 flex items-center gap-3 text-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+            <span className="font-semibold text-green-500 uppercase tracking-wider text-xs">Live</span>
+            <span style={{ color: "var(--text-secondary)" }}>
+              {isSignedIn === true ? (
+                <>All 130+ skills free for the first year. Pick one and run <code className="px-1.5 py-0.5 rounded font-mono text-[11px]" style={{ backgroundColor: "var(--bg-s2)", color: "var(--text-primary)" }}>npx addonweb-claude-skills install &lt;slug&gt;</code> to install.</>
+              ) : (
+                <>All 130+ skills free for the first year. <Link href="/sign-up" className="text-violet-400 hover:text-violet-300 underline">Sign up</Link> to install.</>
+              )}
+            </span>
+          </div>
+        )}
 
         {/* Page header */}
         <div className="mb-7">
@@ -618,26 +627,51 @@ function SkillsPage() {
           </div>
         )}
 
-        {/* Beta sign-up CTA */}
-        <div className="mt-14 rounded-xl border border-green-500/20 bg-gradient-to-r from-green-900/20 to-violet-900/10 p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-          <div>
-            <p className="text-xs text-green-500 font-medium uppercase tracking-widest mb-1">
-              Public beta · Free
-            </p>
-            <h2 className="text-base font-bold mb-1">
-              Sign up to install any skill
-            </h2>
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              No credit card. All 130+ skills free for the first year.
-            </p>
+        {/* Bottom CTA — show "Sign up" for anon, "Connect Claude Desktop"
+            for signed-in users (the natural next action once they've signed
+            up; pulls them into /account#connect for the MCP config copy). */}
+        {authLoaded && isSignedIn !== true && (
+          <div className="mt-14 rounded-xl border border-green-500/20 bg-gradient-to-r from-green-900/20 to-violet-900/10 p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+            <div>
+              <p className="text-xs text-green-500 font-medium uppercase tracking-widest mb-1">
+                Free for the first year
+              </p>
+              <h2 className="text-base font-bold mb-1">
+                Sign up to install any skill
+              </h2>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                No credit card. All 130+ skills free for the first year.
+              </p>
+            </div>
+            <Link
+              href="/sign-up"
+              className="shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
+            >
+              Create free account
+            </Link>
           </div>
-          <Link
-            href="/sign-up"
-            className="shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
-          >
-            Create free account
-          </Link>
-        </div>
+        )}
+        {authLoaded && isSignedIn === true && (
+          <div className="mt-14 rounded-xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-pink-900/10 p-7 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+            <div>
+              <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-1">
+                You&apos;re signed in
+              </p>
+              <h2 className="text-base font-bold mb-1">
+                Connect Claude Desktop in 30 seconds
+              </h2>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Paste one MCP config block and all 130 skills appear as tools.
+              </p>
+            </div>
+            <Link
+              href="/account#connect"
+              className="shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors text-sm"
+            >
+              Open Connect
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Footer */}

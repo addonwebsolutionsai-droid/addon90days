@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { supabaseAdmin } from "@/lib/supabase";
 
+/**
+ * GET /api/skills/[slug] — read a single published skill.
+ *
+ * View counting is NOT done here. It used to be a fire-and-forget update,
+ * but (a) the function context terminates before it completes, (b) Next.js
+ * caches this response for 60s on the page side so the route only fires
+ * once per minute per skill, and (c) the read-then-update pattern races
+ * under load. View counting now lives in POST /api/skills/[slug]/view,
+ * called by a client-side beacon on the skill detail page.
+ */
 export async function GET(
   _req: Request,
   context: { params: Promise<{ slug: string }> }
@@ -21,12 +30,6 @@ export async function GET(
       { status: 404 }
     );
   }
-
-  // Increment view_count — fire and forget, does not block response
-  void supabaseAdmin
-    .from("skills")
-    .update({ view_count: data.view_count + 1 })
-    .eq("id", data.id);
 
   return NextResponse.json(data);
 }
