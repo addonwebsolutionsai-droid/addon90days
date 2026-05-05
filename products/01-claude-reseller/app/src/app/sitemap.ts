@@ -16,6 +16,7 @@ import type { MetadataRoute } from "next";
  */
 
 import type { Skill } from "@/lib/database.types";
+import { CATEGORY_SLUGS } from "@/lib/category-content";
 
 export const revalidate = 3600; // re-build sitemap at most once an hour
 
@@ -81,6 +82,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/sign-up`,        lastModified: now, changeFrequency: "yearly",  priority: 0.5 },
   ];
 
+  // Per-category landing pages — high-priority SEO surface (medium-tail
+  // queries: "claude skills for [category]"). Each ranks independently.
+  const categoryEntries: MetadataRoute.Sitemap = CATEGORY_SLUGS.map((slug) => ({
+    url:            `${baseUrl}/skills/category/${slug}`,
+    lastModified:   now,
+    changeFrequency: "weekly",
+    priority:       0.85,
+  }));
+
   const skillSlugs = await fetchAllSkillSlugs(baseUrl);
   const skillEntries: MetadataRoute.Sitemap = skillSlugs.map((s) => {
     const updated = s.updated_at ?? s.created_at ?? null;
@@ -92,5 +102,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  return [...staticEntries, ...skillEntries];
+  return [...staticEntries, ...categoryEntries, ...skillEntries];
 }

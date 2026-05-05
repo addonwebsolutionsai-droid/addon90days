@@ -135,7 +135,7 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
             return (
               <Link
                 key={key}
-                href={`/skills?category=${key}`}
+                href={`/skills/category/${key}`}
                 onClick={onNavigate}
                 className={`sidebar-category-link flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
                   isActive ? "text-white" : "hover:bg-violet-500/10 hover:text-violet-400"
@@ -269,8 +269,15 @@ export function Sidebar() {
   const [total, setTotal] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Derive active category from URL
-  const activeCategory = searchParams.get("category");
+  // Derive active category from URL. Two URL shapes are valid:
+  //   /skills?category=indian-business         (legacy filter form)
+  //   /skills/category/indian-business         (SEO landing page)
+  // Either should highlight the same sidebar item.
+  const fromQuery = searchParams.get("category");
+  const fromPath  = pathname.startsWith("/skills/category/")
+    ? pathname.slice("/skills/category/".length).split("/")[0] ?? null
+    : null;
+  const activeCategory = fromPath ?? fromQuery;
 
   // Fetch category counts — cache via SWR-style with 5min cache
   useEffect(() => {

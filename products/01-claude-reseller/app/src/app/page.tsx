@@ -195,6 +195,52 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------------------------------ */}
+      {/* FEATURED INTEGRATIONS                                               */}
+      {/* The infra we actually run on. Real tools, real usage = real        */}
+      {/* credibility. No fake partner logos.                                 */}
+      {/* ------------------------------------------------------------------ */}
+      <section
+        className="py-10 border-t"
+        style={{ borderColor: "var(--border-subtle)" }}
+      >
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="text-xs text-violet-400 font-medium uppercase tracking-widest mb-5 text-center">
+            Powered by best-in-class infrastructure
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {[
+              { name: "Anthropic",  role: "Claude AI engine" },
+              { name: "Vercel",     role: "Hosting + Edge"   },
+              { name: "Supabase",   role: "Database + Auth"  },
+              { name: "Clerk",      role: "User management"  },
+              { name: "Groq",       role: "Fast inference"   },
+              { name: "PostHog",    role: "Analytics"        },
+            ].map(({ name, role }) => (
+              <div
+                key={name}
+                className="rounded-xl border px-4 py-3 text-center transition-all hover:border-violet-500/40"
+                style={{
+                  backgroundColor: "var(--bg-surface)",
+                  borderColor:     "var(--border-subtle)",
+                }}
+              >
+                <div className="text-sm font-semibold tracking-tight" style={{ color: "var(--text-primary)" }}>
+                  {name}
+                </div>
+                <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  {role}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-xs mt-5" style={{ color: "var(--text-muted)" }}>
+            We use this stack ourselves to run a 13-agent AI factory in production. Skills are
+            tested against the same infra you'll deploy on.
+          </p>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
       {/* FEATURED SKILLS                                                     */}
       {/* ------------------------------------------------------------------ */}
       <section

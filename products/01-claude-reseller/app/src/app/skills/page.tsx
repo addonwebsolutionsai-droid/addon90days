@@ -401,12 +401,13 @@ function SkillsPage() {
           />
         </div>
 
-        {/* Category pills — synced with sidebar */}
+        {/* Category pills — synced with sidebar. Wraps onto multiple rows
+            so every category is always visible (the previous overflow-x
+            with hidden scrollbar truncated pills past the viewport edge). */}
         <div
           role="tablist"
           aria-label="Filter by category"
-          className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4"
-          style={{ scrollbarWidth: "none" }}
+          className="flex flex-wrap items-center gap-1.5 mb-4"
         >
           <button
             role="tab"
