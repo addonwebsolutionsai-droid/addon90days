@@ -18,6 +18,7 @@ import { Sidebar } from "@/components/sidebar";
 // transferable asset only when it stands alone visually.
 const SIDEBAR_EXCLUDED_PREFIXES = [
   "/account",
+  "/admin",
   "/sign-in",
   "/sign-up",
   "/dashboard",

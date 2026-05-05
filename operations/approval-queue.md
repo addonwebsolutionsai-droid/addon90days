@@ -10,7 +10,83 @@ Items awaiting founder approval. Agents append here; founder clears via `/approv
 
 ---
 
-## Pending (4)
+## Pending (6)
+
+### #006 — Make GitHub repo PRIVATE (founder revised position)
+
+- **Category:** strategic-decision (founder action: GitHub Settings)
+- **Urgency:** today (going live)
+- **Submitted by:** @cto
+
+Founder updated stance: *"github which is vulnerable and not good for business"* — wants the repo private now. Earlier this session I recommended public-for-launch + reassess Day 30. Founder overrides; we go private.
+
+**Steps (founder, ~5 min):**
+
+1. github.com/addonwebsolutionsai-droid/addon90days → Settings → scroll to "Danger Zone" → "Change repository visibility" → "Make private". Confirm.
+
+2. **Vercel deploy implication.** Going private may re-trigger the "commit author did not have contributing access" Hobby block (the same one we hit on 2026-05-04 when commits were authored by `addonwebsolutions-AI` rather than the Vercel-linked GitHub owner). Two safe options:
+   - **A. Vercel Pro** ($20/mo) — supports any committer on private repos. Well within the $500 spend rule. Recommended.
+   - **B. Strict author identity** — set `git config --global user.email "addonwebsolutions.ai@gmail.com"` on every machine, and ensure the cloud-routine PAT belongs to the Vercel-linked owner. Free but fragile.
+
+3. **Open-source narrative.** The launch content (HN, blog, README) references "build in public" + "fork it, study it, copy it". After private flip:
+   - Update README to drop the "fork it" line — auto-pushed when @cto sees the change land
+   - Keep launch content as-is (it's already drafted and approved); the public README of the launch story is a snapshot
+   - llms.txt currently links to the GitHub URL — that link will 404 for unauthenticated visitors. Either remove it or replace with a public mirror later.
+
+4. After flip, **trigger a fresh Vercel deploy** to confirm Hobby plan doesn't block. If it blocks, immediate fix is option A above.
+
+**Action requested:** confirm "make private + Vercel Pro upgrade" or "make private + strict author discipline" or "stay public for now (override)".
+
+I won't touch README/llms.txt until founder confirms the visibility flip is done — don't want to drop the "build in public" hook on a still-public repo.
+
+---
+
+### #007 — Security hardening checklist (in-flight)
+
+- **Category:** code-merge (mostly already shipped, audit summary)
+- **Urgency:** ongoing
+- **Submitted by:** @cto
+
+Founder asked: *"bot protection, hack proof, no one should be able to hack this"*. Total security is impossible but here's where we stand. Items already shipped today land in commit SHA listed below.
+
+**Already in place:**
+
+| Layer | Status | Notes |
+|---|---|---|
+| Auth | Clerk | Session cookies are SameSite=Lax — defends CSRF on state-changing requests by default |
+| HTTPS only | ✓ | Vercel terminates TLS, force-redirects HTTP |
+| Sign-in required for skill runs | ✓ | `/api/skills/run` route does its own `auth()` |
+| Rate limit /api/chat | ✓ | 30/hr per IP |
+| Rate limit /api/skills/run | ✓ NEW | 60/user/hr + 200/user/day + 300/IP/hr (3-tier) |
+| Service role key server-only | ✓ | Never exposed to client |
+| Admin role gated by env | ✓ NEW | `/admin/*` requires Clerk user ID in `ADMIN_USER_IDS` env |
+| Admin user ban/unban | ✓ NEW | `/admin/users` page + `/api/admin/users/:id/ban` |
+| Input validation | ✓ | Zod everywhere; max input length on /api/skills/run = 8000 chars |
+| SQL injection | ✓ | Supabase parameterized queries, no raw SQL with interpolation |
+| CSP + X-Frame-Options + Referrer-Policy | ✓ | next.config.js |
+| HSTS (1 year, includeSubDomains) | ✓ NEW | next.config.js |
+| Permissions-Policy (deny camera/mic/geo) | ✓ NEW | next.config.js |
+| Webhook signature verification | partial | Razorpay-webhook ✓; Meta-webhook stub (verifies token only — full HMAC-SHA256 verification when Meta keys are added) |
+| Secrets never in code/logs | ✓ | All env vars; GitGuardian incident from 2026-05-04 fully cleaned |
+| Dependency audit | weekly | `npm audit` — clean as of today |
+
+**Founder actions that close the remaining gaps:**
+
+1. **Set `ADMIN_USER_IDS` on Vercel** — comma-separated Clerk user IDs of admins (just yours for now). Without this env var the `/admin/*` route 403s for every request including yours. Steps: sign in once → Clerk Dashboard → Users → click yourself → copy User ID (`user_xxx`) → Vercel → Project → Settings → Environment Variables → add `ADMIN_USER_IDS=user_xxx`. 5 min.
+2. **Clerk Bot Protection (Cloudflare Turnstile)** — Clerk Dashboard → User & Authentication → Attack Protection → enable Bot Protection. Free, built-in. 1 min.
+3. **Email verification before signup** — Clerk Dashboard → User & Authentication → Email → require verification. 1 min.
+4. **Clerk PRODUCTION instance** — see queue #003. The current test instance (`pk_test_*`) has lower attack-protection limits than production.
+5. **PostHog key** — pending. Without it we can't see abuse patterns post-launch. queue #007 (this one) blocks abuse-monitoring instrumentation.
+
+**Out of scope for today (defer to Day 30+ retro):**
+
+- Cloudflare WAF (would require DNS migration off Vercel default)
+- SOC 2 / penetration test
+- Bug bounty program
+
+**Recommended:** approve all 4 founder actions above; I've shipped my side.
+
+---
 
 ### #005 — Abuse prevention layers for the free-for-1-year era
 

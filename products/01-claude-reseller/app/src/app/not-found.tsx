@@ -38,7 +38,7 @@ export default function NotFound() {
         <p className="text-sm leading-relaxed mb-7" style={{ color: "var(--text-secondary)" }}>
           The skill or page you&apos;re looking for may have been renamed,
           moved, or never existed. Try the marketplace — 130+ skills, all free
-          during beta.
+          for the first year.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

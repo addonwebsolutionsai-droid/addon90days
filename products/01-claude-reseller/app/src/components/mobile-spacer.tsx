@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 const EXCLUDED_PREFIXES = [
   "/account",
+  "/admin",
   "/sign-in",
   "/sign-up",
   "/dashboard",

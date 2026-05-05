@@ -24,7 +24,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
-import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
+import { checkRateLimit, clientIdentifier, rateLimitedResponse } from "@/lib/rate-limit";
 import {
   runSkill,
   invoiceGenerator,
@@ -71,14 +71,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Sign in to run skills" }, { status: 401 });
   }
 
-  // Rate limit: 60 skill runs per Clerk user per hour. Tighter than /api/chat
-  // because each run consumes ~1500 output tokens vs ~800 for chat — 2× more
-  // expensive on the shared Groq quota.
-  const rate = await checkRateLimit({ key: `skills_run:user:${userId}`, limit: 60, windowSeconds: 3600 });
-  if (!rate.allowed) {
+  // Three-tier rate limit defending against:
+  //   1) burst abuse from one user (60/hr)
+  //   2) slow-drip abuse from one user across the day (200/day)
+  //   3) account farming from one IP — many free accounts, low per-account
+  //      rate, but huge aggregate (300/hr/IP). Bypassable via VPN, but
+  //      raises the cost-of-abuse and stops the cheap script-kiddie case.
+  const userHourly = await checkRateLimit({ key: `skills_run:user:${userId}`, limit: 60, windowSeconds: 3600 });
+  if (!userHourly.allowed) {
     return rateLimitedResponse(
-      rate.retryAfterSec,
-      `Too many runs this hour. Try again in ${Math.ceil(rate.retryAfterSec / 60)} min.`
+      userHourly.retryAfterSec,
+      `Too many runs this hour. Try again in ${Math.ceil(userHourly.retryAfterSec / 60)} min.`
+    );
+  }
+  const userDaily = await checkRateLimit({ key: `skills_run:user_daily:${userId}`, limit: 200, windowSeconds: 86400 });
+  if (!userDaily.allowed) {
+    return rateLimitedResponse(
+      userDaily.retryAfterSec,
+      `You've hit today's limit (200 runs/day). Resets in ${Math.ceil(userDaily.retryAfterSec / 3600)}h.`
+    );
+  }
+  const ipHourly = await checkRateLimit({ key: `skills_run:ip:${clientIdentifier(req)}`, limit: 300, windowSeconds: 3600 });
+  if (!ipHourly.allowed) {
+    return rateLimitedResponse(
+      ipHourly.retryAfterSec,
+      `Too many runs from your network this hour. Try again in ${Math.ceil(ipHourly.retryAfterSec / 60)} min.`
     );
   }
 
