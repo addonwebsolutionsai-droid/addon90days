@@ -8,7 +8,7 @@ import { ArrowRight, Terminal, Zap, Shield, Package, ExternalLink } from "lucide
 const STATS = [
   { value: "130+", label: "Skills" },
   { value: "11",   label: "Categories" },
-  { value: "Free", label: "All skills (beta)" },
+  { value: "Free", label: "Every skill" },
   { value: "Daily", label: "New skills" },
 ];
 
@@ -69,8 +69,8 @@ export default function HomePage() {
           className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs mb-8 border border-green-500/30 bg-green-500/10"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="font-semibold text-green-500 uppercase tracking-wider">Free during beta</span>
-          <span style={{ color: "var(--text-muted)" }}>· 130+ skills · sign-in required</span>
+          <span className="font-semibold text-green-500 uppercase tracking-wider">Live · 130+ skills</span>
+          <span style={{ color: "var(--text-muted)" }}>· every skill free · sign-in to install</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-5 leading-tight">
@@ -86,7 +86,7 @@ export default function HomePage() {
         >
           130+ skills across IoT, trading, developer tools, Indian business, and more.
           Step-by-step guides. Copy-paste code. Runs in Claude Code, your API, or the MCP server.
-          <span className="block mt-2 text-green-500 font-medium">All skills free during public beta.</span>
+          <span className="block mt-2 text-green-500 font-medium">Every skill is free. Sign in to install.</span>
         </p>
 
         <div className="flex items-center justify-center gap-3 mb-10 flex-wrap">
@@ -333,15 +333,15 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] mb-5 border border-green-500/30 bg-green-500/10">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="font-semibold text-green-500 uppercase tracking-wider">Public beta</span>
+            <span className="font-semibold text-green-500 uppercase tracking-wider">Live now</span>
           </div>
 
           <h2 className="text-3xl font-bold mb-4">
-            All 130+ skills.<br />Free for everyone — for now.
+            All 130+ skills.<br />Free for the first year.
           </h2>
           <p className="text-base mb-8 max-w-xl mx-auto" style={{ color: "var(--text-secondary)" }}>
-            We&apos;re onboarding the first 1,000 builders before turning on pricing.
-            Sign up, install any skill in 30 seconds, lock in early-builder benefits.
+            Every skill, every install, every MCP call — free until you ship something we&apos;re proud of together.
+            Sign up, install any skill in 30 seconds, share with your team.
           </p>
 
           <div className="flex items-center justify-center gap-3 flex-wrap">

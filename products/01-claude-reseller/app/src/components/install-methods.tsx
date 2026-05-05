@@ -149,7 +149,7 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
           Install this skill
         </h2>
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          Pick the method that fits your setup. All three are free during beta.
+          Pick the method that fits your setup. All three are free.
         </p>
       </div>
 

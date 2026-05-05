@@ -2,13 +2,13 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
-import { Zap, LayoutDashboard, Sparkles, ShoppingBag, CreditCard, Shield, Settings } from "lucide-react";
+import { Zap, LayoutDashboard, Sparkles, Plug, Share2, Shield, Settings } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/account",           icon: LayoutDashboard, label: "Overview"  },
   { href: "/account/skills",    icon: Sparkles,        label: "My Skills"  },
-  { href: "/account/purchases", icon: ShoppingBag,     label: "Purchases"  },
-  { href: "/account/billing",   icon: CreditCard,      label: "Billing"    },
+  { href: "/account#connect",   icon: Plug,            label: "Connect"    },
+  { href: "/account#invite",    icon: Share2,          label: "Invite"     },
   { href: "/account/security",  icon: Shield,          label: "Security"   },
   { href: "/account/settings",  icon: Settings,        label: "Settings"   },
 ] as const;
@@ -31,18 +31,18 @@ export default async function AccountLayout({ children }: AccountLayoutProps) {
         className="hidden md:flex flex-col w-60 shrink-0 border-r"
         style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
       >
-        {/* Brand */}
-        <div
-          className="flex items-center gap-2 px-5 h-14 border-b"
-          style={{ borderColor: "var(--border-subtle)" }}
+        {/* Brand — entire group is the home link */}
+        <Link
+          href="/"
+          aria-label="AddonWeb Claude Toolkit — home"
+          className="flex items-center gap-2 px-5 h-14 border-b transition-colors hover:bg-white/5"
+          style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
         >
           <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center">
             <Zap size={13} className="text-white" />
           </div>
-          <Link href="/" className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-            Claude Toolkit
-          </Link>
-        </div>
+          <span className="font-semibold text-sm">Claude Toolkit</span>
+        </Link>
 
         {/* Nav items */}
         <nav className="flex-1 py-4 px-3 space-y-0.5" aria-label="Account navigation">

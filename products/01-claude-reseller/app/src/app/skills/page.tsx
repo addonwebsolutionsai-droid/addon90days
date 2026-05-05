@@ -345,9 +345,9 @@ function SkillsPage() {
         {/* Beta banner */}
         <div className="mb-5 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 flex items-center gap-3 text-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
-          <span className="font-semibold text-green-500 uppercase tracking-wider text-xs">Public beta</span>
+          <span className="font-semibold text-green-500 uppercase tracking-wider text-xs">Live</span>
           <span style={{ color: "var(--text-secondary)" }}>
-            All 130+ skills are free during beta. <Link href="/sign-up" className="text-violet-400 hover:text-violet-300 underline">Sign up</Link> to install.
+            All 130+ skills free for the first year. <Link href="/sign-up" className="text-violet-400 hover:text-violet-300 underline">Sign up</Link> to install.
           </span>
         </div>
 
@@ -628,7 +628,7 @@ function SkillsPage() {
               Sign up to install any skill
             </h2>
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              No credit card. All 130+ skills free during beta. Early users keep beta benefits.
+              No credit card. All 130+ skills free for the first year.
             </p>
           </div>
           <Link

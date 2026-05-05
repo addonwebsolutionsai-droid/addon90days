@@ -10,7 +10,61 @@ Items awaiting founder approval. Agents append here; founder clears via `/approv
 
 ---
 
-## Pending (1)
+## Pending (3)
+
+### #003 — Clerk PRODUCTION instance for going-live
+
+- **Category:** strategic-decision (founder credentials only)
+- **Urgency:** today (going live)
+- **Submitted by:** @cto
+
+The current site is using a Clerk **test** instance (`pk_test_YXB0LWFuY2hvdnktNjAuY2xlcmsuYWNjb3VudHMuZGV2JA` is in the deployed HTML). Test instances:
+
+- Show a "Development" notice in some flows
+- Have lower rate limits
+- Sessions don't persist as reliably across deploys → this is the most likely cause of "I'm signed in but it asks me to sign in again"
+
+**Action (10 min):** clerk.com → Dashboard → create a new **Production** instance for `addon90days.vercel.app` → copy `pk_live_*` and `sk_live_*` → on Vercel, replace `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` (production target only — keep test keys on preview/development). Re-deploy.
+
+**Code-side fix already shipped:** the sidebar now uses Clerk's `isLoaded` to avoid flashing "Sign in" while the session hydrates. That removes the most common false-positive but the underlying production-keys issue still needs founder action.
+
+---
+
+### #004 — GitHub repo: keep public OR move to private + Vercel Pro?
+
+- **Category:** strategic-decision (founder choice + budget)
+- **Urgency:** can wait 1–2 days, not blocking launch
+- **Submitted by:** @cto
+
+The repo went public on 2026-05-04 to unblock Vercel deploys (Hobby plan blocks non-owner committers on private repos). Founder asked: "GitHub public access is vulnerable that anyone can see the code. Should we do anything about this?"
+
+**Honest assessment:**
+
+| Concern | Reality |
+|---|---|
+| Secrets in code | None. All keys are env vars on Vercel. GitGuardian has caught the one accidental commit; we cleaned it. |
+| Competitors copy our codebase | Real risk. They could clone the marketplace UI and 130 skills' workflow logic. |
+| Bad actors find security holes | Lower risk than upside of public visibility — security through obscurity isn't real security. Public repos get more eyeballs catching bugs (incl. GitGuardian). |
+| Build-in-public marketing | Major upside. The repo IS the asset for HN/PH launches and developer credibility. |
+
+**Three options:**
+
+| Option | Cost | Tradeoff |
+|---|---|---|
+| **A. Stay public** (recommended for launch) | $0 | Code is visible; build-in-public credibility for launch; competitors can copy faster |
+| **B. Private + Vercel Pro** | $20/mo | Source private; supports any committer; +5x more deploy minutes |
+| **C. Private + single-account discipline** | $0 | All commits must come from `addonwebsolutionsai-droid` GitHub account; CI/agents that commit from other identities break |
+
+**Recommended:** stay public through launch (today + first 30 days). After Day 30, decide based on:
+- Did anyone clone us? (search "addon90days" on GitHub)
+- Are competitors gaining traction with the cloned product? (unlikely — execution and brand matter more than code)
+- Is the build-in-public narrative still pulling traffic?
+
+If yes to "competitors are real": move to private + Vercel Pro ($20/mo, well within the founder's spend rule).
+
+**Action requested:** confirm "stay public for launch + reassess Day 30" or override.
+
+---
 
 ### #002 — P02 ChatBase backend MVP shipped — needs 3 founder actions to activate
 

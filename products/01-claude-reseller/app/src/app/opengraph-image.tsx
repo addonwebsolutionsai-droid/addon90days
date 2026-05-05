@@ -17,7 +17,7 @@ export const runtime = "edge";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "AddonWeb Claude Toolkit — 130 production-ready Claude skills, free during beta";
+export const alt = "AddonWeb Claude Toolkit — 130 production-ready Claude skills, free for the first year";
 
 export default async function OG() {
   return new ImageResponse(
@@ -96,7 +96,7 @@ export default async function OG() {
               alignItems:      "center",
             }}
           >
-            ● Free during beta
+            ● Live · Free for the first year
           </div>
         </div>
 

@@ -139,7 +139,7 @@ export function TrySkillLive({ slug, title, defaultInput, isSignedIn }: Props) {
               Try this skill live
             </h2>
             <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-              Runs in your browser — free during beta, no install needed
+              Runs in your browser — free, no install needed
             </p>
           </div>
         </div>

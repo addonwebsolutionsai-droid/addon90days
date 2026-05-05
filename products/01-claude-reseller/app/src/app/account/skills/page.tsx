@@ -42,14 +42,14 @@ export default function MySkillsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-1">My Skills</h1>
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          {loading ? "Loading skills…" : `All ${total} skills available — free during beta.`}
+          {loading ? "Loading skills…" : `All ${total} skills available — free for the first year.`}
         </p>
       </div>
 
-      {/* Beta banner */}
+      {/* Status banner */}
       <div className="mb-6 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 flex items-center gap-3 text-sm">
         <Sparkles size={14} className="text-green-500 shrink-0" />
-        <span className="font-semibold text-green-500 uppercase tracking-wider text-xs">Public beta</span>
+        <span className="font-semibold text-green-500 uppercase tracking-wider text-xs">Live</span>
         <span style={{ color: "var(--text-secondary)" }}>
           Every skill is free for you. Install any of them with one command.
         </span>

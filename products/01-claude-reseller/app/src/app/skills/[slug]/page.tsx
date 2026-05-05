@@ -21,6 +21,7 @@ import type { Skill } from "@/lib/database.types";
 import { SkillDetailTabs } from "@/components/skill-detail-tabs";
 import { InstallMethods } from "@/components/install-methods";
 import { TrySkillLive } from "@/components/try-skill-live";
+import { ShareSkill } from "@/components/share-skill";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -300,6 +301,14 @@ export default async function SkillDetailPage({
           relatedSkills={relatedSkills}
           categoryLabel={label}
         />
+
+        {/* ---------------------------------------------------------------- */}
+        {/* SHARE — viral surface; placed below the install/try CTAs so the   */}
+        {/* user has already converted before being asked to share.           */}
+        {/* ---------------------------------------------------------------- */}
+        <div className="mt-10">
+          <ShareSkill slug={skill.slug} title={skill.title} tagline={skill.tagline} />
+        </div>
 
       </div>
     </div>

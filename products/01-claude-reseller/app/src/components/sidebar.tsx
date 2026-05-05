@@ -67,27 +67,23 @@ interface SidebarContentProps {
 }
 
 function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarContentProps) {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
-      {/* Brand */}
-      <div
-        className="flex items-center gap-2.5 px-4 h-14 shrink-0 border-b"
-        style={{ borderColor: "var(--border-subtle)" }}
+      {/* Brand — entire group is the home link, not just the text */}
+      <Link
+        href="/"
+        onClick={onNavigate}
+        aria-label="AddonWeb Claude Toolkit — home"
+        className="flex items-center gap-2.5 px-4 h-14 shrink-0 border-b transition-colors hover:bg-white/5"
+        style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
       >
         <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shrink-0">
           <Zap size={13} className="text-white" />
         </div>
-        <Link
-          href="/"
-          onClick={onNavigate}
-          className="font-semibold text-sm leading-none"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Claude Toolkit
-        </Link>
-      </div>
+        <span className="font-semibold text-sm leading-none">Claude Toolkit</span>
+      </Link>
 
       <div className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
 
@@ -208,12 +204,20 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
       >
         <ThemeToggle />
         <div className="flex-1 min-w-0">
-          {isSignedIn ? (
+          {/* While Clerk hydrates, render a neutral placeholder so we don't
+              flash "Sign in" at users who are already signed in. */}
+          {!isLoaded ? (
+            <div className="h-7 w-7 rounded-full bg-white/5 animate-pulse" aria-hidden />
+          ) : isSignedIn ? (
             <div className="flex items-center gap-2">
               <UserButton afterSignOutUrl="/" />
-              <span className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+              <Link
+                href="/account"
+                className="text-xs truncate hover:text-violet-400 transition-colors"
+                style={{ color: "var(--text-muted)" }}
+              >
                 Account
-              </span>
+              </Link>
             </div>
           ) : (
             <Link
@@ -225,7 +229,7 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
             </Link>
           )}
         </div>
-        {!isSignedIn && (
+        {isLoaded && !isSignedIn && (
           <Link
             href="/sign-up"
             className="shrink-0 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-[11px] font-medium transition-colors"

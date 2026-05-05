@@ -1,64 +1,35 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Zap, ShoppingBag, BarChart3, ArrowRight } from "lucide-react";
+import { Sparkles, Plug, Share2, ArrowRight, Github } from "lucide-react";
 import Link from "next/link";
+import { InviteFriends } from "@/components/invite-friends";
+import { MCPConnect } from "@/components/mcp-connect";
 
-export const metadata = { title: "Account Overview" };
+export const metadata = { title: "Your account" };
 
 export default async function AccountOverviewPage() {
   const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  if (userId === null) redirect("/sign-in");
 
   const user = await currentUser();
-  const purchasedPacks =
-    (user?.publicMetadata?.["purchasedPacks"] as string[] | undefined) ?? [];
-
-  // Each pack unlocks ~4 skills on average; free tier includes 4 base skills
-  const freeSkillCount = 4;
-  const paidSkillCount = purchasedPacks.length * 4;
-  const totalSkills    = freeSkillCount + paidSkillCount;
-
-  const stats = [
-    { icon: Zap,         label: "Skills unlocked", value: totalSkills.toString(), href: "/account/skills"    },
-    { icon: ShoppingBag, label: "Packs purchased",  value: purchasedPacks.length.toString(), href: "/account/purchases" },
-    { icon: BarChart3,   label: "API calls today",  value: "—",                  href: null                 },
-  ];
+  const firstName = user?.firstName ?? null;
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-1">Overview</h1>
+    <div className="space-y-10">
+      {/* Welcome */}
+      <div>
+        <h1 className="text-2xl font-bold mb-1">
+          Welcome{firstName !== null ? `, ${firstName}` : ""}.
+        </h1>
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          Welcome back{user?.firstName ? `, ${user.firstName}` : ""}. Here&apos;s your account at a glance.
+          You have access to every skill. Connect Claude Desktop in 30 seconds, then start building.
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-        {stats.map(({ icon: Icon, label, value, href }) => (
-          <div
-            key={label}
-            className="rounded-xl border p-5"
-            style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
-          >
-            <Icon size={16} className="text-violet-400 mb-3" />
-            <div className="text-2xl font-bold tabular-nums mb-1">{value}</div>
-            <div className="flex items-center justify-between">
-              <div className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</div>
-              {href && (
-                <Link href={href} className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-0.5">
-                  View <ArrowRight size={10} />
-                </Link>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Quick actions */}
-      <div className="mb-8">
+      <section>
         <h2 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--text-muted)" }}>
-          Quick actions
+          Quick start
         </h2>
         <div className="grid sm:grid-cols-2 gap-3">
           <Link
@@ -67,55 +38,96 @@ export default async function AccountOverviewPage() {
             style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
           >
             <div>
-              <div className="font-medium text-sm mb-0.5">Browse Marketplace</div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <Sparkles size={13} className="text-violet-400" />
+                <span className="font-medium text-sm">Browse 130+ skills</span>
+              </div>
               <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                130+ skills across 11 categories
+                Indian Business · IoT · Trading · Dev Tools · 7 more
               </div>
             </div>
             <ArrowRight size={15} className="text-violet-400 shrink-0" />
           </Link>
           <Link
-            href="/account/billing"
+            href="/account/skills"
             className="flex items-center justify-between p-4 rounded-xl border transition-all hover:border-violet-500/40"
             style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
           >
             <div>
-              <div className="font-medium text-sm mb-0.5">Upgrade to All-Access</div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <Sparkles size={13} className="text-violet-400" />
+                <span className="font-medium text-sm">My skills</span>
+              </div>
               <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                ₹2,407/mo · every skill unlocked
+                Skills you&apos;ve installed or favourited
               </div>
             </div>
             <ArrowRight size={15} className="text-violet-400 shrink-0" />
           </Link>
         </div>
-      </div>
+      </section>
 
-      {/* Plan status */}
-      <div
-        className="rounded-xl border p-5"
+      {/* Connect Claude Desktop — anchor /account#connect */}
+      <section
+        id="connect"
+        className="rounded-xl border p-6 scroll-mt-20"
         style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-sm font-semibold mb-0.5">
-              Current plan: <span className="text-violet-400">
-                {purchasedPacks.length > 0 ? "Pack owner" : "Free"}
-              </span>
-            </div>
-            <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {purchasedPacks.length > 0
-                ? `${purchasedPacks.length} pack${purchasedPacks.length > 1 ? "s" : ""} · ${totalSkills} skills unlocked`
-                : "4 free skills · upgrade to unlock all 130+"}
-            </div>
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-violet-500/15 flex items-center justify-center shrink-0">
+            <Plug size={16} className="text-violet-400" />
           </div>
-          <Link
-            href="/account/billing"
-            className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-medium transition-colors"
-          >
-            Manage billing
-          </Link>
+          <div>
+            <h2 className="text-base font-semibold mb-0.5">Connect Claude Desktop</h2>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Paste this block once and all 130 skills appear as tools inside Claude Desktop.
+            </p>
+          </div>
         </div>
-      </div>
+        <MCPConnect />
+      </section>
+
+      {/* Invite friends — anchor /account#invite */}
+      <section
+        id="invite"
+        className="rounded-xl border p-6 scroll-mt-20"
+        style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
+      >
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-pink-500/15 flex items-center justify-center shrink-0">
+            <Share2 size={16} className="text-pink-400" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold mb-0.5">Invite your team</h2>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Every skill is free for the first year. The more people on your team using it, the better the catalog gets.
+            </p>
+          </div>
+        </div>
+        <InviteFriends userId={userId} />
+      </section>
+
+      {/* Open source / repo */}
+      <section
+        className="rounded-xl border p-5 flex items-center gap-4"
+        style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
+      >
+        <Github size={18} className="text-violet-400 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium mb-0.5">Built in public</div>
+          <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+            Source, PRDs, and the daily runbook are public on GitHub. Fork it, study it, copy it.
+          </div>
+        </div>
+        <a
+          href="https://github.com/addonwebsolutionsai-droid/addon90days"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 text-xs font-medium text-violet-400 hover:text-violet-300 transition-colors"
+        >
+          View repo →
+        </a>
+      </section>
     </div>
   );
 }

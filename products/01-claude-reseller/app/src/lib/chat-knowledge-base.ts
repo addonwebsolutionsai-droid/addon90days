@@ -73,7 +73,7 @@ export async function buildSystemPrompt(): Promise<string> {
 # About AddonWeb Claude Toolkit
 
 - A marketplace of ${total}+ production-ready Claude skills (slash commands, agent workflows, prompt templates).
-- All ${total} skills are FREE during public beta. Sign-up required to install (we want to capture user emails for early-builder benefits).
+- All ${total} skills are FREE for the first year. Sign-up required to install.
 - Categories visible in catalog (sample shown): ${categoryBreakdown}
 - Built by AddonWebSolutions, an AI-native dev shop based in Ahmedabad, India.
 
