@@ -7,8 +7,8 @@ import { Infinity as InfinityIcon, LayoutDashboard, Sparkles, Plug, Share2, Shie
 const NAV_ITEMS = [
   { href: "/account",           icon: LayoutDashboard, label: "Overview"  },
   { href: "/account/skills",    icon: Sparkles,        label: "My Skills"  },
-  { href: "/account#connect",   icon: Plug,            label: "Connect"    },
-  { href: "/account#invite",    icon: Share2,          label: "Invite"     },
+  { href: "/account/connect",   icon: Plug,            label: "Connect"    },
+  { href: "/account/invite",    icon: Share2,          label: "Invite"     },
   { href: "/account/security",  icon: Shield,          label: "Security"   },
   { href: "/account/settings",  icon: Settings,        label: "Settings"   },
 ] as const;

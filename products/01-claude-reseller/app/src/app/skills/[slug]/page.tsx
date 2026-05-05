@@ -290,7 +290,12 @@ export default async function SkillDetailPage({
         {/* ---------------------------------------------------------------- */}
         {/* TRY LIVE — top-of-funnel demo, in-browser execution              */}
         {/* ---------------------------------------------------------------- */}
-        <TrySkillLive slug={skill.slug} title={skill.title} isSignedIn={isSignedIn} />
+        <TrySkillLive
+          slug={skill.slug}
+          title={skill.title}
+          tagline={skill.tagline}
+          isSignedIn={isSignedIn}
+        />
 
         {/* ---------------------------------------------------------------- */}
         {/* INSTALL METHODS — beginner-friendly, 3 tabs                      */}

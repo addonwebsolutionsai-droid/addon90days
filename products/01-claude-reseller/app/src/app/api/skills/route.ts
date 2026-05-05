@@ -15,7 +15,7 @@ const QuerySchema = z.object({
     .string()
     .optional()
     .transform((v) => v === "true"),
-  sort: z.enum(["new", "trending"]).optional(),
+  sort: z.enum(["new", "newest", "trending", "most-used", "views"]).optional(),
   page: z
     .string()
     .optional()
@@ -83,9 +83,14 @@ export async function GET(req: Request) {
     });
   }
 
-  // Ordering
-  if (sort === "new") {
+  // Ordering. Accept both "newest" (the canonical UI value) and "new"
+  // (legacy alias) for forward compat with old links / bookmarks.
+  // "most-used" / "views" sorts by view_count desc — pairs with the
+  // ViewBeacon counter we ship.
+  if (sort === "newest" || sort === "new") {
     query = query.order("created_at", { ascending: false });
+  } else if (sort === "most-used" || sort === "views") {
+    query = query.order("view_count", { ascending: false });
   } else {
     query = query.order("trending_score", { ascending: false });
   }

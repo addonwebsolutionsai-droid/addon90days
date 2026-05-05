@@ -26,6 +26,8 @@ import { cn } from "@/lib/utils";
 interface Props {
   slug:          string;
   title:         string;
+  /** Skill tagline — used to seed a per-skill input placeholder. */
+  tagline?:      string;
   defaultInput?: string;
   isSignedIn:    boolean;
 }
@@ -36,8 +38,15 @@ interface RunResult {
   runner:     "typed" | "generic";
 }
 
-export function TrySkillLive({ slug, title, defaultInput, isSignedIn }: Props) {
+export function TrySkillLive({ slug, title, tagline, defaultInput, isSignedIn }: Props) {
   const [input, setInput]       = useState(defaultInput ?? "");
+  // Per-skill placeholder. Format: "What do you want {Skill Title} to do?"
+  // followed by an example seeded from the tagline if available. Generic
+  // single-example placeholder was misleading on non-invoice skills.
+  const placeholder =
+    tagline !== undefined && tagline.length > 0
+      ? `What do you want ${title} to do? Example: ${tagline}`
+      : `What do you want ${title} to do? Describe your task in plain English.`;
   const [running, setRunning]   = useState(false);
   const [result, setResult]     = useState<RunResult | null>(null);
   const [error, setError]       = useState<string | null>(null);
@@ -160,7 +169,7 @@ export function TrySkillLive({ slug, title, defaultInput, isSignedIn }: Props) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={running}
-            placeholder={`Describe your task in plain English. Example: "Create a GST invoice for Acme Corp, software services, ₹50,000."`}
+            placeholder={placeholder}
             rows={3}
             className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-y min-h-[80px]"
             style={{

@@ -26,9 +26,7 @@ import {
   FileText,
   ChevronLeft,
   Download,
-  Eye,
   Sparkles,
-  Heart,
 } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -123,10 +121,8 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
             Discover
           </p>
           {[
-            { href: "/skills?sort=trending", icon: TrendingUp, label: "Trending"   },
-            { href: "/skills?sort=newest",   icon: Sparkles,   label: "Newest"     },
-            { href: "/skills?sort=views",    icon: Eye,        label: "Most viewed" },
-            { href: "/skills?free=true",     icon: Heart,      label: "Free picks" },
+            { href: "/skills?sort=trending", icon: TrendingUp, label: "Trending" },
+            { href: "/skills?sort=newest",   icon: Sparkles,   label: "Newest"   },
           ].map(({ href, icon: Icon, label }) => (
             <Link
               key={label}

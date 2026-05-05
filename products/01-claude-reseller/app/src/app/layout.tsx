@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
 import { Suspense } from "react";
+import NextTopLoader from "nextjs-toploader";
 import { ConditionalSidebar } from "@/components/conditional-sidebar";
 import { MobileSpacer } from "@/components/mobile-spacer";
 import { ConditionalChatWidget } from "@/components/conditional-chat-widget";
@@ -75,6 +76,16 @@ export default function RootLayout({ children }: RootLayoutProps) {
         className={`${inter.variable} ${jetbrainsMono.variable}`}
       >
         <body className="font-sans min-h-screen" suppressHydrationWarning>
+          {/* Top progress bar — animates during route changes so navigation
+              never feels frozen on slow networks. Violet to match brand. */}
+          <NextTopLoader
+            color="#8b5cf6"
+            height={2}
+            showSpinner={false}
+            shadow="0 0 10px #8b5cf6, 0 0 5px #8b5cf6"
+            crawlSpeed={200}
+            speed={200}
+          />
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
