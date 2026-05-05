@@ -679,10 +679,7 @@ function SkillsPage() {
         className="border-t py-7 text-center text-xs"
         style={{ borderColor: "var(--border-subtle)", color: "var(--text-muted)" }}
       >
-        © 2026 AddonWeb Solutions · Ahmedabad, India ·{" "}
-        <a href="mailto:support@addonweb.io" className="hover:text-violet-400 transition-colors">
-          support@addonweb.io
-        </a>
+        © 2026 SkilOn · Ahmedabad, India · Powered by Addon Web Solutions
       </footer>
     </div>
   );

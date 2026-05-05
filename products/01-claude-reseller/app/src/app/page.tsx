@@ -394,7 +394,7 @@ export default function HomePage() {
             </div>
           </div>
           <p className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
-            © 2026 AddonWeb Solutions · Ahmedabad, India
+            © 2026 SkilOn · Ahmedabad, India · Powered by Addon Web Solutions
           </p>
         </div>
       </footer>
