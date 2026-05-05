@@ -8,7 +8,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "ChatBase — WhatsApp AI for Indian SMBs (free during beta, by AddonWeb)";
+export const alt = "ChatBase — WhatsApp AI for Indian SMBs (free for the first year, by AddonWeb)";
 
 export default async function OG() {
   return new ImageResponse(

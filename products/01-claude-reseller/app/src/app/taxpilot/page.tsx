@@ -39,8 +39,8 @@ const ACCENT = "#f97316";
 const STATS = [
   { value: "37%",   label: "GST filers miss deadlines" },
   { value: "3 hrs", label: "Avg time per GSTR-1 filing" },
-  { value: "₹0",   label: "During beta" },
-  { value: "Day 30", label: "Beta opens" },
+  { value: "Free", label: "First year" },
+  { value: "Day 30", label: "Public launch" },
 ];
 
 const FEATURES = [
@@ -281,7 +281,7 @@ export default function TaxPilotPage() {
             Coming Day 30
           </span>
           <span style={{ color: "var(--text-muted)" }}>
-            &middot; Free during beta &middot; Join waitlist
+            &middot; Free for the first year &middot; Join waitlist
           </span>
         </div>
 
@@ -568,7 +568,7 @@ export default function TaxPilotPage() {
           <h2 className="text-3xl font-bold mb-4">
             Get early access.
             <br />
-            Free during beta.
+            Free for the first year.
           </h2>
           <p
             className="text-base mb-8 max-w-xl mx-auto"

@@ -24,7 +24,6 @@ import {
   TrendingUp,
   BookOpen,
   FileText,
-  Github,
   ChevronLeft,
   Download,
 } from "lucide-react";
@@ -171,8 +170,7 @@ function SidebarContent({ counts, total, activeCategory, onNavigate }: SidebarCo
             { href: "/skills?sort=trending", icon: TrendingUp, label: "Trending" },
             { href: "#",                     icon: BookOpen,   label: "Blog",         soon: true },
             { href: "#",                     icon: FileText,   label: "Docs",         soon: true },
-            { href: "https://github.com/addonwebsolutionsai-droid/addon90days", icon: Github, label: "GitHub", external: true },
-          ].map(({ href, icon: Icon, label, soon, external }) => (
+          ].map(({ href, icon: Icon, label, soon, external }: { href: string; icon: typeof TrendingUp; label: string; soon?: boolean; external?: boolean }) => (
             <Link
               key={label}
               href={href}

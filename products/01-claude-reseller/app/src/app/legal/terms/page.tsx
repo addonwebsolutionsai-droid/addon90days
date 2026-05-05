@@ -36,8 +36,7 @@ export default function TermsPage() {
               (&quot;Terms&quot;). If you do not agree to these Terms, do not use the Service.
             </p>
             <p>
-              These Terms apply to all visitors, users, and others who access or use the Service,
-              including customers who purchase Skill Packs or All-Access subscriptions.
+              These Terms apply to all visitors, users, and others who access or use the Service.
             </p>
           </Section>
 
@@ -48,18 +47,19 @@ export default function TermsPage() {
               are delivered as TypeScript/JavaScript packages with associated documentation.
             </p>
             <p>
-              We offer a Free tier with a limited set of Skills, individual Skill Pack purchases
-              (one-time payment), and an All-Access subscription plan granting access to all
-              current and future Skills.
+              All Skills are free to install and run during our launch period. We reserve the right
+              to introduce paid plans for advanced features in the future; if and when that happens,
+              users will be notified at least 30 days in advance and existing free access will not
+              be retroactively revoked.
             </p>
           </Section>
 
           <Section title="3. Account Registration">
             <p>
-              You must create an account via our authentication provider (Clerk) to purchase or
-              access paid Skills. You agree to provide accurate, current, and complete information
-              and to update it as necessary. You are responsible for maintaining the security of
-              your credentials. You must notify us immediately of any unauthorized use at{" "}
+              You must create an account via our authentication provider (Clerk) to install or run
+              Skills. You agree to provide accurate, current, and complete information and to
+              update it as necessary. You are responsible for maintaining the security of your
+              credentials. You must notify us immediately of any unauthorized use at{" "}
               <a href="mailto:support@addonweb.io" className="text-violet-400 hover:underline">
                 support@addonweb.io
               </a>
@@ -67,16 +67,12 @@ export default function TermsPage() {
             </p>
           </Section>
 
-          <Section title="4. Payments and Refunds">
+          <Section title="4. Pricing and Payments">
             <p>
-              Payments are processed in Indian Rupees (INR) via Razorpay. Prices include applicable
-              GST. Skill Pack purchases are one-time and non-refundable once the content is
-              downloaded or accessed. All-Access subscriptions may be cancelled at any time;
-              cancellation takes effect at the end of the current billing period with no proration.
-            </p>
-            <p>
-              If you experience a technical failure that prevents access to paid content, contact
-              support within 7 days for a manual review.
+              The Service is currently free for all users. No payment information is collected.
+              If we introduce paid plans in the future, pricing, payment processors, and refund
+              terms will be disclosed prominently in advance and a separate addendum to these Terms
+              will apply to those plans.
             </p>
           </Section>
 

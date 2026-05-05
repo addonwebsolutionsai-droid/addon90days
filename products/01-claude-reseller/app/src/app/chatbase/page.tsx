@@ -259,7 +259,7 @@ export default function ChatBasePage() {
             Coming Day 30
           </span>
           <span style={{ color: "var(--text-muted)" }}>
-            &middot; Free during beta &middot; Join waitlist
+            &middot; Free for the first year &middot; Join waitlist
           </span>
         </div>
 
@@ -523,7 +523,7 @@ export default function ChatBasePage() {
           <h2 className="text-3xl font-bold mb-4">
             Get early access.
             <br />
-            Free during beta.
+            Free for the first year.
           </h2>
           <p
             className="text-base mb-8 max-w-xl mx-auto"

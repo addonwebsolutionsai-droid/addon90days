@@ -18,7 +18,6 @@ import Link from "next/link";
 import { Check, Copy, ArrowRight, Search } from "lucide-react";
 import type { Skill, SkillStep } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
-import { BuyButton } from "@/components/buy-button";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -600,48 +599,20 @@ export function SkillDetailTabs({
         categoryColor={categoryColor}
       />
 
-      {/* Footer CTA */}
+      {/* Footer CTA — every skill is free; sign-in is the only gate. */}
       <div
         className="mt-8 rounded-2xl border border-violet-500/20 bg-gradient-to-r from-violet-900/20 to-pink-900/10 p-6 text-center"
       >
-        {skill.is_free ? (
-          <>
-            <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>This skill is free.</p>
-            <h2 className="text-base font-bold mb-3" style={{ color: "var(--text-primary)" }}>
-              Start using it now
-            </h2>
-            <Link
-              href="/sign-in"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm text-white"
-            >
-              Sign in to access <ArrowRight size={13} />
-            </Link>
-          </>
-        ) : (
-          <>
-            <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>One-time purchase.</p>
-            <h2 className="text-base font-bold mb-1" style={{ color: "var(--text-primary)" }}>
-              {skill.title}
-            </h2>
-            <p className="text-2xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>
-              ₹{skill.price_inr.toLocaleString("en-IN")}
-            </p>
-            {skill.pack_id ? (
-              <BuyButton
-                packId={skill.pack_id}
-                packLabel={skill.title}
-                priceDisplay={`₹${skill.price_inr.toLocaleString("en-IN")}`}
-              />
-            ) : (
-              <Link
-                href="/sign-up"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm text-white"
-              >
-                Get started <ArrowRight size={13} />
-              </Link>
-            )}
-          </>
-        )}
+        <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Free to install. Free to run.</p>
+        <h2 className="text-base font-bold mb-3" style={{ color: "var(--text-primary)" }}>
+          Start using {skill.title} now
+        </h2>
+        <Link
+          href="/sign-in"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl font-medium transition-colors text-sm text-white"
+        >
+          Sign in to access <ArrowRight size={13} />
+        </Link>
         <p className="text-xs mt-5" style={{ color: "rgba(255,255,255,0.2)" }}>
           Questions?{" "}
           <a href="mailto:support@addonweb.io" className="hover:text-violet-400 transition-colors">

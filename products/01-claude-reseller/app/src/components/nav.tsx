@@ -38,9 +38,8 @@ export function Nav() {
         <div className="hidden md:flex items-center gap-6">
           {(
             [
-              { href: "/skills",   label: "Skills",  external: false },
-              { href: "/#pricing", label: "Pricing", external: false },
-              { href: "https://github.com/addonwebsolutionsai-droid/addon90days", label: "Docs", external: true },
+              { href: "/skills",  label: "Skills",  external: false },
+              { href: "/account", label: "Account", external: false },
             ] as const
           ).map(({ href, label, external }) => (
             <Link

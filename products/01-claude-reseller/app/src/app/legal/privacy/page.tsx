@@ -46,7 +46,6 @@ export default function PrivacyPage() {
             <p><strong style={{ color: "var(--text-primary)" }}>Information you provide:</strong></p>
             <ul className="list-disc pl-5 space-y-1">
               <li>Account data: name, email address, password (hashed, managed by Clerk)</li>
-              <li>Payment data: processed by Razorpay — we store only order IDs and status, never card numbers</li>
               <li>Support communications: emails you send us</li>
             </ul>
             <p className="mt-3"><strong style={{ color: "var(--text-primary)" }}>Information collected automatically:</strong></p>
@@ -60,9 +59,8 @@ export default function PrivacyPage() {
           <Section title="3. How We Use Your Information">
             <ul className="list-disc pl-5 space-y-1">
               <li>To provide, operate, and improve the Service</li>
-              <li>To process payments and manage your purchases</li>
               <li>To authenticate your account and protect against fraud</li>
-              <li>To send transactional emails (purchase confirmations, password resets)</li>
+              <li>To send transactional emails (account verification, password resets)</li>
               <li>To send product updates if you have opted in</li>
               <li>To comply with legal obligations</li>
               <li>To analyse usage patterns and improve the product (anonymised)</li>
@@ -72,7 +70,7 @@ export default function PrivacyPage() {
           <Section title="4. Legal Basis for Processing (GDPR)">
             <p>For EEA users, we process your data on these legal bases:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong style={{ color: "var(--text-primary)" }}>Contract:</strong> to fulfil your purchases and provide the Service</li>
+              <li><strong style={{ color: "var(--text-primary)" }}>Contract:</strong> to provide the Service to you</li>
               <li><strong style={{ color: "var(--text-primary)" }}>Legitimate interests:</strong> fraud prevention, security, product improvement</li>
               <li><strong style={{ color: "var(--text-primary)" }}>Consent:</strong> marketing emails (you may withdraw at any time)</li>
               <li><strong style={{ color: "var(--text-primary)" }}>Legal obligation:</strong> tax records, compliance</li>
@@ -83,7 +81,6 @@ export default function PrivacyPage() {
             <p>We do not sell your personal data. We share data only with:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li><strong style={{ color: "var(--text-primary)" }}>Clerk</strong> — authentication and user management</li>
-              <li><strong style={{ color: "var(--text-primary)" }}>Razorpay</strong> — payment processing (PCI-DSS compliant)</li>
               <li><strong style={{ color: "var(--text-primary)" }}>Supabase</strong> — database hosting (data stored in applicable region)</li>
               <li><strong style={{ color: "var(--text-primary)" }}>PostHog</strong> — product analytics (anonymised where possible)</li>
               <li><strong style={{ color: "var(--text-primary)" }}>Sentry</strong> — error monitoring</li>

@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Sparkles, Plug, Share2, ArrowRight, Github } from "lucide-react";
+import { Sparkles, Plug, Share2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { InviteFriends } from "@/components/invite-friends";
 import { MCPConnect } from "@/components/mcp-connect";
@@ -107,27 +107,6 @@ export default async function AccountOverviewPage() {
         <InviteFriends userId={userId} />
       </section>
 
-      {/* Open source / repo */}
-      <section
-        className="rounded-xl border p-5 flex items-center gap-4"
-        style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
-      >
-        <Github size={18} className="text-violet-400 shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium mb-0.5">Built in public</div>
-          <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Source, PRDs, and the daily runbook are public on GitHub. Fork it, study it, copy it.
-          </div>
-        </div>
-        <a
-          href="https://github.com/addonwebsolutionsai-droid/addon90days"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 text-xs font-medium text-violet-400 hover:text-violet-300 transition-colors"
-        >
-          View repo →
-        </a>
-      </section>
     </div>
   );
 }

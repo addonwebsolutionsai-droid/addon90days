@@ -39,8 +39,8 @@ const ACCENT = "#ec4899";
 const STATS = [
   { value: "60%",  label: "Orders via WhatsApp (India)" },
   { value: "3x",   label: "Loyalty retention vs no program" },
-  { value: "₹0",  label: "During beta" },
-  { value: "Day 45", label: "Beta opens" },
+  { value: "Free", label: "First year" },
+  { value: "Day 45", label: "Public launch" },
 ];
 
 const FEATURES = [
@@ -280,7 +280,7 @@ export default function TableFlowPage() {
             Coming Day 45
           </span>
           <span style={{ color: "var(--text-muted)" }}>
-            &middot; Free during beta &middot; Join waitlist
+            &middot; Free for the first year &middot; Join waitlist
           </span>
         </div>
 
@@ -567,7 +567,7 @@ export default function TableFlowPage() {
           <h2 className="text-3xl font-bold mb-4">
             Get early access.
             <br />
-            Free during beta.
+            Free for the first year.
           </h2>
           <p
             className="text-base mb-8 max-w-xl mx-auto"

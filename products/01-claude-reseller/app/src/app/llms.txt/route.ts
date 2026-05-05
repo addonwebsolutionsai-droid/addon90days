@@ -46,7 +46,6 @@ AddonWeb Solutions — a custom dev shop in Ahmedabad, India (10+ years, clients
 - MCP server: https://addon90days.vercel.app/api/skills/mcp
 - Skills API (read-only): https://addon90days.vercel.app/api/skills
 - npm package: https://www.npmjs.com/package/addonweb-claude-skills
-- GitHub: https://github.com/addonwebsolutionsai-droid/addon90days
 - Support: support@addonweb.io
 
 ## Tech stack

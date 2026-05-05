@@ -100,10 +100,8 @@ export default function HomePage() {
           >
             Browse Marketplace <ArrowRight size={14} />
           </Link>
-          <a
-            href="https://github.com/addonwebsolutionsai-droid/addon90days"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/sign-up"
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-colors text-sm border"
             style={{
               backgroundColor: "var(--bg-s2)",
@@ -111,8 +109,8 @@ export default function HomePage() {
               color: "var(--text-secondary)",
             }}
           >
-            <Terminal size={14} /> View on GitHub
-          </a>
+            <Terminal size={14} /> Create free account
+          </Link>
         </div>
 
         {/* Install command badge */}
@@ -392,7 +390,6 @@ export default function HomePage() {
             <div className="flex items-center gap-5 text-xs" style={{ color: "var(--text-muted)" }}>
               <Link href="/legal/terms"    className="hover:text-violet-400 transition-colors">Terms</Link>
               <Link href="/legal/privacy"  className="hover:text-violet-400 transition-colors">Privacy</Link>
-              <a href="https://github.com/addonwebsolutionsai-droid/addon90days" target="_blank" rel="noopener noreferrer" className="hover:text-violet-400 transition-colors">GitHub</a>
               <a href="mailto:support@addonweb.io" className="hover:text-violet-400 transition-colors">support@addonweb.io</a>
             </div>
           </div>
