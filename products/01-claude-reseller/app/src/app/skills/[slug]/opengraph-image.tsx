@@ -8,6 +8,7 @@
  */
 
 import { ImageResponse } from "next/og";
+import { SITE_DOMAIN } from "@/lib/site-config";
 
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
@@ -172,7 +173,7 @@ export default async function OG({ params }: { params: Promise<{ slug: string }>
             <span style={{ background: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)", color: "white", padding: "4px 10px", borderRadius: 6, fontSize: 14, fontWeight: 700, letterSpacing: 0.5 }}>
               TRY LIVE
             </span>
-            <span>addon90days.vercel.app/skills/{slug}</span>
+            <span>{SITE_DOMAIN}/skills/{slug}</span>
           </div>
         </div>
       </div>

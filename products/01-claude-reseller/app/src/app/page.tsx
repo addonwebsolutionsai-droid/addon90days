@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Terminal, Zap, Infinity as InfinityIcon, Shield, Package, ExternalLink } from "lucide-react";
+import { SITE_BASE_URL } from "@/lib/site-config";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -59,12 +60,51 @@ const result = await runSkill(invoiceGenerator, {
 // Page — no Nav (sidebar in layout handles navigation)
 // ---------------------------------------------------------------------------
 
+// Organization + WebSite JSON-LD — gives Google a stable identity for the
+// brand (knowledge panel eligibility) and enables sitelinks search box.
+const HOMEPAGE_JSON_LD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "SKILON",
+    "alternateName": "SkilOn",
+    "url": SITE_BASE_URL,
+    "logo": `${SITE_BASE_URL}/opengraph-image`,
+    "description": "Marketplace of 130+ production-ready Claude skills, MCP servers, and agent bundles. Free for the first year.",
+    "sameAs": [
+      "https://github.com/addonwebsolutionsai-droid/addon90days",
+      "https://www.npmjs.com/package/addonweb-claude-skills",
+    ],
+    "founder":      { "@type": "Organization", "name": "AddonWeb Solutions" },
+    "areaServed":   { "@type": "Country",      "name": "Worldwide" },
+    "foundingDate": "2026-04",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "SKILON",
+    "url": SITE_BASE_URL,
+    "potentialAction": {
+      "@type":  "SearchAction",
+      "target": { "@type": "EntryPoint", "urlTemplate": `${SITE_BASE_URL}/skills?q={search_term_string}` },
+      "query-input": "required name=search_term_string",
+    },
+  },
+];
+
 export default function HomePage() {
   return (
     <div
       className="min-h-screen"
       style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
     >
+      {/* JSON-LD: Organization + WebSite for Google brand panel + sitelinks search */}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(HOMEPAGE_JSON_LD) }}
+      />
+
       {/* ------------------------------------------------------------------ */}
       {/* HERO                                                                */}
       {/* ------------------------------------------------------------------ */}

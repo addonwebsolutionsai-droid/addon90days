@@ -11,12 +11,13 @@
 
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { SITE_BASE_URL } from "@/lib/site-config";
 
 const MCP_CONFIG = `{
   "mcpServers": {
     "addonweb-skills": {
       "type": "http",
-      "url": "https://addon90days.vercel.app/api/skills/mcp"
+      "url": "${SITE_BASE_URL}/api/skills/mcp"
     }
   }
 }`;

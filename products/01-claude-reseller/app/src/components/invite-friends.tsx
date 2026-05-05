@@ -12,8 +12,9 @@
 
 import { useState } from "react";
 import { Copy, Check, Twitter, Linkedin, MessageCircle } from "lucide-react";
+import { SITE_BASE_URL } from "@/lib/site-config";
 
-const APP_ORIGIN = "https://addon90days.vercel.app";
+const APP_ORIGIN = SITE_BASE_URL;
 
 const SHARE_COPY =
   "I'm building with SKILON — 130+ free Claude skills, MCP servers, and agent bundles. 1-line install. Try it:";

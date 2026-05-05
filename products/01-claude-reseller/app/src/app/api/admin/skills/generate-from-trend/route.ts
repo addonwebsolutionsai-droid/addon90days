@@ -28,6 +28,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import type { SkillInsertRow, SkillCategory, SkillDifficulty, SkillStep } from "@/lib/database.types";
+import { SITE_BASE_URL } from "@/lib/site-config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -306,7 +307,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       skill:         data,
       quality_score: score,
       quality_note:  reasoning,
-      url:           `https://addon90days.vercel.app/skills/${draft.slug}`,
+      url:           `${SITE_BASE_URL}/skills/${draft.slug}`,
       ...(source_url !== undefined ? { source_url } : {}),
     },
     { status: 201 },

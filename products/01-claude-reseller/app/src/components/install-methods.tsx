@@ -21,6 +21,7 @@ import { useState } from "react";
 import { Check, Copy, Terminal, Layers, Download, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { SITE_BASE_URL } from "@/lib/site-config";
 
 type Method = "cli" | "mcp" | "manual";
 
@@ -111,7 +112,7 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
   const [active, setActive] = useState<Method>("cli");
 
   const cliCommand = `npx addonweb-claude-skills install ${slug}`;
-  const mcpUrl = `https://addon90days.vercel.app/api/skills/mcp`;
+  const mcpUrl = `${SITE_BASE_URL}/api/skills/mcp`;
   // Native HTTP transport — newest Claude Desktop supports this directly.
   const mcpJsonHttp = `{
   "mcpServers": {

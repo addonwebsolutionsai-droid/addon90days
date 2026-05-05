@@ -60,8 +60,12 @@ export async function generateMetadata({
     if (!res.ok) return { title: "Skill not found" };
     const skill = await res.json() as Skill;
     const canonicalUrl = `${baseUrl}/skills/${skill.slug}`;
-    const title       = `${skill.title} — SKILON`;
-    const description = skill.tagline;
+    // Just the skill title — root layout's title.template appends " | SKILON".
+    // Don't include "SKILON" here or every page renders "X | SKILON | SKILON".
+    const title       = skill.title;
+    // Pad the meta description with a CTA + value prop. Tagline alone (~60 chars)
+    // is too short for SERP snippets; ~140-150 chars is the sweet spot.
+    const description = `${skill.tagline} — Free Claude skill from SKILON. Try Live in your browser, install in 30 seconds. No credit card.`.slice(0, 158);
     return {
       title,
       description,

@@ -5,6 +5,7 @@
  */
 
 import { ImageResponse } from "next/og";
+import { SITE_DOMAIN } from "@/lib/site-config";
 
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
@@ -153,7 +154,7 @@ export default async function OG() {
             Join the waitlist →
           </div>
           <div style={{ fontSize: 18, color: "rgba(255,255,255,0.5)", fontWeight: 500, display: "flex" }}>
-            addon90days.vercel.app/tableflow
+            {SITE_DOMAIN}/tableflow
           </div>
         </div>
       </div>

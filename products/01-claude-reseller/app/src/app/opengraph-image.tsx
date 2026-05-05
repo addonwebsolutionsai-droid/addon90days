@@ -12,6 +12,7 @@
  */
 
 import { ImageResponse } from "next/og";
+import { SITE_DOMAIN } from "@/lib/site-config";
 
 export const runtime = "edge";
 
@@ -154,7 +155,7 @@ export default async function OG() {
             npx addonweb-claude-skills install &lt;skill&gt;
           </div>
           <div style={{ fontSize: 20, color: "rgba(255,255,255,0.5)", fontWeight: 500, display: "flex" }}>
-            addon90days.vercel.app
+            {SITE_DOMAIN}
           </div>
         </div>
       </div>

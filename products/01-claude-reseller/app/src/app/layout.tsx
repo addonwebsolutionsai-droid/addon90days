@@ -7,6 +7,7 @@ import { ConditionalSidebar } from "@/components/conditional-sidebar";
 import { MobileSpacer } from "@/components/mobile-spacer";
 import { ConditionalChatWidget } from "@/components/conditional-chat-widget";
 import { PostHogProvider } from "@/components/posthog-provider";
+import { SITE_BASE_URL } from "@/lib/site-config";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,6 +23,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  // metadataBase makes every relative URL in metadata resolve against the
+  // canonical site origin. Switching to a custom domain = update one env var.
+  metadataBase: new URL(SITE_BASE_URL),
   title: {
     default: "SKILON — AI Skills. Limitless Future.",
     template: "%s | SKILON",
@@ -39,10 +43,12 @@ export const metadata: Metadata = {
     "developer tools",
   ],
   authors: [{ name: "AddonWeb Solutions" }],
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "SKILON",
+    url: "/",
     title: "SKILON — AI Skills. Limitless Future.",
     description:
       "Production-ready Claude skills, MCP servers, and agent bundles. Built by practitioners who run a 13-agent AI company.",

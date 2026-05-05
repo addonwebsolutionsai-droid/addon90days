@@ -33,6 +33,7 @@
 import type { NextRequest } from "next/server";
 import { supabase } from "@/lib/supabase";
 import type { Skill, SkillStep } from "@/lib/database.types";
+import { SITE_BASE_URL } from "@/lib/site-config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -172,7 +173,7 @@ function buildSkillWorkflow(skill: Skill, userInput: string): string {
     }
   }
   lines.push("---");
-  lines.push(`_Skill: \`${skill.slug}\` · Source: https://addon90days.vercel.app/skills/${skill.slug}_`);
+  lines.push(`_Skill: \`${skill.slug}\` · Source: ${SITE_BASE_URL}/skills/${skill.slug}_`);
   return lines.join("\n");
 }
 
@@ -321,7 +322,7 @@ export async function POST(req: NextRequest) {
   try { body = await req.json(); }
   catch { return jsonRpcHttpError(null, -32700, "Parse error: invalid JSON"); }
 
-  const baseUrl = process.env["NEXT_PUBLIC_APP_URL"] ?? "https://addon90days.vercel.app";
+  const baseUrl = SITE_BASE_URL;
 
   // Single request OR batch
   const requests: JsonRpcRequest[] = Array.isArray(body) ? body as JsonRpcRequest[] : [body as JsonRpcRequest];
@@ -357,7 +358,7 @@ export async function GET() {
       protocolVersion: PROTOCOL_VERSION,
       transport:       "streamable-http",
       description:     "SKILON MCP server (by AddonWeb). POST JSON-RPC 2.0 messages to this URL.",
-      docs:            "https://addon90days.vercel.app/skills",
+      docs:            `${SITE_BASE_URL}/skills`,
     },
     { headers: { ...CORS_HEADERS, "Cache-Control": "public, max-age=60" } }
   );

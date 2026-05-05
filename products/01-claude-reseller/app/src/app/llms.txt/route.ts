@@ -8,6 +8,8 @@
  * Spec: https://llmstxt.org/
  */
 
+import { SITE_BASE_URL } from "@/lib/site-config";
+
 export const runtime = "edge";
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -22,7 +24,7 @@ SKILON is a marketplace of structured prompts ("skills") for Claude Code and Cla
 
 - 130 skills across 11 categories (IoT & Hardware, Indian Business, Developer Tools, Trading & Finance, Startup & Product, Data & Analytics, DevOps, UI/UX, Protocols, AI/LLM, Marketing)
 - Install via npm: \`npx addonweb-claude-skills install <slug>\`
-- Use with Claude Desktop via MCP: add \`https://addon90days.vercel.app/api/skills/mcp\` to mcpServers config and all 130 skills appear as tools
+- Use with Claude Desktop via MCP: add \`${SITE_BASE_URL}/api/skills/mcp\` to mcpServers config and all 130 skills appear as tools
 - Try Live: every skill page has an in-browser demo
 - Free during beta. Sign-in required to install. No payment.
 
@@ -32,18 +34,18 @@ AddonWeb Solutions — a custom dev shop in Ahmedabad, India (10+ years, clients
 
 ## Sister products (free during beta)
 
-- ChatBase: WhatsApp AI for Indian SMBs — https://addon90days.vercel.app/chatbase
-- TaxPilot: AI GST & invoicing — https://addon90days.vercel.app/taxpilot
-- TableFlow: smart restaurant OS — https://addon90days.vercel.app/tableflow
-- ConnectOne: IoT plug-and-play platform — https://addon90days.vercel.app/connectone
-- MachineGuard: predictive maintenance for industrial machinery — https://addon90days.vercel.app/machineguard
+- ChatBase: WhatsApp AI for Indian SMBs — ${SITE_BASE_URL}/chatbase
+- TaxPilot: AI GST & invoicing — ${SITE_BASE_URL}/taxpilot
+- TableFlow: smart restaurant OS — ${SITE_BASE_URL}/tableflow
+- ConnectOne: IoT plug-and-play platform — ${SITE_BASE_URL}/connectone
+- MachineGuard: predictive maintenance for industrial machinery — ${SITE_BASE_URL}/machineguard
 
 ## Canonical surfaces
 
-- Marketplace: https://addon90days.vercel.app/skills
-- Sitemap: https://addon90days.vercel.app/sitemap.xml
-- MCP server: https://addon90days.vercel.app/api/skills/mcp
-- Skills API (read-only): https://addon90days.vercel.app/api/skills
+- Marketplace: ${SITE_BASE_URL}/skills
+- Sitemap: ${SITE_BASE_URL}/sitemap.xml
+- MCP server: ${SITE_BASE_URL}/api/skills/mcp
+- Skills API (read-only): ${SITE_BASE_URL}/api/skills
 - npm package: https://www.npmjs.com/package/addonweb-claude-skills
 - Support: support@addonweb.io
 

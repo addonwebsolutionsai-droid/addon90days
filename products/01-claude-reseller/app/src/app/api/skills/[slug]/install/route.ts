@@ -13,9 +13,10 @@ import type { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import type { Skill, SkillStep } from "@/lib/database.types";
+import { SITE_BASE_URL } from "@/lib/site-config";
 
 function buildSkillMarkdown(skill: Skill): string {
-  const appUrl = process.env["NEXT_PUBLIC_APP_URL"] ?? "https://addon90days.vercel.app";
+  const appUrl = SITE_BASE_URL;
   const lines: string[] = [];
 
   // ---- Frontmatter — Claude Code uses this to register the slash command ----

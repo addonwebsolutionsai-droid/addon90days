@@ -9,7 +9,9 @@
 import { useState } from "react";
 import { Copy, Check, Twitter, Linkedin, MessageCircle } from "lucide-react";
 
-const APP_ORIGIN = "https://addon90days.vercel.app";
+import { SITE_BASE_URL } from "@/lib/site-config";
+
+const APP_ORIGIN = SITE_BASE_URL;
 
 interface ShareSkillProps {
   slug: string;
