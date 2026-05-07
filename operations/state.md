@@ -6,10 +6,10 @@
 
 ## Project status
 
-**Start date:** 2026-04-22
-**Current day:** ~12 (2026-05-04)
-**Current phase:** Sprint 1 — Day 15 launch armed, P02 build started
-**Last session:** 2026-05-04
+**Start date:** 2026-04-28 (Day 1 = morning-orchestrator anchor; the 04-22 date in earlier notes was an estimate)
+**Current day:** ~10 (2026-05-07)
+**Current phase:** Post-launch — P01 SKILON live, daily content/sales/scout routines running, custom domain pending
+**Last session:** 2026-05-07 (resumed after 2-day standby)
 
 ---
 
@@ -22,9 +22,27 @@
 
 ## Next action
 
-P02 ChatBase backend MVP is being built right now by @api-engineer (background agent, started 2026-05-04 ~14:35 IST). When it lands, spawn @frontend-architect for the owner dashboard UI. Target P02 launch: Day 30 (~2026-05-22).
+Founder back from 2-day standby (2026-05-07). Faster cadence now. Daily routines re-enabled and running. Skill Smith still gated on `ROUTINE_API_SECRET` — when set, ramp from 1/day → 3/day. Custom domain cutover ready when founder picks the domain.
 
-P01 Day 15 launch (2026-05-06) is armed — Telegram launch-day reminder routine `trig_01Vr97KYBaoG2CjfDsHmyHpF` fires at 2026-05-06T06:00:00Z (11:30 IST).
+---
+
+## Cloud routines status (post-resume 2026-05-07)
+
+| Routine | Cron (UTC) | Status |
+|---|---|---|
+| Morning Orchestrator | 30 3 * * * | **RE-ENABLED** + manual run today |
+| Content Marketer | 30 4 * * * | **RE-ENABLED** |
+| Outbound Sales Drafter | 30 5 * * * | **RE-ENABLED** |
+| Problem Scout | 30 6 * * * | running ✓ |
+| Competitive Intel | 30 1 * * * | running ✓ |
+| SEO Daily Audit | 30 0 * * * | running ✓ |
+| EOD Orchestrator | 30 11 * * * | **RE-ENABLED** |
+| CMO Weekly Review | 30 10 * * 5 | **RE-ENABLED** (Friday) |
+| Telegram Inbound Handler | 0 * * * * | running ✓ |
+| Skill Smith | 30 2 * * * | DISABLED — needs `ROUTINE_API_SECRET` from founder |
+| Daily Backup | 0 18 * * * | running ✓ |
+
+Hedge Fund routines (separate concern from product launch) — leaving as-is.
 
 ---
 
@@ -32,10 +50,11 @@ P01 Day 15 launch (2026-05-06) is armed — Telegram launch-day reminder routine
 
 | Task | Status | Pointer |
 |---|---|---|
-| P02 ChatBase backend MVP | **building (api-engineer in background)** | `products/02-whatsapp-ai-suite/` |
-| P02 dashboard UI | queued — start after backend ADR + first commit lands | — |
-| Cloud-routine commit_repo_file backport | queued — tomorrow morning batch | `operations/diagnostic-routines-2026-05-01.md` |
-| P01 Day 15 launch | **armed** — Telegram reminder set | `content/launch/` |
+| Custom domain cutover | **awaiting founder** — pick domain + set `NEXT_PUBLIC_APP_URL` | `operations/decisions/2026-05-05-domain-cutover-runbook.md` |
+| Cloud-routine helper backport | queued — fix `commit_repo_file` HTTP-aware on the 5 re-enabled routines so they don't auto-disable again | `operations/decisions/2026-05-01-diagnostic-routines.md` (or similar) |
+| Skill Smith ramp | blocked on `ROUTINE_API_SECRET` | queue #008 |
+| P02 ChatBase backend | shipped 1a0ff95; dashboard shipped 1a92e21; runtime smoke blocked on Supabase migration + `P02_ENCRYPTION_KEY` env | queue #002 |
+| P01 SKILON site | live | https://addon90days.vercel.app/ |
 
 ---
 
