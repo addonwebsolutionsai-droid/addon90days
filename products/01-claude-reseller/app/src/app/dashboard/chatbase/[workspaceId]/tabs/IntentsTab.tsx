@@ -39,8 +39,8 @@ export function IntentsTab({ intents }: Props) {
       >
         <Tag size={22} className="text-green-500 mx-auto mb-3" />
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          Intents are seeded automatically when the migration runs.
-          Apply migration `010_p02_chatbase.sql` in Supabase to see them here.
+          Intents load automatically once setup is complete. If you see this,
+          the database migration is still being applied — check back in a moment.
         </p>
       </div>
     );

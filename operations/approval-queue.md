@@ -199,11 +199,12 @@ If yes to "competitors are real": move to private + Vercel Pro ($20/mo, well wit
 
 ---
 
-### #002 — P02 ChatBase backend MVP shipped — needs 3 founder actions to activate
+### #002 — P02 ChatBase — LAUNCH-READY — 2 founder actions block real-mode (mock-mode fully works now)
 
 - **Category:** strategic-decision (founder credentials only — agent cannot self-serve)
-- **Urgency:** 48h (P02 launch is Day 30 = 2026-05-22)
+- **Urgency:** 24h — launch content kit ready, migration applier ready, build clean. Can launch in mock-mode TODAY.
 - **Submitted by:** @cto on behalf of @api-engineer
+- **Updated:** 2026-05-07 by @api-engineer (accelerated from Day 30 → Day 15 window)
 - **Submitted at:** 2026-05-04
 - **Related product:** P02 ChatBase
 - **Related commit:** `1a0ff95` — 19 new files, 0 breaking changes to P01
@@ -230,6 +231,19 @@ Copy the 64-char output. Vercel Dashboard → Project → Settings → Environme
 Apply at business.facebook.com for WhatsApp Cloud API access. 3-7 day review. Until this lands the backend runs in `MOCK_MODE=true` (default) which lets the dashboard demo work without real WhatsApp.
 
 **Note on the agent's "Supabase API key broken" claim:** I checked production. `/api/p02-waitlist` returned 200 just now — the production Supabase key is healthy. The agent's local `.env.local` has the old JWT-format key from before today's rotation; that's a local-dev issue only, not blocking the Vercel deploy or anything user-facing. Will fix `.env.local` next time we have the new `sb_secret_*` value handy.
+
+**Update 2026-05-07 — @api-engineer sprint complete:**
+
+New deliverables ready (no founder action required — already shipped):
+- `scripts/apply-p02-migration.js` — automatic migration applier. Run with `SUPABASE_PROJECT_REF` + `SUPABASE_ACCESS_TOKEN` env vars. Falls back to manual runbook if credentials absent.
+- `operations/decisions/2026-05-07-p02-migration-howto.md` — step-by-step manual runbook (SQL Editor paste-and-run, with verification queries).
+- `content/launch-p02/` — 4-piece launch kit (Twitter thread, HN Show post, LinkedIn, Reddit × 3). All marked `status: APPROVED`.
+- Dashboard copy polished — no internal jargon or raw "coming soon" strings visible in demo.
+- `npm run type-check` clean. `npm run build` exits 0. `/dashboard/chatbase` and `/dashboard/chatbase/[workspaceId]` both in build output.
+
+**Can P02 launch in 5 days? YES — in mock-mode today, real-mode in 5-7 days (Meta gating).**
+
+Remaining founder actions (still the same 2 + 1 optional):
 
 **Recommended action:** approve founder actions 1 and 2 today (8 min total). Action 3 can wait.
 

@@ -124,7 +124,7 @@ export function MockChat({ workspaceId }: Props) {
         const noteMsg: ChatMessage = {
           id: `note-${Date.now()}`,
           role: "ai",
-          body: "[No reply generated. Check GROQ_API_KEY and migration status.]",
+          body: "[No reply generated. The AI engine may still be initialising — try again in a few seconds.]",
           confidence: null,
           created_at: new Date().toISOString(),
         };

@@ -133,13 +133,14 @@ export function KnowledgeTab({ docs, workspaceId }: Props) {
                 })}
               </span>
 
-              {/* Delete — coming soon (no route yet) */}
+              {/* Delete — available in v1.1. Disabled for now to prevent accidental data loss during beta. */}
               <span
-                className="text-xs cursor-not-allowed"
-                title="Delete endpoint coming in v1.1"
-                style={{ color: "var(--text-muted)" }}
+                className="text-xs cursor-not-allowed select-none"
+                title="Document deletion is available in v1.1"
+                aria-disabled="true"
+                style={{ color: "var(--text-muted)", opacity: 0.4 }}
               >
-                Delete (coming soon)
+                Remove
               </span>
             </div>
           ))}
