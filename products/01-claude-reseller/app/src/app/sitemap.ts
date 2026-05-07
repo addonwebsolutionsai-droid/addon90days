@@ -17,6 +17,7 @@ import type { MetadataRoute } from "next";
 
 import type { Skill } from "@/lib/database.types";
 import { CATEGORY_SLUGS } from "@/lib/category-content";
+import { getTopTags } from "@/app/skills/tag/[tag]/page";
 
 export const revalidate = 3600; // re-build sitemap at most once an hour
 
@@ -102,5 +103,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  return [...staticEntries, ...categoryEntries, ...skillEntries];
+  // Per-tag landing pages — slightly below categories in priority (0.75).
+  // We only include the top 50 qualifying tags (>= 3 skills) to avoid
+  // polluting the sitemap with thin-content pages.
+  let tagEntries: MetadataRoute.Sitemap = [];
+  try {
+    const topTags = await getTopTags(3, 50);
+    tagEntries = topTags.map(({ tag }) => ({
+      url:             `${baseUrl}/skills/tag/${tag}`,
+      lastModified:    now,
+      changeFrequency: "weekly" as const,
+      priority:        0.75,
+    }));
+  } catch {
+    // Non-fatal — sitemap still emits static + category + skill entries
+  }
+
+  return [...staticEntries, ...categoryEntries, ...tagEntries, ...skillEntries];
 }

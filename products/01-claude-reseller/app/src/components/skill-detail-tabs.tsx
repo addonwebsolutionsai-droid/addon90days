@@ -355,11 +355,17 @@ function OverviewTab({ skill }: { skill: Skill }) {
           <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-muted)" }}>
             Tags
           </p>
+          {/*
+           * Each tag links to its programmatic landing page (/skills/tag/<tag>).
+           * This is critical for inbound link equity — without these links the
+           * tag pages are orphans with no crawl path from the skill detail pages.
+           */}
           <div className="flex flex-wrap gap-1.5">
             {skill.tags.map((tag) => (
-              <span
+              <Link
                 key={tag}
-                className="px-2.5 py-1 rounded-lg border text-xs font-mono"
+                href={`/skills/tag/${tag}`}
+                className="px-2.5 py-1 rounded-lg border text-xs font-mono transition-colors hover:border-violet-500/40 hover:text-violet-400"
                 style={{
                   backgroundColor: "var(--bg-s2)",
                   borderColor: "var(--border-subtle)",
@@ -367,7 +373,7 @@ function OverviewTab({ skill }: { skill: Skill }) {
                 }}
               >
                 {tag}
-              </span>
+              </Link>
             ))}
           </div>
         </div>

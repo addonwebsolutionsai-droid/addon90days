@@ -22,10 +22,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Tag } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Skill, SkillCategory } from "@/lib/database.types";
 import { CATEGORY_CONTENT, CATEGORY_SLUGS } from "@/lib/category-content";
+import { formatTagLabel } from "@/lib/tag-format";
 
 export const revalidate = 1800;
 
@@ -85,12 +86,25 @@ export default async function CategoryPage({ params }: RouteParams) {
   const category = slug as SkillCategory;
   const { data: rows } = await supabase
     .from("skills")
-    .select("slug, title, tagline, difficulty, view_count, is_new, trending_score")
+    .select("slug, title, tagline, difficulty, view_count, is_new, trending_score, tags")
     .eq("category", category)
     .eq("published", true)
     .order("trending_score", { ascending: false })
     .limit(60);
-  const skills = (rows ?? []) as Pick<Skill, "slug" | "title" | "tagline" | "difficulty" | "view_count" | "is_new" | "trending_score">[];
+  const skills = (rows ?? []) as Pick<Skill, "slug" | "title" | "tagline" | "difficulty" | "view_count" | "is_new" | "trending_score" | "tags">[];
+
+  // Compute the 5 most-frequent tags from skills in this category for the
+  // "Popular tags" internal linking row at the bottom of the page.
+  const tagFreq = new Map<string, number>();
+  for (const s of skills) {
+    for (const t of s.tags ?? []) {
+      tagFreq.set(t, (tagFreq.get(t) ?? 0) + 1);
+    }
+  }
+  const popularTags = Array.from(tagFreq.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([t]) => t);
 
   const baseUrl = process.env["NEXT_PUBLIC_APP_URL"] ?? "https://addon90days.vercel.app";
   const jsonLd = {
@@ -272,6 +286,33 @@ export default async function CategoryPage({ params }: RouteParams) {
             })}
           </div>
         </section>
+
+        {/* Popular tags in this category — internal linking to tag landing pages */}
+        {popularTags.length > 0 && (
+          <section aria-label="Popular tags in this category" className="mt-8">
+            <h2 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
+              Popular tags in {cat.label}
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {popularTags.map((t) => (
+                <Link
+                  key={t}
+                  href={`/skills/tag/${t}`}
+                  className="group inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-medium transition-all hover:border-violet-500/40 hover:text-violet-400"
+                  style={{
+                    backgroundColor: "var(--bg-surface)",
+                    borderColor:     "var(--border-subtle)",
+                    color:           "var(--text-secondary)",
+                  }}
+                >
+                  <Tag size={11} className="text-violet-400" aria-hidden />
+                  {formatTagLabel(t)}
+                  <ArrowRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Bottom CTA — bring users to the catalog hub */}
         <div className="mt-12 text-center">
