@@ -1,17 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Terminal, Zap, Infinity as InfinityIcon, Shield, Package, ExternalLink, UserPlus } from "lucide-react";
 import { SITE_BASE_URL } from "@/lib/site-config";
-
-// ---------------------------------------------------------------------------
-// Data
-// ---------------------------------------------------------------------------
-
-const STATS = [
-  { value: "130+", label: "Skills" },
-  { value: "11",   label: "Categories" },
-  { value: "Free", label: "Every skill" },
-  { value: "Daily", label: "New skills" },
-];
+import { getCatalogTotal, formatSkillCount } from "@/lib/catalog-stats";
 
 const CATEGORIES = [
   { key: "ai-llm",                  emoji: "🤖", label: "AI & LLM",           color: "#8b5cf6" },
@@ -62,37 +52,49 @@ const result = await runSkill(invoiceGenerator, {
 
 // Organization + WebSite JSON-LD — gives Google a stable identity for the
 // brand (knowledge panel eligibility) and enables sitelinks search box.
-const HOMEPAGE_JSON_LD = [
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "SKILON",
-    "alternateName": "SkilOn",
-    "url": SITE_BASE_URL,
-    "logo": `${SITE_BASE_URL}/opengraph-image`,
-    "description": "Marketplace of 130+ production-ready Claude skills, MCP servers, and agent bundles. Free for the first year.",
-    "sameAs": [
-      "https://github.com/addonwebsolutionsai-droid/addon90days",
-      "https://www.npmjs.com/package/addonweb-claude-skills",
-    ],
-    "founder":      { "@type": "Organization", "name": "AddonWeb Solutions" },
-    "areaServed":   { "@type": "Country",      "name": "Worldwide" },
-    "foundingDate": "2026-04",
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "SKILON",
-    "url": SITE_BASE_URL,
-    "potentialAction": {
-      "@type":  "SearchAction",
-      "target": { "@type": "EntryPoint", "urlTemplate": `${SITE_BASE_URL}/skills?q={search_term_string}` },
-      "query-input": "required name=search_term_string",
+function buildHomepageJsonLd(skillCountLabel: string) {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "SKILON",
+      "alternateName": "SkilOn",
+      "url": SITE_BASE_URL,
+      "logo": `${SITE_BASE_URL}/opengraph-image`,
+      "description": `Marketplace of ${skillCountLabel} production-ready Claude skills, MCP servers, and agent bundles. Free for the first year.`,
+      "sameAs": [
+        "https://github.com/addonwebsolutionsai-droid/addon90days",
+        "https://www.npmjs.com/package/addonweb-claude-skills",
+      ],
+      "founder":      { "@type": "Organization", "name": "AddonWeb Solutions" },
+      "areaServed":   { "@type": "Country",      "name": "Worldwide" },
+      "foundingDate": "2026-04",
     },
-  },
-];
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "SKILON",
+      "url": SITE_BASE_URL,
+      "potentialAction": {
+        "@type":  "SearchAction",
+        "target": { "@type": "EntryPoint", "urlTemplate": `${SITE_BASE_URL}/skills?q={search_term_string}` },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ];
+}
 
-export default function HomePage() {
+export default async function HomePage() {
+  const totalSkills = await getCatalogTotal();
+  const skillCountLabel = formatSkillCount(totalSkills);
+  const HOMEPAGE_JSON_LD = buildHomepageJsonLd(skillCountLabel);
+  const STATS = [
+    { value: skillCountLabel, label: "Skills" },
+    { value: "11",            label: "Categories" },
+    { value: "Free",          label: "Every skill" },
+    { value: "Daily",         label: "New skills" },
+  ];
+
   return (
     <div
       className="min-h-screen"
@@ -113,7 +115,7 @@ export default function HomePage() {
           className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs mb-8 border border-green-500/30 bg-green-500/10"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="font-semibold text-green-500 uppercase tracking-wider">Live · 130+ skills</span>
+          <span className="font-semibold text-green-500 uppercase tracking-wider">Live · {skillCountLabel} skills</span>
           <span style={{ color: "var(--text-muted)" }}>· every skill free · sign-in to install</span>
         </div>
 
@@ -128,7 +130,7 @@ export default function HomePage() {
           className="text-base max-w-xl mx-auto mb-8"
           style={{ color: "var(--text-secondary)" }}
         >
-          130+ skills across IoT, trading, developer tools, Indian business, and more.
+          {skillCountLabel} skills across IoT, trading, developer tools, Indian business, and more.
           Step-by-step guides. Copy-paste code. Runs in Claude Code, your API, or the MCP server.
           <span className="block mt-2 text-green-500 font-medium">Every skill is free. Sign in to install.</span>
         </p>
@@ -344,7 +346,7 @@ export default function HomePage() {
                 color: "var(--text-secondary)",
               }}
             >
-              Browse all 130+ skills <ExternalLink size={13} />
+              Browse all {skillCountLabel} skills <ExternalLink size={13} />
             </Link>
           </div>
         </div>
@@ -426,7 +428,7 @@ export default function HomePage() {
           </div>
 
           <h2 className="text-3xl font-bold mb-4">
-            All 130+ skills.<br />Free for the first year.
+            All {skillCountLabel} skills.<br />Free for the first year.
           </h2>
           <p className="text-base mb-8 max-w-xl mx-auto" style={{ color: "var(--text-secondary)" }}>
             Every skill, every install, every MCP call — free until you ship something we&apos;re proud of together.

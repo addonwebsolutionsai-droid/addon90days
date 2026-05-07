@@ -267,8 +267,26 @@ function SkillsPage() {
 
   const [skills, setSkills]                 = useState<Skill[]>([]);
   const [total, setTotal]                   = useState(0);
+  // Unfiltered catalog total — used in the "Live · all X+ skills free" banner and
+  // bottom CTAs which describe the whole catalog, not the current filter.
+  const [catalogLabel, setCatalogLabel]     = useState("100+");
   const [loading, setLoading]               = useState(true);
   const [error, setError]                   = useState<string | null>(null);
+
+  // Fetch unfiltered catalog total once on mount.
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/skills?limit=1")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { total?: number } | null) => {
+        if (!alive || data === null || typeof data.total !== "number") return;
+        const n = data.total;
+        if (n < 10)            setCatalogLabel(String(n));
+        else                   setCatalogLabel(`${Math.floor(n / 10) * 10}+`);
+      })
+      .catch(() => { /* keep fallback */ });
+    return () => { alive = false; };
+  }, []);
 
   // Filters — category + sort come from URL so sidebar/Discover stay in sync
   const [query, setQuery]                   = useState("");
@@ -380,9 +398,9 @@ function SkillsPage() {
             <span className="font-semibold text-green-500 uppercase tracking-wider text-xs">Live</span>
             <span style={{ color: "var(--text-secondary)" }}>
               {isSignedIn === true ? (
-                <>All 130+ skills free for the first year. Pick one and run <code className="px-1.5 py-0.5 rounded font-mono text-[11px]" style={{ backgroundColor: "var(--bg-s2)", color: "var(--text-primary)" }}>npx addonweb-claude-skills install &lt;slug&gt;</code> to install.</>
+                <>All {catalogLabel} skills free for the first year. Pick one and run <code className="px-1.5 py-0.5 rounded font-mono text-[11px]" style={{ backgroundColor: "var(--bg-s2)", color: "var(--text-primary)" }}>npx addonweb-claude-skills install &lt;slug&gt;</code> to install.</>
               ) : (
-                <>All 130+ skills free for the first year. <Link href="/sign-up" className="text-violet-400 hover:text-violet-300 underline">Sign up</Link> to install.</>
+                <>All {catalogLabel} skills free for the first year. <Link href="/sign-up" className="text-violet-400 hover:text-violet-300 underline">Sign up</Link> to install.</>
               )}
             </span>
           </div>
@@ -669,7 +687,7 @@ function SkillsPage() {
                 Sign up to install any skill
               </h2>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                No credit card. All 130+ skills free for the first year.
+                No credit card. All {catalogLabel} skills free for the first year.
               </p>
             </div>
             <Link
@@ -690,7 +708,7 @@ function SkillsPage() {
                 Connect Claude Desktop in 30 seconds
               </h2>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Paste one MCP config block and all 130 skills appear as tools.
+                Paste one MCP config block and all {catalogLabel} skills appear as tools.
               </p>
             </div>
             <Link

@@ -16,21 +16,22 @@ import { SITE_BASE_URL } from "@/lib/site-config";
 
 const APP_ORIGIN = SITE_BASE_URL;
 
-const SHARE_COPY =
-  "I'm building with SKILON — 130+ free Claude skills, MCP servers, and agent bundles. 1-line install. Try it:";
-
 interface InviteFriendsProps {
   userId: string;
+  /** Live catalog label like "140+" — server passes it down so share copy tracks the catalog. */
+  skillCountLabel?: string;
 }
 
-export function InviteFriends({ userId }: InviteFriendsProps) {
+export function InviteFriends({ userId, skillCountLabel }: InviteFriendsProps) {
   const [copied, setCopied] = useState(false);
+  const countText = skillCountLabel ?? "100+";
+  const shareCopy = `I'm building with SKILON — ${countText} free Claude skills, MCP servers, and agent bundles. 1-line install. Try it:`;
   const link = `${APP_ORIGIN}/?ref=${encodeURIComponent(userId)}`;
-  const xText = encodeURIComponent(`${SHARE_COPY} ${link}`);
+  const xText = encodeURIComponent(`${shareCopy} ${link}`);
   const liUrl = encodeURIComponent(link);
-  const waText = encodeURIComponent(`${SHARE_COPY} ${link}`);
+  const waText = encodeURIComponent(`${shareCopy} ${link}`);
   const redditUrl = encodeURIComponent(link);
-  const redditTitle = encodeURIComponent("SKILON — 130+ free Claude skills, MCP & agents (by AddonWeb)");
+  const redditTitle = encodeURIComponent(`SKILON — ${countText} free Claude skills, MCP & agents (by AddonWeb)`);
 
   async function copyLink() {
     try {

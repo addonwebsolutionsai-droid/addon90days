@@ -34,6 +34,7 @@ import type { NextRequest } from "next/server";
 import { supabase } from "@/lib/supabase";
 import type { Skill, SkillStep } from "@/lib/database.types";
 import { SITE_BASE_URL } from "@/lib/site-config";
+import { formatSkillCount } from "@/lib/catalog-stats";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -191,6 +192,11 @@ async function handleRpc(req: JsonRpcRequest, baseUrl: string): Promise<JsonRpcR
     switch (req.method) {
       // ---- Lifecycle ----
       case "initialize": {
+        // Pull live count for the instructions string so MCP clients see
+        // the current catalog size (not a stale "130+"). Uses the same
+        // 60s cache as tools/list, no extra DB hit on the warm path.
+        const allSkills = await getAllSkills();
+        const countLabel = formatSkillCount(allSkills.length);
         return {
           jsonrpc: "2.0", id,
           result: {
@@ -201,7 +207,7 @@ async function handleRpc(req: JsonRpcRequest, baseUrl: string): Promise<JsonRpcR
               logging:   {},
             },
             serverInfo: { name: SERVER_NAME, version: SERVER_VERSION },
-            instructions: "This server exposes the SKILON catalog (130+ Claude skills, by AddonWeb) as MCP tools. Each tool returns a step-by-step workflow Claude follows to do the work. Tool name = skill slug (kebab-case).",
+            instructions: `This server exposes the SKILON catalog (${countLabel} Claude skills, by AddonWeb) as MCP tools. Each tool returns a step-by-step workflow Claude follows to do the work. Tool name = skill slug (kebab-case).`,
           },
         };
       }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Search } from "lucide-react";
+import { getSkillCountLabel } from "@/lib/catalog-stats";
 
 /**
  * Custom 404 — branded with the same violet/pink accents as the marketplace.
@@ -14,7 +15,8 @@ export const metadata = {
   description: "The page you're looking for doesn't exist on SKILON.",
 };
 
-export default function NotFound() {
+export default async function NotFound() {
+  const skillCountLabel = await getSkillCountLabel();
   return (
     <main
       className="min-h-screen flex items-center justify-center px-5"
@@ -37,7 +39,7 @@ export default function NotFound() {
         </h1>
         <p className="text-sm leading-relaxed mb-7" style={{ color: "var(--text-secondary)" }}>
           The skill or page you&apos;re looking for may have been renamed,
-          moved, or never existed. Try the marketplace — 130+ skills, all free
+          moved, or never existed. Try the marketplace — {skillCountLabel} skills, all free
           for the first year.
         </p>
 

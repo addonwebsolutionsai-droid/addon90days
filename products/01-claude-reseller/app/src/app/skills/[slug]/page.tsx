@@ -23,6 +23,7 @@ import { InstallMethods } from "@/components/install-methods";
 import { TrySkillLive } from "@/components/try-skill-live";
 import { ShareSkill } from "@/components/share-skill";
 import { ViewBeacon } from "@/components/view-beacon";
+import { getSkillCountLabel } from "@/lib/catalog-stats";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -150,6 +151,10 @@ export default async function SkillDetailPage({
 
   const { userId } = await auth();
   const isSignedIn = userId !== null;
+
+  // Live catalog count — passed to InstallMethods so the MCP tab never
+  // overstates how many tools land in Claude Desktop.
+  const skillCountLabel = await getSkillCountLabel();
 
   // ---------------------------------------------------------------------- //
   // JSON-LD structured data (schema.org SoftwareApplication)               //
@@ -301,7 +306,7 @@ export default async function SkillDetailPage({
         {/* INSTALL METHODS — beginner-friendly, 3 tabs                      */}
         {/* ---------------------------------------------------------------- */}
         <div id="install" className="mb-4 scroll-mt-20">
-          <InstallMethods slug={skill.slug} isSignedIn={isSignedIn} />
+          <InstallMethods slug={skill.slug} isSignedIn={isSignedIn} skillCountLabel={skillCountLabel} />
         </div>
 
         {/* ---------------------------------------------------------------- */}

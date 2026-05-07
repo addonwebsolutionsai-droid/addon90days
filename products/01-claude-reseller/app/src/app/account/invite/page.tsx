@@ -2,12 +2,14 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Share2 } from "lucide-react";
 import { InviteFriends } from "@/components/invite-friends";
+import { getSkillCountLabel } from "@/lib/catalog-stats";
 
 export const metadata = { title: "Invite your team" };
 
 export default async function InvitePage() {
   const { userId } = await auth();
   if (userId === null) redirect("/sign-in?redirect_url=/account/invite");
+  const skillCountLabel = await getSkillCountLabel();
 
   return (
     <div className="space-y-6">
@@ -33,7 +35,7 @@ export default async function InvitePage() {
             </p>
           </div>
         </div>
-        <InviteFriends userId={userId} />
+        <InviteFriends userId={userId} skillCountLabel={skillCountLabel} />
       </section>
     </div>
   );

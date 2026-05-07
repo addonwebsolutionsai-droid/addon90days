@@ -27,6 +27,7 @@ import { supabase } from "@/lib/supabase";
 import type { Skill, SkillCategory } from "@/lib/database.types";
 import { CATEGORY_CONTENT, CATEGORY_SLUGS } from "@/lib/category-content";
 import { formatTagLabel } from "@/lib/tag-format";
+import { getSkillCountLabel } from "@/lib/catalog-stats";
 
 export const revalidate = 1800;
 
@@ -79,6 +80,8 @@ export default async function CategoryPage({ params }: RouteParams) {
   const { slug } = await params;
   const cat = CATEGORY_CONTENT[slug];
   if (cat === undefined) notFound();
+
+  const skillCountLabel = await getSkillCountLabel();
 
   // Server fetch — Supabase via the public anon client (only published skills).
   // Slug came from generateStaticParams (CATEGORY_SLUGS), so it's already
@@ -325,7 +328,7 @@ export default async function CategoryPage({ params }: RouteParams) {
               color:           "var(--text-secondary)",
             }}
           >
-            Browse all 130+ skills <ArrowRight size={13} />
+            Browse all {skillCountLabel} skills <ArrowRight size={13} />
           </Link>
         </div>
       </div>

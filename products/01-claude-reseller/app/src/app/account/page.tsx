@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Sparkles, Plug, Share2, Shield, Settings as SettingsIcon, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { getSkillCountLabel } from "@/lib/catalog-stats";
 
 export const metadata = { title: "Your account" };
 
@@ -11,6 +12,7 @@ export default async function AccountOverviewPage() {
 
   const user = await currentUser();
   const firstName = user?.firstName ?? null;
+  const skillCountLabel = await getSkillCountLabel();
 
   return (
     <div className="space-y-10">
@@ -37,7 +39,7 @@ export default async function AccountOverviewPage() {
             href="/skills"
             icon={Sparkles}
             iconColor="#8b5cf6"
-            title="Browse 130+ skills"
+            title={`Browse ${skillCountLabel} skills`}
             description="Indian Business · IoT · Trading · Dev Tools · 7 more"
           />
           <QuickCard
@@ -52,7 +54,7 @@ export default async function AccountOverviewPage() {
             icon={Plug}
             iconColor="#8b5cf6"
             title="Connect Claude Desktop"
-            description="Paste one MCP config block, get 130 tools"
+            description={`Paste one MCP config block, get ${skillCountLabel} tools`}
           />
           <QuickCard
             href="/account/invite"

@@ -2,19 +2,21 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Plug } from "lucide-react";
 import { MCPConnect } from "@/components/mcp-connect";
+import { getSkillCountLabel } from "@/lib/catalog-stats";
 
 export const metadata = { title: "Connect Claude Desktop" };
 
 export default async function ConnectPage() {
   const { userId } = await auth();
   if (userId === null) redirect("/sign-in?redirect_url=/account/connect");
+  const skillCountLabel = await getSkillCountLabel();
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold mb-1">Connect Claude Desktop</h1>
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          Paste this MCP config block once and all 130 skills appear as tools inside Claude Desktop.
+          Paste this MCP config block once and all {skillCountLabel} skills appear as tools inside Claude Desktop.
         </p>
       </div>
 
@@ -33,7 +35,7 @@ export default async function ConnectPage() {
             </p>
           </div>
         </div>
-        <MCPConnect />
+        <MCPConnect skillCountLabel={skillCountLabel} />
       </section>
     </div>
   );

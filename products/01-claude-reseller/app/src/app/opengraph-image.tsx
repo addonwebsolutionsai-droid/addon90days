@@ -13,14 +13,17 @@
 
 import { ImageResponse } from "next/og";
 import { SITE_DOMAIN } from "@/lib/site-config";
+import { getCatalogTotal, formatSkillCount } from "@/lib/catalog-stats";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "SKILON — AI Skills. Limitless Future. 130+ production-ready Claude skills. Free for the first year.";
+export const alt = "SKILON — AI Skills. Limitless Future. Production-ready Claude skills. Free for the first year.";
 
 export default async function OG() {
+  const total = await getCatalogTotal();
+  const label = formatSkillCount(total);
   return new ImageResponse(
     (
       <div
@@ -114,7 +117,7 @@ export default async function OG() {
               flexDirection:   "column",
             }}
           >
-            <span>130 production-ready</span>
+            <span>{label} production-ready</span>
             <span
               style={{
                 background:               "linear-gradient(90deg, #c4b5fd 0%, #f9a8d4 100%)",

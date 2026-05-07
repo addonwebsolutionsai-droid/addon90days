@@ -6,7 +6,7 @@
  * For now the MCP endpoint is the same for every user (the catalog is shared);
  * personalised tokens land when we wire per-user rate limits in v1.1. Until
  * then, this is still the highest-value action a logged-in user can take —
- * paste this block into Claude Desktop and 130 skills appear as tools.
+ * paste this block into Claude Desktop and every catalog skill appears as a tool.
  */
 
 import { useState } from "react";
@@ -22,8 +22,14 @@ const MCP_CONFIG = `{
   }
 }`;
 
-export function MCPConnect() {
+interface MCPConnectProps {
+  /** Live catalog label like "140+" — server passes it down so the copy stays accurate. */
+  skillCountLabel?: string;
+}
+
+export function MCPConnect({ skillCountLabel }: MCPConnectProps = {}) {
   const [copied, setCopied] = useState(false);
+  const countText = skillCountLabel !== undefined ? `all ${skillCountLabel} skills` : "all skills";
 
   async function copy() {
     try {
@@ -81,7 +87,7 @@ export function MCPConnect() {
       <ol className="text-xs space-y-1 list-decimal pl-5" style={{ color: "var(--text-secondary)" }}>
         <li>Open <span className="font-mono">claude_desktop_config.json</span> (Claude Desktop → Settings → Developer → Edit Config).</li>
         <li>Paste the block above. If you already have an <span className="font-mono">mcpServers</span> section, merge in <span className="font-mono">addonweb-skills</span>.</li>
-        <li>Restart Claude Desktop. All 130 skills appear as tools.</li>
+        <li>Restart Claude Desktop. {countText.charAt(0).toUpperCase() + countText.slice(1)} appear as tools.</li>
       </ol>
     </div>
   );

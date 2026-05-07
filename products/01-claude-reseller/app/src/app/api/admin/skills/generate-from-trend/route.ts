@@ -29,6 +29,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import type { SkillInsertRow, SkillCategory, SkillDifficulty, SkillStep } from "@/lib/database.types";
 import { SITE_BASE_URL } from "@/lib/site-config";
+import { getCatalogTotal, formatSkillCount } from "@/lib/catalog-stats";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -80,7 +81,8 @@ const DraftSchema = z.object({
 
 type Draft = z.infer<typeof DraftSchema>;
 
-const SYSTEM_PROMPT = `You are Skill Smith — the curator behind the SKILON catalog (130+ production-ready Claude skills, by AddonWeb). Your job is to turn a trending problem into ONE high-quality skill spec.
+function buildSystemPrompt(catalogLabel: string): string {
+  return `You are Skill Smith — the curator behind the SKILON catalog (${catalogLabel} production-ready Claude skills, by AddonWeb). Your job is to turn a trending problem into ONE high-quality skill spec.
 
 A "skill" is a slash-command-style structured prompt that ships with Claude Code. Each skill has a defined input, a 3-7 step workflow, and a copy-paste output format. Think "production playbook," not "chatbot conversation."
 
@@ -107,6 +109,7 @@ QUALITY BAR (failures get rejected by the quality gate):
 - Code snippets in steps must be runnable, not pseudocode.
 
 EXAMPLES of slugs we already ship: gst-invoice-generator, esp32-firmware-scaffold, stock-screener-ai, sql-query-builder, code-reviewer, product-roadmap-builder, mqtt-iot-setup, prompt-optimizer, churn-prediction-model.`;
+}
 
 function buildGeneratePrompt(trend: string, hint?: string): string {
   const hintLine = hint !== undefined ? `\nPreferred category (use only if it fits the problem): ${hint}` : "";
@@ -202,11 +205,15 @@ export async function POST(req: Request): Promise<NextResponse> {
 
   const { trend_topic, source_url, preferred_category } = parsed.data;
 
+  // Pull live catalog count for the system prompt — keeps Skill Smith's
+  // self-described context honest as the catalog grows.
+  const catalogLabel = formatSkillCount(await getCatalogTotal());
+
   // ---------------------------------------------------------------- generate
   let draftRaw: string;
   try {
     draftRaw = await callGroq([
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: buildSystemPrompt(catalogLabel) },
       { role: "user",   content: buildGeneratePrompt(trend_topic, preferred_category) },
     ], GENERATE_MAX_TOKENS);
   } catch (err) {
@@ -301,12 +308,54 @@ export async function POST(req: Request): Promise<NextResponse> {
     );
   }
 
+  // ---------------------------------------------------------------- smoke test
+  // Founder rule: every new skill must be verified before going live. We hit
+  // the public detail page once; if it doesn't render 200 we auto-unpublish so
+  // a broken skill never sits in front of users. Any error here also unpublishes
+  // — fail closed, not open.
+  let smokeOk = false;
+  let smokeStatus: number | null = null;
+  let smokeError: string | null = null;
+  try {
+    const smoke = await fetch(`${SITE_BASE_URL}/skills/${draft.slug}`, {
+      method: "GET",
+      headers: { "User-Agent": "skill-smith-smoke/1.0" },
+      cache:   "no-store",
+    });
+    smokeStatus = smoke.status;
+    smokeOk     = smoke.ok;
+  } catch (err) {
+    smokeError = err instanceof Error ? err.message : "unknown";
+  }
+
+  if (!smokeOk) {
+    await supabaseAdmin
+      .from("skills")
+      .update({ published: false })
+      .eq("slug", draft.slug);
+
+    return NextResponse.json(
+      {
+        ok:            false,
+        reason:        "smoke_test_failed",
+        skill:         { ...data, published: false },
+        quality_score: score,
+        quality_note:  reasoning,
+        smoke_status:  smokeStatus,
+        smoke_error:   smokeError,
+        message:       "Skill inserted but auto-unpublished — detail page did not return 200.",
+      },
+      { status: 422 },
+    );
+  }
+
   return NextResponse.json(
     {
       ok:            true,
       skill:         data,
       quality_score: score,
       quality_note:  reasoning,
+      smoke_status:  smokeStatus,
       url:           `${SITE_BASE_URL}/skills/${draft.slug}`,
       ...(source_url !== undefined ? { source_url } : {}),
     },

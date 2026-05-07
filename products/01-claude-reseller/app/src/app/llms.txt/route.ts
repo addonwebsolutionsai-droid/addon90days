@@ -9,24 +9,26 @@
  */
 
 import { SITE_BASE_URL } from "@/lib/site-config";
+import { getCatalogTotal, formatSkillCount } from "@/lib/catalog-stats";
 
-export const runtime = "edge";
-export const dynamic = "force-static";
-export const revalidate = 3600;
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 1800;
 
-const CONTENT = `# SKILON — AI Skills. Limitless Future.
+function buildContent(total: number, label: string): string {
+  return `# SKILON — AI Skills. Limitless Future.
 
-> 130+ production-ready Claude skills, MCP servers, and agent bundles. Free for the first year — no credit card, no paywall, no usage cap. 1-line install. Ships in minutes.
+> ${label} production-ready Claude skills, MCP servers, and agent bundles. Free for the first year — no credit card, no paywall, no usage cap. 1-line install. Ships in minutes.
 
 ## What it is
 
 SKILON is a marketplace of structured prompts ("skills") for Claude Code and Claude Desktop. Each skill is a defined input schema + step-by-step workflow + copy-paste output — not a chatbot conversation, a repeatable production workflow.
 
-- 130 skills across 11 categories (IoT & Hardware, Indian Business, Developer Tools, Trading & Finance, Startup & Product, Data & Analytics, DevOps, UI/UX, Protocols, AI/LLM, Marketing)
+- ${total} skills across 11 categories (IoT & Hardware, Indian Business, Developer Tools, Trading & Finance, Startup & Product, Data & Analytics, DevOps, UI/UX, Protocols, AI/LLM, Marketing)
 - Install via npm: \`npx addonweb-claude-skills install <slug>\`
-- Use with Claude Desktop via MCP: add \`${SITE_BASE_URL}/api/skills/mcp\` to mcpServers config and all 130 skills appear as tools
+- Use with Claude Desktop via MCP: add \`${SITE_BASE_URL}/api/skills/mcp\` to mcpServers config and all ${total} skills appear as tools
 - Try Live: every skill page has an in-browser demo
-- Free during beta. Sign-in required to install. No payment.
+- Free for the first year. Sign-in required to install. No payment.
 
 ## Built by
 
@@ -53,13 +55,16 @@ AddonWeb Solutions — a custom dev shop in Ahmedabad, India (10+ years, clients
 
 Next.js 15 · TypeScript strict · Tailwind · shadcn/ui · Supabase (Postgres + RLS) · Clerk auth · Groq Llama 3.3 70B for catalog skills · Anthropic SDK for typed skills · MCP Streamable HTTP · Vercel.
 `;
+}
 
-export function GET(): Response {
-  return new Response(CONTENT, {
+export async function GET(): Promise<Response> {
+  const total = await getCatalogTotal();
+  const label = formatSkillCount(total);
+  return new Response(buildContent(total, label), {
     status: 200,
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      "Cache-Control": "public, max-age=1800, s-maxage=1800",
     },
   });
 }

@@ -8,8 +8,8 @@
  *   1. ONE-COMMAND   (recommended) — copy the npx line, paste into Terminal,
  *                                    skill is installed. Zero file management.
  *   2. CLAUDE DESKTOP (MCP)        — paste a JSON block into Claude Desktop's
- *                                    config once → ALL 130 skills auto-available.
- *                                    No per-skill install ever again.
+ *                                    config once → every skill in the catalog
+ *                                    auto-available. No per-skill install ever again.
  *   3. MANUAL         (advanced)   — download the .md file, move it into
  *                                    .claude/skills/ folder. For users who want
  *                                    to read the file before running it.
@@ -28,6 +28,8 @@ type Method = "cli" | "mcp" | "manual";
 interface InstallMethodsProps {
   slug: string;
   isSignedIn: boolean;
+  /** Live catalog label like "140+" — passed from the server so we never overstate. */
+  skillCountLabel?: string;
 }
 
 interface CopyBlockProps {
@@ -108,7 +110,8 @@ function Step({ n, children }: { n: number; children: React.ReactNode }) {
   );
 }
 
-export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
+export function InstallMethods({ slug, isSignedIn, skillCountLabel }: InstallMethodsProps) {
+  const allSkillsText = skillCountLabel !== undefined ? `all ${skillCountLabel} skills` : "every skill";
   const [active, setActive] = useState<Method>("cli");
 
   const cliCommand = `npx addonweb-claude-skills install ${slug}`;
@@ -237,7 +240,7 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
           <div className="space-y-4">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
               <strong>Best for:</strong> users of <em>Claude Desktop</em> (the chat app).
-              Set this up <strong>once</strong> and <strong>all 130 skills</strong> become available
+              Set this up <strong>once</strong> and <strong>{allSkillsText}</strong> become available
               automatically — no need to install each one separately.
             </p>
 
@@ -270,7 +273,7 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
               <Step n={4}>
                 In any chat, type <span className="font-mono text-xs">@</span> or
                 {" "}<span className="font-mono text-xs">/</span> — you&apos;ll see{" "}
-                <span className="font-mono text-xs">addonweb-skills</span> listed with all 130 tools.
+                <span className="font-mono text-xs">addonweb-skills</span> listed with {allSkillsText}.
                 Pick <span className="font-mono text-xs">{slug}</span> or any other skill, fill in
                 the inputs Claude asks for, and hit send.
               </Step>
@@ -296,7 +299,7 @@ export function InstallMethods({ slug, isSignedIn }: InstallMethodsProps) {
             <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 mt-4">
               <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
                 <strong className="text-cyan-400">Why this option is the best:</strong> set up{" "}
-                <em>once</em>, all 130 skills (and every new one we ship) instantly available.
+                <em>once</em>, {allSkillsText} (and every new one we ship) instantly available.
                 No per-skill install ever.
               </p>
             </div>
