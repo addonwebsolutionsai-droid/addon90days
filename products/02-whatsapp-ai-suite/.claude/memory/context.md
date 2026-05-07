@@ -1,10 +1,23 @@
 # P02 · ChatBase — Session Context
 
 ## Current Status
-**Phase:** Build phase — backend + dashboard MVP shipped
-**Build started:** 2026-05-04 (Day ~12)
-**Target Launch:** Day 30 (~2026-05-22)
-**Last Updated:** 2026-05-04
+**Phase:** Launch-ready — backend + dashboard + launch kit all shipped
+**Build started:** 2026-05-04 (Day ~12 by old anchor; Day 7 by 04-28 anchor)
+**Target Launch:** Day 12-13 mock-mode soft launch · Day 18-22 real WhatsApp post-Meta-verify
+**Last Updated:** 2026-05-07 (Day 10) — launch acceleration sprint complete
+
+## Day 10 Update — Launch acceleration (commit 70fbb2d)
+
+- `scripts/apply-p02-migration.js` — uses Supabase Mgmt API to apply
+  010_p02_chatbase.sql when `SUPABASE_PROJECT_REF` + `SUPABASE_ACCESS_TOKEN`
+  are in env. Falls back to a manual SQL Editor runbook at
+  `operations/decisions/2026-05-07-p02-migration-howto.md`.
+- 4 launch content pieces in `content/launch-p02/` (Twitter / HN / LinkedIn / Reddit),
+  all marked `status: APPROVED` and ready to post once mock-mode is live.
+- Dashboard polish: KnowledgeTab, IntentsTab, MockChat copy tightened.
+- Launch path now: 8 min of founder action (apply migration + add P02_ENCRYPTION_KEY)
+  → mock-mode public soft launch → submit Meta verification (3-7 day wait)
+  → flip MOCK_MODE=false on Vercel → real WhatsApp.
 
 ## What's Done
 
