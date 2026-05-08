@@ -7,9 +7,9 @@
 ## Project status
 
 **Start date:** 2026-04-28 (Day 1 = morning-orchestrator anchor; the 04-22 date in earlier notes was an estimate)
-**Current day:** ~10 (2026-05-07)
-**Current phase:** Post-launch — P01 SKILON live, daily content/sales/scout routines running, custom domain pending
-**Last session:** 2026-05-07 (resumed after 2-day standby)
+**Current day:** 11 (2026-05-08)
+**Current phase:** Post-launch — P01 SKILON live (150 skills), autonomous Skill Smith firing 3x/day, daily routines running.
+**Last session:** 2026-05-08 (continued from previous; founder requested faster 24h cadence)
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## Next action
 
-Founder back from 2-day standby (2026-05-07). Faster cadence now. Daily routines re-enabled and running. Skill Smith still gated on `ROUTINE_API_SECRET` — when set, ramp from 1/day → 3/day. Custom domain cutover ready when founder picks the domain.
+Faster 24h cadence engaged (2026-05-08). Skill Smith now runs in **autonomous mode** — empty body to the API, the route picks a curated seed (50 in `lib/skill-seeds.ts`) biased toward under-represented categories. Cloud cron `30 2,8,14 * * *` UTC = 8:00 / 14:00 / 20:00 IST = 3 fires/day, expected 2-3 new skills/day. Catalog 150 → target 175 by Day 14. Custom domain cutover and GitHub privacy still founder calls.
 
 ---
 
@@ -39,7 +39,7 @@ Founder back from 2-day standby (2026-05-07). Faster cadence now. Daily routines
 | EOD Orchestrator | 30 11 * * * | **RE-ENABLED** |
 | CMO Weekly Review | 30 10 * * 5 | **RE-ENABLED** (Friday) |
 | Telegram Inbound Handler | 0 * * * * | running ✓ |
-| Skill Smith | 30 2 * * * | DISABLED — needs `ROUTINE_API_SECRET` from founder |
+| Skill Smith (autonomous) | 30 2,8,14 * * * | **RUNNING** ✓ — autonomous mode, 3x/day |
 | Daily Backup | 0 18 * * * | running ✓ |
 
 Hedge Fund routines (separate concern from product launch) — leaving as-is.
@@ -52,7 +52,8 @@ Hedge Fund routines (separate concern from product launch) — leaving as-is.
 |---|---|---|
 | Custom domain cutover | **awaiting founder** — pick domain + set `NEXT_PUBLIC_APP_URL` | `operations/decisions/2026-05-05-domain-cutover-runbook.md` |
 | Cloud-routine helper backport | queued — fix `commit_repo_file` HTTP-aware on the 5 re-enabled routines so they don't auto-disable again | `operations/decisions/2026-05-01-diagnostic-routines.md` (or similar) |
-| Skill Smith ramp | blocked on `ROUTINE_API_SECRET` | queue #008 |
+| Skill Smith ramp | **DONE** — autonomous 3x/day with seed-list + retry-on-fail (commit `0cba338`) | `lib/skill-seeds.ts` |
+| Rotate `ROUTINE_API_SECRET` | placeholder leaked in transcript — founder must rotate on Vercel | queue #008 |
 | P02 ChatBase backend | shipped 1a0ff95; dashboard shipped 1a92e21; runtime smoke blocked on Supabase migration + `P02_ENCRYPTION_KEY` env | queue #002 |
 | P01 SKILON site | live | https://addon90days.vercel.app/ |
 
