@@ -46,13 +46,26 @@ export async function POST(req: NextRequest, ctx: RouteContext): Promise<NextRes
     return NextResponse.json({ error: { code: "VALIDATION_ERROR", message: parsed.error.message } }, { status: 400 });
   }
 
+  // Send via Meta first; we want the actual Meta error to flow back to the
+  // admin UI so failures are visible (token expired, recipient outside 24h
+  // session window, recipient not in tester list, etc.).
+  let sendResult: { meta_message_id: string | null; mock: boolean };
   try {
-    const sendResult = await sendTextMessage({
+    sendResult = await sendTextMessage({
       to:              conversation.customer_phone,
       body:            parsed.data.body,
       phone_number_id: workspace.whatsapp_phone_number_id ?? undefined,
     });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error(`[admin/chatbase/send] meta send failed: ${message}`);
+    return NextResponse.json(
+      { error: { code: "META_SEND_FAILED", message } },
+      { status: 502 },
+    );
+  }
 
+  try {
     const msg = await insertMessage({
       conversation_id: conversationId,
       direction:       "outbound",
@@ -60,11 +73,13 @@ export async function POST(req: NextRequest, ctx: RouteContext): Promise<NextRes
       role:            "human",
       meta_message_id: sendResult.meta_message_id ?? undefined,
     });
-
-    return NextResponse.json({ data: msg });
+    return NextResponse.json({ data: msg, mock: sendResult.mock });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    console.error(`[admin/chatbase/send] ${message}`);
-    return NextResponse.json({ error: { code: "INTERNAL", message: "Send failed" } }, { status: 500 });
+    console.error(`[admin/chatbase/send] db insert failed (message WAS sent to WhatsApp): ${message}`);
+    return NextResponse.json(
+      { error: { code: "DB_INSERT_FAILED", message: `Sent to WhatsApp but DB log failed: ${message}` } },
+      { status: 500 },
+    );
   }
 }
