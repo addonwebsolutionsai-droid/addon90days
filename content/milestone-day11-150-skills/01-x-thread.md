@@ -3,7 +3,7 @@
 ---
 
 **Tweet 1 (hook)**
-11 days since launch. 150 Claude skills in the catalog. 18 shipped yesterday — autonomously, no human touching a keyboard for any of them.
+11 days since launch. 150 Claude skills in the catalog. 18 shipped in 24 hours — autonomously, no human writing any of them.
 
 Here's the pipeline that did it. [thread]
 
@@ -24,7 +24,7 @@ No human in the loop per skill.
 ---
 
 **Tweet 3**
-Midway through yesterday's batch, we raised the quality floor.
+Midway through this batch, we raised the quality floor.
 
 Before: step descriptions could be 30 chars. Code blocks: optional.
 After: step descriptions ≥ 100 chars. Every skill must ship ≥ 200 chars of runnable code in a real language.
@@ -44,7 +44,7 @@ The categories we're covering:
 - AI/LLM tooling: 10
 - IoT: 8
 
-Three concrete examples from yesterday:
+Three concrete examples from this batch:
 
 `gst-e-invoice-irp-integrator` — connects to India's IRP API and generates IRN-compliant e-invoices
 `mqtt-esp32-debug-checklist` — structured debug flow for MQTT drops on embedded hardware
