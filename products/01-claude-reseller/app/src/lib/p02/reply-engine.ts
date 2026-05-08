@@ -12,7 +12,7 @@
  *   7. Send via Meta API (or mock)
  */
 
-import { getWorkspace, getIntents, getKbDocs, insertMessage, updateConversationStatus } from "./db";
+import { getWorkspace, getIntents, getKbDocs, getConversation, insertMessage, updateConversationStatus } from "./db";
 import { retrieveTopChunks, buildKbContext } from "./kb";
 import { classifyIntent } from "./intent";
 import { sendTextMessage } from "./meta-api";
@@ -25,11 +25,21 @@ const MAX_REPLY_TOKENS = 400; // keep replies well under 1600 WhatsApp chars
 export async function processMessage(input: ReplyEngineInput): Promise<ReplyEngineResult> {
   const { workspace_id, conversation_id, customer_message, history } = input;
 
-  // 1. Load workspace
-  const workspace = await getWorkspace(workspace_id);
+  // 1. Load workspace + conversation in parallel. Conversation gives us the
+  // customer phone, which both the main reply path AND the clarification path
+  // (when intent='unknown') need to send a Meta message. Pre-fetching here
+  // avoids the duplicate-DB-call hack the older code had.
+  const [workspace, conversation] = await Promise.all([
+    getWorkspace(workspace_id),
+    getConversation(conversation_id),
+  ]);
   if (workspace === null) {
     throw new Error(`Workspace not found: ${workspace_id}`);
   }
+  if (conversation === null) {
+    throw new Error(`Conversation not found: ${conversation_id}`);
+  }
+  const customerPhone = conversation.customer_phone;
 
   // 2. Load intents + KB
   const [intents, kbDocs] = await Promise.all([
@@ -85,7 +95,7 @@ export async function processMessage(input: ReplyEngineInput): Promise<ReplyEngi
 
       if (clarificationReply !== null) {
         const sendResult = await sendTextMessage({
-          to: extractPhoneFromHistory(history),
+          to: customerPhone,
           body: clarificationReply,
         });
 
@@ -151,16 +161,8 @@ export async function processMessage(input: ReplyEngineInput): Promise<ReplyEngi
     };
   }
 
-  // 7. Send via Meta API
-  // We need the customer phone — extract from history or conversation record
-  // The webhook caller sets customer phone on the conversation; we pass it through
-  // the context via a convention: history items may carry phone in metadata.
-  // For MVP: the mock/inbound endpoint passes customer_phone as an extra field.
-  // Real webhook hydrates from the Meta payload. We pull it from the DB conversation.
-  const { getConversation } = await import("./db");
-  const conversation = await getConversation(conversation_id);
-  const customerPhone = conversation?.customer_phone ?? "unknown";
-
+  // 7. Send via Meta API. customerPhone was loaded once at the top of the
+  // function so we don't make a second DB round-trip here.
   const sendResult = await sendTextMessage({
     to: customerPhone,
     body: replyBody,
@@ -265,10 +267,3 @@ async function generateReply(params: GenerateParams): Promise<string | null> {
   }
 }
 
-/** Extract phone from history (fallback only — real code uses DB conversation). */
-function extractPhoneFromHistory(
-  history: Array<{ role: string; body: string }>
-): string {
-  // This is a fallback. Real phone comes from the DB conversation record.
-  return "unknown";
-}
