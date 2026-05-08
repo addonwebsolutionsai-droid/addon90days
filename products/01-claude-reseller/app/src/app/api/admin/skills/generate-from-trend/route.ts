@@ -478,9 +478,12 @@ export async function POST(req: Request): Promise<NextResponse> {
 
   // ---------------------------------------------------------------- smoke test
   // Founder rule: every new skill must be verified before going live. We hit
-  // the public detail page once; if it doesn't render 200 we auto-unpublish so
-  // a broken skill never sits in front of users. Any error here also unpublishes
-  // — fail closed, not open.
+  // the public detail page once and assert TWO things:
+  //   (1) HTTP 200 — page resolved at all
+  //   (2) the skill title literally appears in the rendered HTML — guards
+  //       against a soft-rendered error overlay or a partial render that
+  //       would still send 200 but show no skill content.
+  // Any failure auto-unpublishes the row. Fail closed.
   let smokeOk = false;
   let smokeStatus: number | null = null;
   let smokeError: string | null = null;
@@ -491,7 +494,17 @@ export async function POST(req: Request): Promise<NextResponse> {
       cache:   "no-store",
     });
     smokeStatus = smoke.status;
-    smokeOk     = smoke.ok;
+    if (smoke.ok) {
+      const html = await smoke.text();
+      // The title is rendered both in <title> and as the <h1> on the detail
+      // page; finding the literal string anywhere in the HTML is sufficient.
+      // We also strip HTML entities Next.js might have escaped in the title
+      // (the ampersand in "&amp;" being the most common one to mismatch).
+      const needle      = draft.title;
+      const needleLooser = draft.title.replace(/&/g, "&amp;");
+      smokeOk = html.includes(needle) || html.includes(needleLooser);
+      if (!smokeOk) smokeError = "title_not_in_rendered_html";
+    }
   } catch (err) {
     smokeError = err instanceof Error ? err.message : "unknown";
   }
