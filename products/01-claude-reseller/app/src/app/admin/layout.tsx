@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-guard";
 import Link from "next/link";
-import { Shield, Users, ArrowLeft } from "lucide-react";
+import { Shield, Users, MessageCircle, ArrowLeft } from "lucide-react";
 
 export const metadata = { title: "Admin · SKILON" };
 
@@ -39,6 +39,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           >
             <Users size={15} />
             Users
+          </Link>
+          <Link
+            href="/admin/chatbase"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-white/5"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            <MessageCircle size={15} />
+            ChatBase (P02)
           </Link>
         </nav>
 
