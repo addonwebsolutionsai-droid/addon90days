@@ -268,6 +268,74 @@ export const SKILL_SEEDS: readonly SkillSeed[] = [
     prompt:
       "A founder doing SEO for the first time wants a skill that produces a programmatic-SEO page bundle for a long-tail keyword cluster (e.g. 'X tool for Y use case'). They need it to identify 30 long-tail variants, draft a unique 800-word page template per variant slot, and include a JSON-LD schema block. Output is the keyword sheet + a page template + the JSON-LD.",
   },
+
+  // -------- 2026-05-08 problem-radar derived seeds (highly topical) --------
+  // Pulled from operations/problem-radar/2026-05-08.md — these reflect what
+  // founders & enterprises are actively complaining about THIS WEEK in
+  // Reddit/HN/Indie Hackers/YC RFS, so skills built off them have built-in
+  // search demand and content marketing handles.
+
+  {
+    category: "ai-llm",
+    prompt:
+      "A platform team running a customer-facing LLM product wants to detect sycophancy — the model agreeing with users even when they're factually wrong or making poor decisions. They need a skill that takes a sample of 30+ chat transcripts, scores each turn on 'over-agreement' against a rubric (affirming illegal/unethical user actions, never disagreeing, validating provably wrong claims), and outputs a sycophancy index per conversation plus the 5 worst examples. Output is a CSV report + 5 redline annotated transcripts + a rewrite of one example showing what an honest response would look like.",
+  },
+  {
+    category: "ai-llm",
+    prompt:
+      "A founder shipping an autonomous agent in production wants reliability monitoring before a 76%-fail-rate incident kills their company. They need a skill that scaffolds the production safety harness: per-step success-rate tracking, daily cost dashboard with shutoff thresholds, automatic rollback triggers when a cost spike or error rate breaches limits, and an oncall paging integration. Output is the monitoring module (TypeScript), a Postgres schema for the metrics, and a runbook for the first incident.",
+  },
+  {
+    category: "ai-llm",
+    prompt:
+      "A four-person startup that just got a $113k unexpected LLM bill wants a token-cost forecaster. They need a skill that ingests their last 30 days of OpenAI/Anthropic usage logs, attributes spend per feature (chat / RAG / agent / batch), models the next 90 days under three growth scenarios (1×, 3×, 10× users), and recommends 3 concrete cost-cuts (model swap, context pruning, caching). Output is a forecast spreadsheet + a 3-action remediation plan with estimated savings per action.",
+  },
+  {
+    category: "startup-product",
+    prompt:
+      "An indie founder pitching their AI product to enterprise procurement wants to pre-empt the questions that kill deals. They need a skill that takes their current product and produces an 'enterprise readiness audit' — a checklist of the 12 questions enterprise CIOs actually ask (data residency, model ownership, audit trails, SLA tier, on-prem option, retraining policy, SSO, SOC2 status, GDPR/DPDP, sub-processor list, BCDR, exit terms) with their current answer + the gap to close. Output is the audit doc + a draft procurement-friendly one-pager.",
+  },
+  {
+    category: "marketing-growth",
+    prompt:
+      "A SaaS founder whose AI-product pricing 'feels arbitrary' to prospects wants to translate token cost into a customer-facing tier. They need a skill that takes their per-customer monthly token cost (from logs), groups customers into 3-5 cohorts by spend, recommends a tier structure (Starter / Pro / Scale) with margin targets, and writes the pricing-page copy that justifies each tier in plain English. Output is a tier matrix + the rewritten pricing-page section + a draft email to current customers explaining the change.",
+  },
+
+  // ------------------------- additional moat-category seeds -------------------------
+  // These bias toward categories where the catalog is still thin (IoT, UI/UX,
+  // Indian business). Adding more variety here means the autonomous picker
+  // has 4-5 options per under-represented category instead of 3.
+
+  {
+    category: "iot",
+    prompt:
+      "An ESP32 firmware developer using BLE for the first time wants to scaffold a GATT server with a custom service & characteristic. They need a skill that produces the C++ Arduino code for the BLE service definition, the read/write/notify handlers, and a companion HTML+Web Bluetooth page for testing without an app. Output is firmware.ino + the test HTML + a connection-flow diagram in markdown.",
+  },
+  {
+    category: "iot",
+    prompt:
+      "A factory wants to integrate machine vision QC into a production line using a Raspberry Pi 5 with a USB camera. They need a skill that scaffolds the OpenCV pipeline: capture → preprocess → defect detection (template-match or small ONNX model) → trigger PLC reject signal via GPIO. Output is the Python service + the deployment systemd unit + a calibration UI sketch.",
+  },
+  {
+    category: "ui-ux",
+    prompt:
+      "A SaaS founder wants to systematically improve form completion rates. They need a skill that takes a screenshot or HTML of their current form and outputs a redline: which fields to combine, which to remove, which to convert to single-tap (segmented control vs dropdown), and the exact Tailwind class changes to ship. Output is a before/after screenshot brief + a code diff.",
+  },
+  {
+    category: "ui-ux",
+    prompt:
+      "An indie SaaS team wants to design a customer-facing 'why does this cost what it costs' transparency page. They need a skill that takes their unit-economics data and renders a one-page explainer: cost breakdown chart spec, a paragraph per cost driver, a FAQ section addressing common objections. Output is the page React component + the chart data JSON.",
+  },
+  {
+    category: "indian-business",
+    prompt:
+      "A D2C brand selling on their own Shopify store wants automated GST e-invoicing once their turnover crosses ₹5cr. They need a skill that integrates with the GSTN IRP API: generates the IRN per invoice, embeds the QR code on the printable invoice, and persists the IRN + ack date for audit. Output is the Node.js IRP client module, the invoice template with QR slot, and a recovery flow for IRP downtime.",
+  },
+  {
+    category: "indian-business",
+    prompt:
+      "An Indian SaaS exporter (zero-rated supply, LUT mode) needs to handle GST on services exported to USA/EU customers. They need a skill that generates the LUT-mode invoice (no GST, with the correct LUT reference + 'export of services' annotation), the FIRC tracking sheet for inward remittances, and the GSTR-1 export-section line items. Output is the invoice template + a remittance reconciliation sheet + the GSTR-1 helper rows.",
+  },
 ];
 
 /** Pull all categories that appear at least once in the seed list. */

@@ -70,7 +70,10 @@ const RequestSchema = z.object({
 const DraftStepSchema = z.object({
   number:      z.number().int().positive(),
   title:       z.string().min(8).max(120),
-  description: z.string().min(30).max(1500),
+  // 100 char min so each step says something concrete, not "do X." — Llama
+  // tends to write thin step descriptions when not pushed; bumping the floor
+  // here forces depth without us having to babysit every prompt.
+  description: z.string().min(100).max(2000),
   code:        z.string().max(4000).optional(),
   language:    z.string().max(20).optional(),
 });
@@ -113,7 +116,8 @@ QUALITY BAR (failures get rejected by the quality gate):
 - Concrete artifacts. The tagline must name what the user gets out (a PDF, a SQL query, a config file, a code scaffold, a checklist).
 - Indian business / IoT / trading angle wins when the problem fits — those are AddonWeb's moat categories.
 - 4-6 steps is the sweet spot. Each step is one verb-led action with enough detail that Claude can execute it.
-- Code snippets in steps must be runnable, not pseudocode.
+- Each step description MUST be 100-400 chars — long enough to be actionable. Don't write "Do X." Write what data flows in, what transformation happens, what the next step expects.
+- AT LEAST ONE step MUST include a runnable code snippet of 200+ characters in a real language (typescript, python, sql, c++, bash, yaml). Pseudocode = rejection. Toy 2-line snippets = rejection.
 
 EXAMPLES of slugs we already ship: gst-invoice-generator, esp32-firmware-scaffold, stock-screener-ai, sql-query-builder, code-reviewer, product-roadmap-builder, mqtt-iot-setup, prompt-optimizer, churn-prediction-model.`;
 }
@@ -155,6 +159,8 @@ function buildScorePrompt(draft: Draft): string {
 2. Workflow depth (vague description = low, concrete 4-6 steps with code = high)
 3. Useful to a real practitioner (toy example = low, real production task = high)
 4. Avoids overlap with common LLM defaults (a thing Claude already does well without a skill = low)
+5. Code substance — at least one step must include a runnable code snippet of 200+ chars in a real language. Cap any draft with no code at 6. Cap any draft whose only code is a 1-3 line stub at 6.
+6. Step density — if step descriptions average under 100 chars, cap at 6.
 
 Score is an integer 1-10. ≥ 7 = ship it. ≤ 6 = reject.
 
