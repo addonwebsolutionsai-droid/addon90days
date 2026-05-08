@@ -54,16 +54,20 @@ export interface WorkspaceRow {
 }
 
 export interface RecentConversationRow {
-  id:               string;
-  workspace_id:     string;
-  workspace_name:   string;
-  customer_phone:   string;
-  customer_name:    string | null;
-  status:           string;
-  last_intent:      string | null;
-  message_count:    number;
-  last_message_at:  string;
-  created_at:       string;
+  id:                 string;
+  workspace_id:       string;
+  workspace_name:     string;
+  customer_phone:     string;
+  customer_name:      string | null;
+  status:             string;
+  last_intent:        string | null;
+  message_count:      number;
+  last_message_at:    string;
+  /** Body of the most recent message (in OR out) — used for the row preview. */
+  last_message_body:  string | null;
+  /** Whether the most recent message was inbound (customer waiting for reply). */
+  last_message_is_inbound: boolean;
+  created_at:         string;
 }
 
 export interface RecentMessageRow {
@@ -244,20 +248,32 @@ export async function loadChatbaseAdminDashboard(): Promise<ChatbaseAdminDashboa
 
   const recentConversations: RecentConversationRow[] = await Promise.all(
     conversationRows.map(async (c) => {
-      const { count: msgCount } = await p02("p02_messages")
-        .select("id", { count: "exact", head: true })
-        .eq("conversation_id", c.id);
+      // Pull the most recent message + count in parallel
+      const [{ count: msgCount }, lastMsgRes] = await Promise.all([
+        p02("p02_messages").select("id", { count: "exact", head: true }).eq("conversation_id", c.id),
+        p02("p02_messages")
+          .select("body, direction, created_at")
+          .eq("conversation_id", c.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+
+      const lastMsg = (lastMsgRes.data ?? null) as { body: string; direction: string; created_at: string } | null;
+
       return {
-        id:              c.id,
-        workspace_id:    c.workspace_id,
-        workspace_name:  workspaceNameById.get(c.workspace_id) ?? "(unknown workspace)",
-        customer_phone:  c.customer_phone,
-        customer_name:   c.customer_name,
-        status:          c.status,
-        last_intent:     c.last_intent,
-        message_count:   msgCount ?? 0,
-        last_message_at: c.updated_at,
-        created_at:      c.created_at,
+        id:                       c.id,
+        workspace_id:             c.workspace_id,
+        workspace_name:           workspaceNameById.get(c.workspace_id) ?? "(unknown workspace)",
+        customer_phone:           c.customer_phone,
+        customer_name:            c.customer_name,
+        status:                   c.status,
+        last_intent:              c.last_intent,
+        message_count:            msgCount ?? 0,
+        last_message_at:          lastMsg?.created_at ?? c.updated_at,
+        last_message_body:        lastMsg?.body ?? null,
+        last_message_is_inbound:  lastMsg?.direction === "inbound",
+        created_at:               c.created_at,
       };
     }),
   );

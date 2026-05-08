@@ -1,374 +1,367 @@
 /**
- * /admin/chatbase — P02 ChatBase analytics + ops dashboard.
+ * /admin/chatbase — P02 ChatBase admin dashboard.
  *
- * Server component. Single round-trip data load via loadChatbaseAdminDashboard().
- * Auth gate inherited from /admin/layout.tsx (requireAdmin via ADMIN_USER_IDS env).
+ * Conversation-first design. The 90% use case is: "show me conversations
+ * that need attention, let me jump in." So the page leads with that, not
+ * with stats.
  *
- * Layout (top → bottom):
- *   1. Title + status pill (real mode vs mock mode at the env level)
- *   2. KPI strip — 6 cards
- *   3. Two-column grid:
- *        left: Intent breakdown (last 7d) + Recent messages
- *        right: Workspaces table + Recent conversations
- *
- * Dark, dense, no fluff. Same design tokens as the rest of the app.
+ * Layout (top → bottom, single column for clarity):
+ *   1. Compact stats strip (4 numbers, no chart fluff)
+ *   2. Status filter tabs: All · Active · Needs attention · Closed
+ *   3. Conversations list — phone/name + last-message preview + workspace + time
+ *   4. Workspaces summary (small, secondary)
+ *   5. Link to detailed views (intent breakdown, recent messages timeline)
  */
 
 import Link from "next/link";
-import {
-  Building2, MessageSquare, Activity, AlertTriangle, Gauge, Inbox, ArrowRight,
-} from "lucide-react";
-import {
-  loadChatbaseAdminDashboard,
-  type IntentBreakdownRow,
-  type WorkspaceRow,
-  type RecentConversationRow,
-  type RecentMessageRow,
-} from "@/lib/p02/admin-stats";
+import { ArrowRight, Clock, Building2, RefreshCw, ChevronRight } from "lucide-react";
+import { loadChatbaseAdminDashboard, type RecentConversationRow } from "@/lib/p02/admin-stats";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = { title: "ChatBase · Admin" };
 
-export default async function ChatbaseAdminPage() {
-  const data = await loadChatbaseAdminDashboard();
-  const { kpis } = data;
+type StatusFilter = "all" | "active" | "escalated" | "closed";
+const STATUS_TABS: { key: StatusFilter; label: string; description: string }[] = [
+  { key: "all",        label: "All",             description: "every conversation" },
+  { key: "active",     label: "Active",          description: "AI is handling" },
+  { key: "escalated",  label: "Needs attention", description: "human takeover required" },
+  { key: "closed",     label: "Closed",          description: "resolved / archived" },
+];
 
-  // Whether we're sending real WhatsApp or stuck in mock mode (env-level)
+export default async function ChatbaseAdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status: rawStatus } = await searchParams;
+  const status: StatusFilter = (STATUS_TABS.some((t) => t.key === rawStatus)
+    ? rawStatus
+    : "all") as StatusFilter;
+
+  const data = await loadChatbaseAdminDashboard();
+  const { kpis, workspaces, recentConversations } = data;
+
+  // Apply status filter to the conversations list
+  const filteredConversations = status === "all"
+    ? recentConversations
+    : recentConversations.filter((c) => c.status === status);
+
   const isRealMode = process.env["MOCK_MODE"] === "false" && process.env["WHATSAPP_PHONE_NUMBER_ID"] !== undefined;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* ----- Header ----- */}
       <header className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <p className="text-xs uppercase tracking-widest font-medium mb-1" style={{ color: "var(--text-muted)" }}>
-            P02 · ChatBase
-          </p>
-          <h1 className="text-2xl font-bold">Analytics &amp; ops</h1>
-          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-            Live data across every workspace. Refreshes on every visit (no cache).
+          <h1 className="text-2xl font-bold tracking-tight">ChatBase</h1>
+          <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+            Live WhatsApp conversations across every workspace.
           </p>
         </div>
-        <ModePill isRealMode={isRealMode} />
+        <div className="flex items-center gap-3">
+          <ModePill isRealMode={isRealMode} />
+          <Link
+            href="/admin/chatbase"
+            prefetch={false}
+            className="text-xs px-2.5 py-1.5 rounded-md border inline-flex items-center gap-1.5 transition-colors hover:bg-white/5"
+            style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}
+            title="Reload"
+          >
+            <RefreshCw size={12} /> Refresh
+          </Link>
+        </div>
       </header>
 
-      {/* KPI strip */}
-      <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <KpiCard icon={Building2}      iconColor="#22c55e"  label="Workspaces"            value={kpis.totalWorkspaces.toLocaleString()} />
-        <KpiCard icon={MessageSquare}  iconColor="#06b6d4"  label="Conversations · today" value={kpis.conversationsToday.toLocaleString()} sub={`${kpis.conversationsAllTime.toLocaleString()} all-time`} />
-        <KpiCard icon={Activity}       iconColor="#8b5cf6"  label="Messages · today"      value={kpis.messagesToday.toLocaleString()}     sub={`${kpis.messagesAllTime.toLocaleString()} all-time`} />
-        <KpiCard icon={AlertTriangle}  iconColor="#f59e0b"  label="Escalation rate · 7d"  value={`${kpis.escalationRate7d.toFixed(1)}%`}  sub="of conversations" />
-        <KpiCard icon={Gauge}          iconColor="#ec4899"  label="Avg confidence · 7d"   value={kpis.avgConfidence7d > 0 ? kpis.avgConfidence7d.toFixed(2) : "—"} sub="0.0 – 1.0" />
-        <KpiCard icon={Inbox}          iconColor="#ef4444"  label="Escalated queue"       value={kpis.escalatedQueueDepth.toLocaleString()} sub="awaiting takeover" />
+      {/* ----- Compact stats strip ----- */}
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Stat label="Workspaces"     value={kpis.totalWorkspaces.toLocaleString()} />
+        <Stat label="Conversations"  value={kpis.conversationsAllTime.toLocaleString()} sub={`${kpis.conversationsToday} today`} />
+        <Stat label="Messages"       value={kpis.messagesAllTime.toLocaleString()}      sub={`${kpis.messagesToday} today`} />
+        <Stat
+          label="Need attention"
+          value={kpis.escalatedQueueDepth.toLocaleString()}
+          sub={kpis.escalatedQueueDepth > 0 ? "click below to handle" : "all clear"}
+          highlight={kpis.escalatedQueueDepth > 0}
+        />
       </section>
 
-      {/* Two-column body */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* LEFT: intent breakdown + recent messages */}
-        <div className="space-y-6">
-          <PanelCard title="Intent breakdown · last 7d" subtitle={`${data.intentBreakdown7d.reduce((s, r) => s + r.count, 0)} classified messages`}>
-            {data.intentBreakdown7d.length === 0 ? (
-              <EmptyState>No intent classifications in the last 7 days.</EmptyState>
-            ) : (
-              <IntentBars rows={data.intentBreakdown7d} />
-            )}
-          </PanelCard>
+      {/* ----- Status filter tabs ----- */}
+      <nav
+        className="flex flex-wrap gap-1 p-1 rounded-xl border"
+        style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
+      >
+        {STATUS_TABS.map((tab) => {
+          const active = tab.key === status;
+          const count =
+            tab.key === "all"
+              ? recentConversations.length
+              : recentConversations.filter((c) => c.status === tab.key).length;
+          return (
+            <Link
+              key={tab.key}
+              href={tab.key === "all" ? "/admin/chatbase" : `/admin/chatbase?status=${tab.key}`}
+              className="flex-1 min-w-[140px] rounded-lg px-3 py-2 text-sm transition-colors text-left"
+              style={
+                active
+                  ? { backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }
+                  : { color: "var(--text-secondary)" }
+              }
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <span className={`font-medium ${tab.key === "escalated" && count > 0 ? "text-amber-400" : ""}`}>
+                  {tab.label}
+                </span>
+                <span className="text-[11px] tabular-nums" style={{ color: "var(--text-muted)" }}>
+                  {count}
+                </span>
+              </div>
+              <div className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                {tab.description}
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
 
-          <PanelCard title="Recent messages" subtitle="Last 50 across all workspaces">
-            {data.recentMessages.length === 0 ? (
-              <EmptyState>No messages yet.</EmptyState>
-            ) : (
-              <MessagesList rows={data.recentMessages} />
-            )}
-          </PanelCard>
-        </div>
+      {/* ----- Conversations list (the main thing) ----- */}
+      <section
+        className="rounded-xl border overflow-hidden"
+        style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
+      >
+        <header
+          className="px-4 py-3 border-b flex items-baseline justify-between"
+          style={{ borderColor: "var(--border-subtle)" }}
+        >
+          <h2 className="text-sm font-semibold">
+            {status === "all" ? "Recent conversations" : STATUS_TABS.find((t) => t.key === status)?.label}
+          </h2>
+          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            {filteredConversations.length} shown
+          </p>
+        </header>
 
-        {/* RIGHT: workspaces + recent conversations */}
-        <div className="space-y-6">
-          <PanelCard title="Workspaces" subtitle={`${data.workspaces.length} total — newest first`}>
-            {data.workspaces.length === 0 ? (
-              <EmptyState>No workspaces yet.</EmptyState>
-            ) : (
-              <WorkspacesTable rows={data.workspaces} />
-            )}
-          </PanelCard>
+        {filteredConversations.length === 0 ? (
+          <div className="text-center py-10 text-xs" style={{ color: "var(--text-muted)" }}>
+            {status === "all"
+              ? "No conversations yet. Send a WhatsApp message to your test number to get started."
+              : `No ${STATUS_TABS.find((t) => t.key === status)?.label.toLowerCase()} conversations.`}
+          </div>
+        ) : (
+          <ul className="divide-y" style={{ borderColor: "var(--border-subtle)" }}>
+            {filteredConversations.map((c) => (
+              <li key={c.id} style={{ borderColor: "var(--border-subtle)" }}>
+                <ConversationRow conversation={c} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-          <PanelCard title="Recent conversations" subtitle="Last 20 by activity">
-            {data.recentConversations.length === 0 ? (
-              <EmptyState>No conversations yet.</EmptyState>
-            ) : (
-              <ConversationsTable rows={data.recentConversations} />
+      {/* ----- Workspaces (small secondary panel) ----- */}
+      <section
+        className="rounded-xl border overflow-hidden"
+        style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
+      >
+        <header
+          className="px-4 py-3 border-b flex items-baseline justify-between"
+          style={{ borderColor: "var(--border-subtle)" }}
+        >
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            <Building2 size={13} className="text-violet-400" /> Workspaces
+          </h2>
+          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            {workspaces.length} total
+          </p>
+        </header>
+
+        {workspaces.length === 0 ? (
+          <div className="text-center py-6 text-xs" style={{ color: "var(--text-muted)" }}>
+            No workspaces yet.
+          </div>
+        ) : (
+          <ul className="divide-y" style={{ borderColor: "var(--border-subtle)" }}>
+            {workspaces.slice(0, 6).map((w) => (
+              <li key={w.id} style={{ borderColor: "var(--border-subtle)" }}>
+                <Link
+                  href={`/admin/chatbase/workspaces/${w.id}`}
+                  className="flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-white/5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium truncate">{w.business_name}</span>
+                      {w.whatsapp_phone_number_id !== null ? (
+                        <Badge color="green">WhatsApp linked</Badge>
+                      ) : (
+                        <Badge color="muted">no WhatsApp</Badge>
+                      )}
+                    </div>
+                    <div className="text-[11px] mt-0.5 font-mono truncate" style={{ color: "var(--text-muted)" }}>
+                      {w.owner_clerk_user_id}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
+                      {w.conversations_count} conv
+                    </span>
+                    <ChevronRight size={14} className="text-violet-400" />
+                  </div>
+                </Link>
+              </li>
+            ))}
+            {workspaces.length > 6 && (
+              <li className="px-4 py-2 text-[11px] text-center" style={{ color: "var(--text-muted)" }}>
+                + {workspaces.length - 6} more
+              </li>
             )}
-          </PanelCard>
-        </div>
-      </div>
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
 
 // ===========================================================================
-// Components — kept inline for first ship; split if they grow large
+// Components
 // ===========================================================================
 
 function ModePill({ isRealMode }: { isRealMode: boolean }) {
   if (isRealMode) {
     return (
       <span
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border"
         style={{ backgroundColor: "rgba(34,197,94,0.12)", borderColor: "rgba(34,197,94,0.35)", color: "#4ade80" }}
       >
         <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-        Real WhatsApp · LIVE
+        Live WhatsApp
       </span>
     );
   }
   return (
     <span
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border"
       style={{ backgroundColor: "rgba(245,158,11,0.12)", borderColor: "rgba(245,158,11,0.35)", color: "#fbbf24" }}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-      Mock mode (env)
+      Mock mode
     </span>
   );
 }
 
-interface KpiCardProps {
-  icon:      typeof Building2;
-  iconColor: string;
-  label:     string;
-  value:     string;
-  sub?:      string;
-}
-
-function KpiCard({ icon: Icon, iconColor, label, value, sub }: KpiCardProps) {
+function Stat({
+  label, value, sub, highlight = false,
+}: {
+  label: string; value: string; sub?: string; highlight?: boolean;
+}) {
   return (
     <div
       className="rounded-xl border p-4"
-      style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
+      style={{
+        backgroundColor: highlight ? "rgba(245,158,11,0.08)" : "var(--bg-surface)",
+        borderColor: highlight ? "rgba(245,158,11,0.35)" : "var(--border-subtle)",
+      }}
     >
-      <div className="flex items-center gap-2 mb-2">
-        <Icon size={13} style={{ color: iconColor }} />
-        <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
-          {label}
-        </span>
+      <div className="text-[10px] uppercase tracking-wider font-semibold mb-1" style={{ color: "var(--text-muted)" }}>
+        {label}
       </div>
-      <div className="text-2xl font-bold tabular-nums">{value}</div>
+      <div className={`text-2xl font-bold tabular-nums ${highlight ? "text-amber-400" : ""}`}>
+        {value}
+      </div>
       {sub !== undefined && (
-        <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>{sub}</div>
+        <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+          {sub}
+        </div>
       )}
     </div>
   );
 }
 
-interface PanelCardProps {
-  title:    string;
-  subtitle: string;
-  children: React.ReactNode;
-}
-
-function PanelCard({ title, subtitle, children }: PanelCardProps) {
-  return (
-    <section
-      className="rounded-xl border overflow-hidden"
-      style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
-    >
-      <header
-        className="px-4 py-3 border-b flex items-baseline justify-between"
-        style={{ borderColor: "var(--border-subtle)" }}
-      >
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>{subtitle}</p>
-      </header>
-      <div className="p-4">{children}</div>
-    </section>
-  );
-}
-
-function EmptyState({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-center py-8 text-xs" style={{ color: "var(--text-muted)" }}>
-      {children}
-    </div>
-  );
-}
-
-function IntentBars({ rows }: { rows: IntentBreakdownRow[] }) {
-  const max = Math.max(...rows.map((r) => r.count), 1);
-  return (
-    <div className="space-y-2">
-      {rows.map((r) => {
-        const pct = (r.count / max) * 100;
-        return (
-          <div key={r.intent} className="space-y-1">
-            <div className="flex items-baseline justify-between text-xs">
-              <span className="font-mono" style={{ color: "var(--text-secondary)" }}>{r.intent}</span>
-              <span className="tabular-nums" style={{ color: "var(--text-muted)" }}>{r.count}</span>
-            </div>
-            <div
-              className="h-1.5 rounded-full overflow-hidden"
-              style={{ backgroundColor: "var(--bg-base)" }}
-            >
-              <div
-                className="h-full"
-                style={{ width: `${pct}%`, background: "linear-gradient(90deg, #8b5cf6 0%, #ec4899 100%)" }}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function WorkspacesTable({ rows }: { rows: WorkspaceRow[] }) {
-  return (
-    <div className="space-y-1.5">
-      {rows.slice(0, 8).map((w) => (
-        <Link
-          key={w.id}
-          href={`/admin/chatbase/workspaces/${w.id}`}
-          className="flex items-center justify-between px-3 py-2 rounded-lg transition-colors hover:bg-white/5"
-        >
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium truncate">{w.business_name}</span>
-              {w.whatsapp_phone_number_id !== null && (
-                <span
-                  className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold"
-                  style={{ backgroundColor: "rgba(34,197,94,0.12)", color: "#4ade80" }}
-                >
-                  WA
-                </span>
-              )}
-              {w.mock_mode && (
-                <span
-                  className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold"
-                  style={{ backgroundColor: "rgba(245,158,11,0.12)", color: "#fbbf24" }}
-                >
-                  MOCK
-                </span>
-              )}
-            </div>
-            <div className="text-[11px] mt-0.5 font-mono truncate" style={{ color: "var(--text-muted)" }}>
-              {w.owner_clerk_user_id}
-            </div>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="text-right">
-              <div className="text-sm font-bold tabular-nums">{w.conversations_count}</div>
-              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>convs</div>
-            </div>
-            <ArrowRight size={13} className="text-violet-400" />
-          </div>
-        </Link>
-      ))}
-      {rows.length > 8 && (
-        <p className="text-[11px] text-center pt-2" style={{ color: "var(--text-muted)" }}>
-          +{rows.length - 8} more workspaces
-        </p>
-      )}
-    </div>
-  );
-}
-
-function ConversationsTable({ rows }: { rows: RecentConversationRow[] }) {
-  return (
-    <div className="space-y-1.5">
-      {rows.slice(0, 12).map((c) => (
-        <Link
-          key={c.id}
-          href={`/admin/chatbase/conversations/${c.id}`}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-white/5"
-        >
-          <StatusDot status={c.status} />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono">{c.customer_phone}</span>
-              {c.customer_name !== null && (
-                <span className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>· {c.customer_name}</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-[11px] mt-0.5">
-              <span className="truncate" style={{ color: "var(--text-muted)" }}>{c.workspace_name}</span>
-              {c.last_intent !== null && (
-                <span className="font-mono shrink-0" style={{ color: "var(--text-muted)" }}>· {c.last_intent}</span>
-              )}
-            </div>
-          </div>
-          <div className="text-right shrink-0">
-            <div className="text-xs font-bold tabular-nums">{c.message_count}</div>
-            <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>msgs</div>
-          </div>
-        </Link>
-      ))}
-    </div>
-  );
-}
-
-function StatusDot({ status }: { status: string }) {
-  const color = status === "active"
+function ConversationRow({ conversation: c }: { conversation: RecentConversationRow }) {
+  const status = c.status;
+  const dotColor = status === "active"
     ? "#4ade80"
     : status === "escalated"
       ? "#fbbf24"
       : status === "closed"
         ? "#6b7280"
         : "#a8a8b3";
+
+  const preview = c.last_message_body !== null
+    ? truncate(c.last_message_body, 110)
+    : "(no messages yet)";
+
+  // The displayed "name" — prefer customer_name, fall back to phone
+  const headline = c.customer_name ?? c.customer_phone;
+  const subline  = c.customer_name !== null ? c.customer_phone : null;
+
   return (
-    <span
-      className="w-2 h-2 rounded-full shrink-0"
-      style={{ backgroundColor: color, boxShadow: `0 0 4px ${color}` }}
-      title={status}
-    />
+    <Link
+      href={`/admin/chatbase/conversations/${c.id}`}
+      className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-white/5"
+    >
+      {/* Status dot */}
+      <span
+        className="w-2 h-2 rounded-full shrink-0 mt-2"
+        style={{ backgroundColor: dotColor, boxShadow: `0 0 4px ${dotColor}` }}
+        title={status}
+      />
+
+      {/* Center: name + preview + meta */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2 mb-0.5">
+          <div className="flex items-baseline gap-2 min-w-0">
+            <span className="text-sm font-medium truncate">{headline}</span>
+            {subline !== null && (
+              <span className="text-[11px] font-mono truncate" style={{ color: "var(--text-muted)" }}>
+                {subline}
+              </span>
+            )}
+          </div>
+          <span className="text-[11px] tabular-nums shrink-0" style={{ color: "var(--text-muted)" }}>
+            <Clock size={10} className="inline mr-0.5" />
+            {relativeTime(c.last_message_at)}
+          </span>
+        </div>
+
+        <p
+          className={`text-xs leading-snug truncate ${c.last_message_is_inbound && status !== "closed" ? "font-medium" : ""}`}
+          style={{ color: c.last_message_is_inbound && status !== "closed"
+            ? "var(--text-primary)"
+            : "var(--text-secondary)" }}
+        >
+          {c.last_message_is_inbound ? "↓ " : "↑ "}{preview}
+        </p>
+
+        <div className="flex items-center gap-2 mt-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <span className="truncate">{c.workspace_name}</span>
+          <span>·</span>
+          <span>{c.message_count} {c.message_count === 1 ? "message" : "messages"}</span>
+          {c.last_intent !== null && (
+            <>
+              <span>·</span>
+              <span className="font-mono">{c.last_intent}</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      <ArrowRight size={14} className="text-violet-400 shrink-0 mt-2" />
+    </Link>
   );
 }
 
-function MessagesList({ rows }: { rows: RecentMessageRow[] }) {
+function Badge({ children, color }: { children: React.ReactNode; color: "green" | "muted" }) {
+  const palette = color === "green"
+    ? { bg: "rgba(34,197,94,0.12)", text: "#4ade80" }
+    : { bg: "rgba(168,168,179,0.10)", text: "var(--text-muted)" };
   return (
-    <div className="space-y-2 max-h-[480px] overflow-y-auto subtle-scrollbar">
-      {rows.map((m) => {
-        const isInbound  = m.direction === "inbound";
-        const dotColor   = isInbound ? "#06b6d4" : "#8b5cf6";
-        const roleLabel  = m.role === "customer" ? "customer" : m.role === "ai" ? "AI" : "human";
-        return (
-          <div
-            key={m.id}
-            className="flex gap-3 px-3 py-2 rounded-lg"
-            style={{ backgroundColor: "var(--bg-base)" }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-2" style={{ backgroundColor: dotColor }} />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider font-semibold mb-0.5" style={{ color: "var(--text-muted)" }}>
-                <span>{isInbound ? "↓ in" : "↑ out"}</span>
-                <span>·</span>
-                <span>{roleLabel}</span>
-                {m.intent !== null && (
-                  <>
-                    <span>·</span>
-                    <span className="font-mono normal-case">{m.intent}</span>
-                  </>
-                )}
-                {m.confidence !== null && (
-                  <>
-                    <span>·</span>
-                    <span className="tabular-nums normal-case">conf {m.confidence.toFixed(2)}</span>
-                  </>
-                )}
-                <span className="ml-auto normal-case" style={{ color: "var(--text-muted)" }}>{relativeTime(m.created_at)}</span>
-              </div>
-              <p className="text-xs leading-snug" style={{ color: "var(--text-primary)" }}>
-                {truncate(m.body, 200)}
-              </p>
-              <p className="text-[10px] mt-1 font-mono truncate" style={{ color: "var(--text-muted)" }}>
-                {m.workspace_name} · {m.customer_phone}
-              </p>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <span
+      className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-semibold"
+      style={{ backgroundColor: palette.bg, color: palette.text as string }}
+    >
+      {children}
+    </span>
   );
 }
 
