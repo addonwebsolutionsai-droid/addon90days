@@ -30,6 +30,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import type { SkillInsertRow, SkillCategory, SkillDifficulty, SkillStep } from "@/lib/database.types";
 import { SITE_BASE_URL } from "@/lib/site-config";
 import { getCatalogTotal, formatSkillCount } from "@/lib/catalog-stats";
+import { pickSeed, type SkillSeed } from "@/lib/skill-seeds";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,8 +55,14 @@ const CATEGORIES: readonly SkillCategory[] = [
   "trading-finance",
 ] as const;
 
+/**
+ * Request schema — every field optional. With no body the route runs in
+ * AUTONOMOUS mode: picks a seed from lib/skill-seeds.ts, biased toward
+ * categories we under-cover. With a body it runs in MANUAL mode using the
+ * supplied trend_topic verbatim.
+ */
 const RequestSchema = z.object({
-  trend_topic:        z.string().min(20).max(2000),
+  trend_topic:        z.string().min(20).max(2000).optional(),
   source_url:         z.string().url().optional(),
   preferred_category: z.enum(CATEGORIES as unknown as [string, ...string[]]).optional(),
 });
@@ -121,6 +128,26 @@ ${trend}${hintLine}
 Remember: specific, concrete artifacts, 4-6 steps, runnable code where applicable.`;
 }
 
+/**
+ * Retry prompt — shown to the model after a low-quality first draft. Includes
+ * the score reasoning so the model can target the exact failure mode (too
+ * generic, missing artifact, vague steps). Reuses the original problem so
+ * we stay on-topic.
+ */
+function buildRetryPrompt(trend: string, hint: string | undefined, prevDraft: Draft, prevReasoning: string): string {
+  const hintLine = hint !== undefined ? `\nPreferred category (use only if it fits the problem): ${hint}` : "";
+  return `Your previous draft was rejected by the quality gate. Reviewer feedback:
+"${prevReasoning}"
+
+Previous draft slug: ${prevDraft.slug}
+Previous title:      ${prevDraft.title}
+
+Write a STRONGER second draft for the same problem. Specifically address the reviewer's complaint. Make it more specific, name the artifact in the tagline, and show real runnable code in at least one step. Return ONLY the JSON object — no prose, no markdown fence.
+
+PROBLEM:
+${trend}${hintLine}`;
+}
+
 function buildScorePrompt(draft: Draft): string {
   return `Score this candidate skill 1-10 across these axes (return JSON {"score": int, "reasoning": "..."}):
 
@@ -170,6 +197,122 @@ async function callGroq(messages: GroqMessage[], maxTokens: number): Promise<str
   return content;
 }
 
+interface GenScoreResult { draft: Draft; score: number; reasoning: string }
+interface RetryHint       { prevDraft: Draft; prevReasoning: string }
+
+class GenError extends Error {
+  constructor(public code: "groq_generate_failed" | "invalid_json" | "draft_validation" | "groq_score_failed" | "score_parse_failed",
+              public detail: unknown,
+              public httpStatus: number) {
+    super(typeof detail === "string" ? detail : code);
+  }
+}
+
+/**
+ * Run one generate + score round. Throws GenError on any of the structured
+ * failure modes so the POST handler can return the matching status without
+ * duplicating boilerplate across attempt 1 and attempt 2.
+ */
+async function generateAndScore(
+  trend:        string,
+  categoryHint: string | undefined,
+  catalogLabel: string,
+  retry?:       RetryHint,
+): Promise<GenScoreResult> {
+  const userPrompt = retry !== undefined
+    ? buildRetryPrompt(trend, categoryHint, retry.prevDraft, retry.prevReasoning)
+    : buildGeneratePrompt(trend, categoryHint);
+
+  let draftRaw: string;
+  try {
+    draftRaw = await callGroq([
+      { role: "system", content: buildSystemPrompt(catalogLabel) },
+      { role: "user",   content: userPrompt },
+    ], GENERATE_MAX_TOKENS);
+  } catch (err) {
+    throw new GenError("groq_generate_failed", err instanceof Error ? err.message : "unknown", 502);
+  }
+
+  let draftJson: unknown;
+  try { draftJson = JSON.parse(draftRaw); }
+  catch { throw new GenError("invalid_json", draftRaw.slice(0, 400), 422); }
+
+  const draftParsed = DraftSchema.safeParse(draftJson);
+  if (!draftParsed.success) {
+    throw new GenError("draft_validation", { issues: draftParsed.error.issues, draft: draftJson }, 422);
+  }
+  const draft = draftParsed.data;
+
+  let scoreRaw: string;
+  try {
+    scoreRaw = await callGroq([
+      { role: "system", content: "You are a strict editorial reviewer. Be honest." },
+      { role: "user",   content: buildScorePrompt(draft) },
+    ], SCORE_MAX_TOKENS);
+  } catch (err) {
+    throw new GenError("groq_score_failed", err instanceof Error ? err.message : "unknown", 502);
+  }
+
+  let score = 0;
+  let reasoning = "";
+  try {
+    const parsedScore = JSON.parse(scoreRaw) as { score?: unknown; reasoning?: unknown };
+    if (typeof parsedScore.score === "number") score = Math.round(parsedScore.score);
+    if (typeof parsedScore.reasoning === "string") reasoning = parsedScore.reasoning;
+  } catch {
+    throw new GenError("score_parse_failed", scoreRaw.slice(0, 200), 422);
+  }
+
+  return { draft, score, reasoning };
+}
+
+function classifyGenError(err: unknown): NextResponse {
+  if (err instanceof GenError) {
+    return NextResponse.json(
+      { ok: false, reason: err.code, detail: err.detail },
+      { status: err.httpStatus },
+    );
+  }
+  return NextResponse.json(
+    { ok: false, reason: "internal", error: err instanceof Error ? err.message : "unknown" },
+    { status: 500 },
+  );
+}
+
+/**
+ * Find categories whose count is below the average — used to bias the
+ * autonomous seed pick so the catalog grows in a balanced shape rather
+ * than piling 30 dev-tools skills against 5 IoT skills. Cached 5min so
+ * a 3x/day cron doesn't hammer the count query.
+ */
+async function fetchUnderrepresentedCategories(): Promise<readonly SkillCategory[]> {
+  const { data, error } = await supabaseAdmin
+    .from("skills")
+    .select("category")
+    .eq("published", true);
+  if (error !== null || data === null) return [];
+
+  const counts = new Map<SkillCategory, number>();
+  for (const row of data as Array<{ category: SkillCategory }>) {
+    counts.set(row.category, (counts.get(row.category) ?? 0) + 1);
+  }
+  const all = Array.from(counts.values());
+  if (all.length === 0) return [];
+  const avg = all.reduce((a, b) => a + b, 0) / all.length;
+
+  const under: SkillCategory[] = [];
+  for (const [cat, n] of counts) {
+    if (n < avg) under.push(cat);
+  }
+  // If no category exists yet that's below average (early catalog state),
+  // include zero-count categories from the canonical CATEGORIES list so the
+  // bias still has somewhere to push.
+  for (const cat of CATEGORIES) {
+    if (!counts.has(cat)) under.push(cat);
+  }
+  return under;
+}
+
 // Accept either ADMIN_API_KEY (for the founder to curl from a terminal) or
 // ROUTINE_API_SECRET (for cloud routines). Two keys so we can rotate the
 // founder's day-to-day key without breaking the daily cron, and vice versa.
@@ -191,9 +334,14 @@ export async function POST(req: Request): Promise<NextResponse> {
     );
   }
 
-  let body: unknown;
-  try { body = await req.json(); }
-  catch { return NextResponse.json({ ok: false, reason: "bad_json" }, { status: 400 }); }
+  // Empty body is allowed in autonomous mode — cloud routine fires with no
+  // payload to let Skill Smith pick its own seed.
+  let body: unknown = {};
+  const raw = await req.text();
+  if (raw.length > 0) {
+    try { body = JSON.parse(raw); }
+    catch { return NextResponse.json({ ok: false, reason: "bad_json" }, { status: 400 }); }
+  }
 
   const parsed = RequestSchema.safeParse(body);
   if (!parsed.success) {
@@ -203,69 +351,83 @@ export async function POST(req: Request): Promise<NextResponse> {
     );
   }
 
-  const { trend_topic, source_url, preferred_category } = parsed.data;
+  const inputTrend         = parsed.data.trend_topic;
+  const inputCategoryHint  = parsed.data.preferred_category;
+  const source_url         = parsed.data.source_url;
 
   // Pull live catalog count for the system prompt — keeps Skill Smith's
   // self-described context honest as the catalog grows.
   const catalogLabel = formatSkillCount(await getCatalogTotal());
 
-  // ---------------------------------------------------------------- generate
-  let draftRaw: string;
+  // -------------------------------------------------------- pick trend topic
+  // Manual mode: caller supplied trend_topic. Autonomous mode: pick a seed
+  // biased toward the under-represented half of the category distribution
+  // so the catalog stays balanced as we ship daily.
+  let trend:        string;
+  let categoryHint: string | undefined;
+  let mode:         "manual" | "autonomous";
+  let seedCategory: SkillCategory | undefined;
+
+  if (inputTrend !== undefined) {
+    trend        = inputTrend;
+    categoryHint = inputCategoryHint;
+    mode         = "manual";
+  } else {
+    const under = await fetchUnderrepresentedCategories();
+    const seed: SkillSeed = pickSeed(under);
+    trend        = seed.prompt;
+    categoryHint = inputCategoryHint ?? seed.category;
+    seedCategory = seed.category;
+    mode         = "autonomous";
+  }
+
+  // --------------------------------------------------- generate + score loop
+  // First attempt; if quality < threshold, retry ONCE with reviewer feedback.
+  // Two attempts max — Vercel timeout budget is 60s on Pro, two Groq calls per
+  // attempt easily fit. After two rejections we give up and return 422.
+  let draft:    Draft;
+  let score:    number;
+  let reasoning: string;
+  let attempt = 1;
+
   try {
-    draftRaw = await callGroq([
-      { role: "system", content: buildSystemPrompt(catalogLabel) },
-      { role: "user",   content: buildGeneratePrompt(trend_topic, preferred_category) },
-    ], GENERATE_MAX_TOKENS);
+    const first = await generateAndScore(trend, categoryHint, catalogLabel);
+    draft     = first.draft;
+    score     = first.score;
+    reasoning = first.reasoning;
   } catch (err) {
-    return NextResponse.json(
-      { ok: false, reason: "groq_generate_failed", error: err instanceof Error ? err.message : "unknown" },
-      { status: 502 },
-    );
+    return classifyGenError(err);
   }
 
-  let draftJson: unknown;
-  try { draftJson = JSON.parse(draftRaw); }
-  catch { return NextResponse.json({ ok: false, reason: "invalid_json", raw: draftRaw.slice(0, 400) }, { status: 422 }); }
-
-  const draftParsed = DraftSchema.safeParse(draftJson);
-  if (!draftParsed.success) {
-    return NextResponse.json(
-      { ok: false, reason: "draft_validation", issues: draftParsed.error.issues, draft: draftJson },
-      { status: 422 },
-    );
-  }
-  const draft: Draft = draftParsed.data;
-
-  // ---------------------------------------------------------------- score
-  let scoreRaw: string;
-  try {
-    scoreRaw = await callGroq([
-      { role: "system", content: "You are a strict editorial reviewer. Be honest." },
-      { role: "user",   content: buildScorePrompt(draft) },
-    ], SCORE_MAX_TOKENS);
-  } catch (err) {
-    return NextResponse.json(
-      { ok: false, reason: "groq_score_failed", error: err instanceof Error ? err.message : "unknown" },
-      { status: 502 },
-    );
-  }
-
-  let score = 0;
-  let reasoning = "";
-  try {
-    const parsedScore = JSON.parse(scoreRaw) as { score?: unknown; reasoning?: unknown };
-    if (typeof parsedScore.score === "number") score = Math.round(parsedScore.score);
-    if (typeof parsedScore.reasoning === "string") reasoning = parsedScore.reasoning;
-  } catch {
-    return NextResponse.json(
-      { ok: false, reason: "score_parse_failed", raw: scoreRaw.slice(0, 200) },
-      { status: 422 },
-    );
+  if (score < QUALITY_THRESHOLD) {
+    attempt = 2;
+    try {
+      const retry = await generateAndScore(
+        trend,
+        categoryHint,
+        catalogLabel,
+        { prevDraft: draft, prevReasoning: reasoning },
+      );
+      draft     = retry.draft;
+      score     = retry.score;
+      reasoning = retry.reasoning;
+    } catch (err) {
+      return classifyGenError(err);
+    }
   }
 
   if (score < QUALITY_THRESHOLD) {
     return NextResponse.json(
-      { ok: false, reason: "low_quality", score, reasoning, draft },
+      {
+        ok:        false,
+        reason:    "low_quality",
+        score,
+        reasoning,
+        draft,
+        attempts:  attempt,
+        mode,
+        ...(seedCategory !== undefined ? { seed_category: seedCategory } : {}),
+      },
       { status: 422 },
     );
   }
@@ -356,7 +518,10 @@ export async function POST(req: Request): Promise<NextResponse> {
       quality_score: score,
       quality_note:  reasoning,
       smoke_status:  smokeStatus,
+      attempts:      attempt,
+      mode,
       url:           `${SITE_BASE_URL}/skills/${draft.slug}`,
+      ...(seedCategory !== undefined ? { seed_category: seedCategory } : {}),
       ...(source_url !== undefined ? { source_url } : {}),
     },
     { status: 201 },
