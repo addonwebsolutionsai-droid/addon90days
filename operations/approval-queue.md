@@ -359,3 +359,4 @@ When walking the queue, process in this order:
 - [ ] 2026-05-03 · 30 outbound drafts ready: sales/drafts/2026-05-03.md (Outbound)
 - [ ] 2026-05-04 · Content draft ready: content/queue/2026-05-04-twitter.md (CMO)
 - [ ] 2026-05-04 · 30 outbound drafts ready: sales/drafts/2026-05-04.md (Outbound)
+- [ ] 2026-05-08 · Weekly review ready: operations/cmo-weekly/2026-05-04.md (CMO)
