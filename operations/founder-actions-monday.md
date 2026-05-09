@@ -110,7 +110,21 @@ After creating the project, set these env vars (Production + Preview + Developme
 
 ---
 
-## P03 — TaxPilot / GST Invoicing (still inside P01, extraction queued for next session)
+## P03 — TaxPilot / GST Invoicing (EXTRACTED to own app, NOT YET DEPLOYED)
+
+P03 is now a standalone Next.js app at `products/03-gst-invoicing/app/`. P01 + P02 + P03 type-check clean. Founder action needed to bring P03 online.
+
+### P03-00a — Create P03 Vercel project from monorepo
+Same as P02-01 but for P03:
+- **Project Name:** `taxpilot` (or `addonweb-taxpilot`)
+- **Root Directory:** `products/03-gst-invoicing/app`
+- **Framework:** Next.js
+- **Time:** 5 min
+
+### P03-00b — Copy P03 environment variables (same set as P02)
+Same env var matrix as P02-02 (Supabase shared, Clerk new or shared, Razorpay shared). Plus when GSP is set up:
+- `GSTN_GSP_API_KEY`, `GSTN_GSP_API_SECRET`, `GSTN_TENANT_ID` — provided by chosen GSP after P03-01
+- **Time:** 15 min
 
 ### P03-01 — Apply for GSP / GSTN sandbox access
 - **What:** Submit GSP application at https://gstn.gov.in/gsps. Documents: PAN, business proof, list of GSPs to integrate with. Takes 7–10 business days.
@@ -126,21 +140,54 @@ After creating the project, set these env vars (Production + Preview + Developme
 
 ---
 
-## P04 — TableFlow / Restaurant OS (not started)
+## P04 — TableFlow / Restaurant OS (extraction in flight as of 2026-05-09 night)
 
-No founder actions yet. Build is queued for the next product extraction phase. Item appears here once any external account is needed.
+A background agent is extracting P04 from P01 right now. By Monday morning P04 should be a standalone app at `products/04-restaurant-os/app/`. Same Vercel-project setup as P02/P03 will be needed.
+
+### P04-00a — Create P04 Vercel project from monorepo (post-extraction)
+Same shape as P02-01 / P03-00a:
+- **Project Name:** `tableflow` (or `addonweb-tableflow`)
+- **Root Directory:** `products/04-restaurant-os/app`
+- **Framework:** Next.js
+- **Time:** 5 min
+
+### P04-00b — Copy P04 environment variables
+Same env matrix as P02-02 (Supabase shared, Clerk new or shared, Razorpay shared). Future restaurant-specific keys (POS gateway, KOT printer cloud) will be added once Phase 2 begins.
+- **Time:** 15 min
 
 ---
 
-## P05 — ConnectOne / IoT Platform (not started)
+## P05 — ConnectOne / IoT Platform (SCAFFOLDED, pre-launch landing live in repo)
 
-No founder actions yet. Will be built fresh from PRD with Path D's sync as the baseline (plug-and-play library inheritance from day 1).
+P05's Next.js app exists at `products/05-iot-platform/app/`. Currently a marketing landing page with email-capture early-access framing. Shared lib utilities are inherited from `packages/` via sync — backend/dashboards layered on later.
+
+### P05-00 — (Optional, when ready to start P05 build) — Create P05 Vercel project
+Same shape as P02/P03/P04:
+- **Project Name:** `connectone` (or `addonweb-connectone`)
+- **Root Directory:** `products/05-iot-platform/app`
+- **Time:** 5 min
+
+For Phase 2 (when MQTT + device infra goes live):
+- `EMQX_HOST`, `EMQX_USERNAME`, `EMQX_PASSWORD` — EMQX broker creds
+- `IOT_DEVICE_PROVISIONING_KEY` — for QR/BLE pairing
+- (To be expanded as the platform grows)
 
 ---
 
-## P06 — MachineGuard / Predictive Maintenance (not started)
+## P06 — MachineGuard / Predictive Maintenance (SCAFFOLDED, pre-launch landing live in repo)
 
-No founder actions yet. Same as P05 — will use Path D from day 1.
+P06's Next.js app exists at `products/06-predictive-maintenance/app/`. Currently a marketing landing page with pilot-enquiry framing. Shared lib utilities are inherited from `packages/` via sync.
+
+### P06-00 — (Optional, when ready to start P06 pilot) — Create P06 Vercel project
+Same shape as P05:
+- **Project Name:** `machineguard`
+- **Root Directory:** `products/06-predictive-maintenance/app`
+- **Time:** 5 min
+
+For Phase 2 (when sensor pilots start):
+- `MQTT_BROKER_URL`, `MQTT_USERNAME`, `MQTT_PASSWORD` — telemetry intake
+- `WHATSAPP_ALERT_NUMBER` — outgoing alarms via P02's Meta channel
+- ML model storage credentials (Supabase Storage or S3)
 
 ---
 
@@ -178,13 +225,27 @@ No founder actions yet. Same as P05 — will use Path D from day 1.
 |---|---|---|---|
 | P0 | P02-01 + P02-02 | 25 min | All P02 customer access |
 | P0 | P02-03 (Meta perm token) | 10 min | P02 going live |
+| P0 | P03-00a + P03-00b | 20 min | All P03 customer access |
+| P0 | P04-00a + P04-00b (after agent lands) | 20 min | All P04 customer access |
 | P1 | P01-02 (ROUTINE_API_SECRET) | 3 min | Daily skill auto-generation |
 | P1 | P01-03 (repo visibility decision) | 10 min | Team trust + IP protection |
 | P1 | P02-04 (Meta verification) | 20 min submit (3-5d Meta) | P02 production scale |
 | P2 | P03-01 (GSP application) | 30 min submit (7-10d) | P03 Phase 2 |
 | P2 | P02-05 / P02-06 (post-deploy) | 7 min | P02 webhook + brand URLs |
+| P2 | P05-00 / P06-00 (when ready) | 10 min | P05/P06 launch |
 | P3 | CRX-01..04 (cleanup) | 10 min | Hygiene |
 
-**Estimated total founder time, Monday: ~80 min (P0/P1 only) or ~110 min (everything).**
+**Estimated total founder time, Monday: ~80 min (P0 only — bring P02/P03/P04 online), ~110 min (P0 + P1), ~140 min (everything).**
 
-What Claude/agents are doing while founder is offline (Sat-Sun): continuing P03 TaxPilot extraction → P04 TableFlow extraction → P05/P06 fresh scaffolds, all using Path D's sync. By Monday morning, all six products should have own-app structure with shared lib parity.
+### Status as of 2026-05-09 (end of Day 12)
+
+| Product | App scaffold | Lib parity | Vercel project | Status |
+|---|---|---|---|---|
+| P01 SKILON | ✅ in `products/01-claude-reseller/app/` | ✅ canonical packages | ✅ live at `addon90days.vercel.app` | **Live, free beta** |
+| P02 ChatBase | ✅ in `products/02-whatsapp-ai-suite/app/` | ✅ synced from packages/ | ❌ founder action P02-01 | Code ready, awaits Vercel |
+| P03 TaxPilot | ✅ in `products/03-gst-invoicing/app/` | ✅ synced from packages/ | ❌ founder action P03-00a | Code ready, awaits Vercel |
+| P04 TableFlow | 🟡 extraction agent in flight | 🟡 sync runs after extraction | ❌ founder action P04-00a | Mid-extraction Sat-Sun |
+| P05 ConnectOne | ✅ scaffold + landing in `products/05-iot-platform/app/` | ✅ synced from packages/ | ❌ founder action P05-00 (later) | Marketing landing only |
+| P06 MachineGuard | ✅ scaffold + landing in `products/06-predictive-maintenance/app/` | ✅ synced from packages/ | ❌ founder action P06-00 (later) | Marketing landing only |
+
+What Claude/agents are doing while founder is offline (Sat-Sun): continued through P03 (✅ landed in commit `12a22d3`), P04 in flight, P05/P06 fresh scaffolds (✅ landed). All six products now have own-app structure with shared lib parity through `scripts/sync-libs.mjs`.
