@@ -1,3 +1,6 @@
+// AUTO-SYNCED FROM packages/db-client/src/supabase.ts — DO NOT EDIT THIS COPY.
+// Edit upstream and run `node scripts/sync-libs.mjs` to propagate to all products.
+// Last synced: 2026-05-09T12:04:29.510Z
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 

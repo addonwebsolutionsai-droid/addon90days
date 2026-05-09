@@ -40,18 +40,11 @@ export const metadata: Metadata = {
   },
 };
 
-type RootLayoutProps = {
-  children: React.ReactNode;
-};
-
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
       <html lang="en" className={`dark ${inter.variable}`}>
-        <body
-          className="font-sans bg-[#07070a] text-white min-h-screen"
-          suppressHydrationWarning
-        >
+        <body className="font-sans min-h-screen" suppressHydrationWarning>
           {children}
         </body>
       </html>

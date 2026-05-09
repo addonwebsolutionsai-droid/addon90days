@@ -1,3 +1,6 @@
+// AUTO-SYNCED FROM packages/billing/src/db.ts — DO NOT EDIT THIS COPY.
+// Edit upstream and run `node scripts/sync-libs.mjs` to propagate to all products.
+// Last synced: 2026-05-09T12:04:29.495Z
 /**
  * Billing layer — database helpers.
  *

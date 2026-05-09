@@ -2,7 +2,14 @@
   "name": "@addonweb/cms",
   "version": "0.1.0",
   "private": true,
-  "description": "Phase-0 placeholder. See packages/README.md for what lands here in Phase 1.",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "description": "Canonical CMS database helpers (categories, posts, FAQs, search). Synced into each product's app/src/lib/cms/ via scripts/sync-libs.mjs.",
+  "main": "./src/db.ts",
+  "types": "./src/db.ts",
+  "addonweb": {
+    "sync": {
+      "destSubdir": "cms",
+      "files": ["db.ts"],
+      "products": ["p01", "p02", "p03", "p04", "p05", "p06"]
+    }
+  }
 }

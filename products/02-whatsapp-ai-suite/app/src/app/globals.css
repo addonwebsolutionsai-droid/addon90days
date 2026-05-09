@@ -3,16 +3,113 @@
 @tailwind utilities;
 
 @layer base {
+  /* Light theme (default) */
   :root {
+    color-scheme: light;
+    --bg-base: #ffffff;
+    --bg-surface: #f8f8fb;
+    --bg-s2: #f0f0f4;
+    --bg-s3: #e8e8ee;
+    --border-subtle: #e5e5ea;
+    --border: #d1d1d6;
+    --border-strong: #b8b8c0;
+    --text-primary: #09090b;
+    --text-secondary: #52525b;
+    --text-muted: #a1a1aa;
+  }
+
+  /* Dark theme */
+  .dark {
     color-scheme: dark;
+    --bg-base: #07070a;
+    --bg-surface: #0f0f12;
+    --bg-s2: #161619;
+    --bg-s3: #1c1c20;
+    --border-subtle: #1f1f24;
+    --border: #27272d;
+    --border-strong: #3a3a42;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.3);
   }
 
-  html {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  html,
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    @apply antialiased;
+    scrollbar-gutter: stable;
   }
 
-  * {
-    box-sizing: border-box;
+  /* Subtle noise texture overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
   }
+
+  /* Focus ring using green accent (ChatBase brand) */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-green-500 ring-offset-2;
+    ring-offset-color: var(--bg-base);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Animations
+ * --------------------------------------------------------------------------- */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-4px); }
+  40%       { transform: translateX(4px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease;
+}
+
+@layer utilities {
+  /* Glassmorphism nav panel */
+  .glass-panel {
+    background-color: color-mix(in srgb, var(--bg-surface) 85%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* Subtle scrollbar */
+  .subtle-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  }
+  .subtle-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .subtle-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .subtle-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.10);
+    border-radius: 3px;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+  .subtle-scrollbar::-webkit-scrollbar-corner { background: transparent; }
 }

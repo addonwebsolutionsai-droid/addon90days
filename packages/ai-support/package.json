@@ -2,7 +2,14 @@
   "name": "@addonweb/ai-support",
   "version": "0.1.0",
   "private": true,
-  "description": "Phase-0 placeholder. See packages/README.md for what lands here in Phase 1.",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "description": "Canonical AI support engine (intent classify + KB retrieval + reply gen + admin/route handlers). Synced into each product's app/src/lib/ai-support/ via scripts/sync-libs.mjs.",
+  "main": "./src/engine.ts",
+  "types": "./src/engine.ts",
+  "addonweb": {
+    "sync": {
+      "destSubdir": "ai-support",
+      "files": ["engine.ts", "db.ts", "admin-handlers.ts", "route-handlers.ts"],
+      "products": ["p01", "p02", "p03", "p04", "p05", "p06"]
+    }
+  }
 }

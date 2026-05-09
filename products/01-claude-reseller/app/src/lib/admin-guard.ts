@@ -1,3 +1,6 @@
+// AUTO-SYNCED FROM packages/auth/src/admin-guard.ts — DO NOT EDIT THIS COPY.
+// Edit upstream and run `node scripts/sync-libs.mjs` to propagate to all products.
+// Last synced: 2026-05-09T12:04:29.481Z
 import { auth } from "@clerk/nextjs/server";
 
 /**

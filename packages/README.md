@@ -1,49 +1,67 @@
-# `packages/` — ABANDONED (architectural tombstone)
+# `packages/` — canonical library shelf for the multi-app monorepo
 
-> **DO NOT IMPORT FROM HERE.** This directory was set up in Phase 0 of the multi-app split as a shared-packages monorepo workspace. The Phase 1 lift was attempted on 2026-05-09 and reverted because Vercel's per-app project Root Directory (`products/01-claude-reseller/app/`) doesn't see workspace-hoisted symlinks. Reconfiguring Vercel was deemed out-of-scope (founder-action only).
->
-> The active strategy is now **Path B — per-product physical duplication**. Each product's `app/src/lib/` owns its OWN copy of shared utilities (supabase client, admin guard, audit, rbac, etc.). The cost is ~500 lines × 6 products of duplication; the benefit is operational independence (no Vercel monorepo gymnastics, no shared workspace symlinks).
->
-> See `operations/decisions/2026-05-09-multi-app-product-separation.md` for the full reasoning.
+> **This is the single source of truth for every shared utility used across our 6 product apps.** Each product's `app/src/lib/` holds a *physical copy* of the relevant package, refreshed by `node scripts/sync-libs.mjs` from the repo root. This is **Path D** — see `operations/decisions/2026-05-09-multi-app-product-separation.md` for why we landed here after Paths A and B failed.
 
-Below is the original Phase-0 documentation, kept for reference.
+## Why this layout
 
----
+- **Path A (npm workspace symlinks)** — broke Vercel because each product's Vercel project has Root Directory = `products/<id>/app/` and never sees workspace-hoisted symlinks. Reconfiguring Vercel was out-of-scope (founder-only action).
+- **Path B (per-product physical duplication, hand-maintained)** — wastes tokens/time the moment any shared utility changes; six divergent copies of every util within weeks.
+- **Path D (canonical packages/ + scripted sync)** — `packages/<name>/src/` holds the canonical version. `scripts/sync-libs.mjs` walks every product's `app/src/lib/` and copies the relevant subset in. Vercel sees real files at deploy time. Single source of truth. Plug-and-play for any new product.
 
-# `packages/` — shared code for the multi-app monorepo (ORIGINAL — abandoned)
+## Mental model
 
-Each subdirectory here is a workspace package consumed by one or more product apps under `products/<id>/app/`.
+```
+packages/<name>/src/        ← edit here (canonical)
+        │
+        ▼  node scripts/sync-libs.mjs
+        │
+products/01-claude-reseller/app/src/lib/<dest>/   ← physical copy, committed
+products/02-whatsapp-ai-suite/app/src/lib/<dest>/ ← physical copy, committed
+products/03-gst-invoicing/app/src/lib/<dest>/      ← physical copy, committed
+… and so on for P04, P05, P06
+```
+
+Each product's app uses ordinary `@/lib/<file>` imports — Vercel sees real code at the path it expects. No workspace plumbing.
 
 ## Packages
 
-| Package | Purpose | Phase 1 source |
+Each package's `package.json` declares an `addonweb.sync` block telling the script *where* its files land in each product's `lib/`.
+
+| Package | Source files (in `packages/<name>/src/`) | Lands in `products/<id>/app/src/lib/` |
 |---|---|---|
-| `@addonweb/db-client`    | Supabase client + Database type definitions | from `products/01-claude-reseller/app/src/lib/{supabase,database.types}.ts` |
-| `@addonweb/auth`         | Clerk wrappers + admin-guard env-list bypass | from `products/01-claude-reseller/app/src/lib/admin-guard.ts` |
-| `@addonweb/rbac`         | Role/permission system + audit log | from `lib/{rbac,rbac-admin,audit}.ts` |
-| `@addonweb/ai-support`   | Shared support engine (intent + KB + reply) | from `lib/ai-support/*` |
-| `@addonweb/billing`      | Razorpay client + plan/subscription/invoice/refund helpers | from `lib/billing/*` |
-| `@addonweb/cms`          | Posts/FAQs/categories DB layer | from `lib/cms/*` |
-| `@addonweb/ui-tokens`    | Design token CSS variables (`--bg-base`, `--text-primary`, etc.) | from `globals.css` extraction |
-| `@addonweb/admin-shell`  | Shared admin sidebar, layout, panel components | from `components/admin/*` + `app/admin/layout.tsx` |
-| `@addonweb/tutorials`    | Tutorial viewer modal + auto-translate pipeline | from `lib/tutorials/*` (when shipped) |
+| `@addonweb/db-client`    | `supabase.ts`, `database.types.ts` | top-level (flat) |
+| `@addonweb/auth`         | `admin-guard.ts`, `rate-limit.ts` | top-level (flat) |
+| `@addonweb/rbac`         | `rbac.ts`, `rbac-admin.ts`, `audit.ts` | top-level (flat) |
+| `@addonweb/ai-support`   | `engine.ts`, `db.ts`, `admin-handlers.ts`, `route-handlers.ts` | `ai-support/` |
+| `@addonweb/billing`      | `db.ts`, `razorpay-client.ts` | `billing/` |
+| `@addonweb/cms`          | `db.ts` | `cms/` |
+| `@addonweb/tutorials`    | `auto-translate.ts`, `db.ts`, `storage.ts` | `tutorials/` |
+| `@addonweb/ui-tokens`    | (placeholder — design tokens to be added) | `tokens/` |
+| `@addonweb/admin-shell`  | (placeholder — admin layout components to be added) | `admin-shell/` |
 
-## Status
+The package manifest's `addonweb.sync.products` array picks which products get the sync (default: all 6 — but only existing `products/<id>/app/` directories are touched).
 
-**All packages are placeholder shells right now (Phase 0).** The actual code lift from `products/01-claude-reseller/app/src/lib/*` happens in Phase 1 (next session). See `operations/decisions/2026-05-09-multi-app-product-separation.md`.
+## Editing flow
+
+1. Make the edit inside `packages/<name>/src/<file>.ts`.
+2. From the repo root: `node scripts/sync-libs.mjs`. This overwrites every product's local copy.
+3. `git diff` will show the change replicated across each product's `lib/`.
+4. Commit. CI runs each product's type-check + build and catches regressions.
+
+**Do not edit the in-product copy directly.** It will be overwritten by the next sync. (The script also writes a `// AUTO-SYNCED FROM packages/<name> — DO NOT EDIT HERE` banner on top of every synced file as a reminder.)
 
 ## Adding a new shared package
 
 1. `mkdir -p packages/<name>/src`
-2. Add a `packages/<name>/package.json` mirroring the template below
-3. Add a `packages/<name>/tsconfig.json` extending the shared root tsconfig (when one exists; for now copy from an existing package)
-4. Update `packages/README.md` (this file)
-5. Consumers reference it as `"@addonweb/<name>": "*"` in their `package.json` `dependencies`
+2. Add a `package.json` with the `addonweb.sync` block (see existing packages for shape)
+3. Drop the source files into `packages/<name>/src/`
+4. Update this README's table
+5. Run `node scripts/sync-libs.mjs` to propagate
 
-## Versioning
+## Why we don't use `transpilePackages` or workspace imports
 
-All packages stay at `0.1.0` and `private: true` until we decide to publish anything externally. Internal consumers use `*` semver — they get whatever's in the workspace.
+Both reintroduce the Vercel-Root-Directory problem we already solved. The sync approach is dumber, more verbose on disk, and works on every CI/deploy stack without configuration.
 
-## Build
+## Versioning + publishing
 
-Most packages are TypeScript that consumers import directly (Next.js compiles them as part of its build via `transpilePackages` in the consumer's `next.config.ts`). We don't run a separate `tsc` build per package — the consumer compiles them.
+All packages stay `0.1.0` and `private: true`. We do not publish to npm. They are templates that the sync script copies — nothing more.

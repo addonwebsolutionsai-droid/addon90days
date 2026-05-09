@@ -2,7 +2,14 @@
   "name": "@addonweb/rbac",
   "version": "0.1.0",
   "private": true,
-  "description": "Phase-0 placeholder. See packages/README.md for what lands here in Phase 1.",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "description": "Canonical role/permission system + admin audit log. Synced into each product's app/src/lib/ via scripts/sync-libs.mjs.",
+  "main": "./src/rbac.ts",
+  "types": "./src/rbac.ts",
+  "addonweb": {
+    "sync": {
+      "destSubdir": "",
+      "files": ["rbac.ts", "rbac-admin.ts", "audit.ts"],
+      "products": ["p01", "p02", "p03", "p04", "p05", "p06"]
+    }
+  }
 }

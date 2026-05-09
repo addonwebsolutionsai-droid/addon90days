@@ -2,7 +2,14 @@
   "name": "@addonweb/db-client",
   "version": "0.1.0",
   "private": true,
-  "description": "Phase-0 placeholder. See packages/README.md for what lands here in Phase 1.",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "description": "Canonical Supabase client. Synced into each product's app/src/lib/supabase.ts via scripts/sync-libs.mjs. database.types.ts stays per-product (each product owns its schema view).",
+  "main": "./src/supabase.ts",
+  "types": "./src/supabase.ts",
+  "addonweb": {
+    "sync": {
+      "destSubdir": "",
+      "files": ["supabase.ts"],
+      "products": ["p01", "p02", "p03", "p04", "p05", "p06"]
+    }
+  }
 }

@@ -180,3 +180,64 @@ P02-P06 admin sub-trees + API routes get DELETED from P01 once each product's ow
 | Founder dependency | high | zero |
 | Extraction-to-investor | clean | clean |
 | Update shared util | one place | propagate to each product (small) |
+
+---
+
+## Update — 2026-05-09 night: pivot from Path B to Path D — `packages/` as plug-and-play library shelf, products receive copies via sync
+
+### What founder pushed back on
+
+After Path B was settled, founder said: *"the features you are developing which are commonly used in any of the products or any other upcoming projects should have library / common global features which can easily implemented in another project to save tokens, time to develop and by this way we have lots of ready to plug and play libraries of common features."*
+
+Path B (pure duplication) means six divergent copies of every shared utility within a few weeks — exactly the "wastes tokens, wastes time" outcome the founder is calling out.
+
+### Path D — `packages/*` as canonical, products receive copies via `sync-libs`
+
+**Architecture:**
+- `packages/<name>/src/*.ts` is the **single source of truth** for every shared library (auth, rbac, audit, billing, cms, ai-support, tutorials, db-client, ui-tokens, admin-shell).
+- Each product's `app/src/lib/<name>/` holds a **physical copy**, refreshed by running `node scripts/sync-libs.mjs` from the repo root.
+- The sync script walks each product directory and overwrites the lib copy with the latest from `packages/`. Idempotent. Diff-friendly.
+- Each product's app imports from its own `@/lib/<name>` — relative, simple, Vercel-friendly. No workspace symlinks. No monorepo gymnastics.
+
+**Plug-and-play for new products:** when scaffolding P05 ConnectOne or any future product, scaffold its `app/` and run `sync-libs` — it inherits all the libraries baseline. New product is "plug-and-play ready" without re-coding anything.
+
+**Update flow:** edit `packages/<name>/`, run `sync-libs`, commit. The diff shows up across all products at once. CI verifies each product builds.
+
+**Extraction flow:** when selling P02, the new buyer gets `products/02-whatsapp-ai-suite/app/` plus `packages/` (or just the parts P02 used). They can keep importing from `@/lib/<name>` exactly like before — fully self-contained.
+
+### Why this works where Path A failed
+
+- Vercel's per-app project Root Directory (`products/02/app/`) STILL doesn't see `packages/`. **But that's fine** — Vercel only sees `app/src/lib/<name>/` which has actual code (a copy). No symlink resolution needed at deploy time.
+- npm install runs only inside the app dir as before.
+- TypeScript path alias is just `@/*` → `./src/*` — same as today.
+- Zero workspace config required. Zero Vercel UI changes required.
+
+### Path D vs the others
+
+| Concern | Path A (workspaces) | Path B (pure copy) | **Path D (canonical + sync)** |
+|---|---|---|---|
+| Code duplication | none | high | high (but generated, not hand-maintained) |
+| Vercel config | needs UI changes | none | none |
+| Founder dependency | high | zero | zero |
+| Single source of truth | yes | no | **yes** |
+| Plug-and-play for new products | yes | no | **yes (run sync)** |
+| Update propagation | automatic | manual | **scripted (one command)** |
+| Extraction to investor | clean | clean | clean |
+
+### Implementation order (revised again)
+
+| Phase | Work | Status |
+|---|---|---|
+| 0 | Decision doc + workspace scaffold | shipped |
+| 1 | (attempted) workspace lift | reverted (Vercel build failed) |
+| 2 | Extract P02 ChatBase to its own app | **in progress (agent running)** |
+| **2.5** | **Lift canonical libs into `packages/*` + write `scripts/sync-libs.mjs`** | **next** |
+| 3 | Same as Phase 2 for P03 TaxPilot, scaffold from packages/ via sync | next session |
+| 4 | Same for P04 TableFlow | next session |
+| 5 | Build P05 + P06 fresh — they get baseline libs from packages/ via sync from day 1 | iterative |
+
+The agent currently extracting P02 will leave it with copies of P01's libs. After Phase 2.5 (canonicalising packages/), I'll re-run sync to bring P02's copies into alignment with the canonical version. Idempotent.
+
+### `packages/` directory — un-deprecating it
+
+The "abandoned" notice in `packages/README.md` is wrong now. Path D resurrects packages/ as the canonical library shelf. Update that README to reflect the new role.

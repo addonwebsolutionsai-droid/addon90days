@@ -1,3 +1,6 @@
+// AUTO-SYNCED FROM packages/rbac/src/rbac.ts — DO NOT EDIT THIS COPY.
+// Edit upstream and run `node scripts/sync-libs.mjs` to propagate to all products.
+// Last synced: 2026-05-09T12:04:29.521Z
 /**
  * RBAC — role-based access control for the admin panels.
  *
