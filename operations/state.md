@@ -6,10 +6,10 @@
 
 ## Project status
 
-**Start date:** 2026-04-28 (Day 1 = morning-orchestrator anchor; the 04-22 date in earlier notes was an estimate)
-**Current day:** 11 (2026-05-08)
-**Current phase:** Post-launch — P01 SKILON live (150 skills), autonomous Skill Smith firing 3x/day, daily routines running.
-**Last session:** 2026-05-08 (continued from previous; founder requested faster 24h cadence)
+**Start date:** 2026-04-28 (Day 1 = morning-orchestrator anchor)
+**Current day:** 12 (2026-05-09)
+**Current phase:** Massive admin foundation sprint complete. Multi-app monorepo Phase 0 done. P01 SKILON live (160+ skills), P02 ChatBase real WhatsApp live, P03 TaxPilot Phase 1 owner flow live, P04 TableFlow backend live.
+**Last session:** 2026-05-09 (12,478 lines / 248 files / 4 commits / 5 DB migrations / 33 new tables in one day)
 
 ---
 
@@ -22,7 +22,11 @@
 
 ## Next action
 
-Faster 24h cadence engaged (2026-05-08). Skill Smith now runs in **autonomous mode** — empty body to the API, the route picks a curated seed (50 in `lib/skill-seeds.ts`) biased toward under-represented categories. Cloud cron `30 2,8,14 * * *` UTC = 8:00 / 14:00 / 20:00 IST = 3 fires/day, expected 2-3 new skills/day. Catalog 150 → target 175 by Day 14. Custom domain cutover and GitHub privacy still founder calls.
+**Phase 1 of multi-app split** — lift cross-product libs from `products/01-claude-reseller/app/src/lib/{rbac,rbac-admin,audit,supabase,admin-guard,billing,cms,ai-support,tutorials}` into the `packages/` shared workspace. Update P01 imports. Verify P01 still type-checks + builds + deploys without changes to functionality. Decision doc: `operations/decisions/2026-05-09-multi-app-product-separation.md`.
+
+After Phase 1 lands cleanly: Phase 2 extracts P02 ChatBase to `products/02-whatsapp-ai-suite/app/` as its own Next.js app + Vercel project.
+
+Catalog autoSkill Smith continues firing 3x/day (8:00 / 14:00 / 20:00 IST). Catalog 160 → target 175 by Day 14.
 
 ---
 
