@@ -2,7 +2,10 @@
   "name": "@addonweb/db-client",
   "version": "0.1.0",
   "private": true,
-  "description": "Phase-0 placeholder. See packages/README.md for what lands here in Phase 1.",
+  "description": "Shared Supabase client + Database types. Lifted from products/01-claude-reseller/app/src/lib/{supabase,database.types}.ts in Phase 1 of the multi-app split.",
   "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "types": "./src/index.ts",
+  "peerDependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  }
 }
