@@ -38,12 +38,11 @@ export async function loadCatalogSummary(): Promise<{ topSkills: KnownSkill[]; t
     return { topSkills: [], total: 0, categories: {} };
   }
 
-  type Row = { slug: string; title: string; category: string; tagline: string };
-  const skills = ((data ?? []) as Row[]).map((s) => ({
-    slug:     s.slug,
-    title:    s.title,
-    category: s.category,
-    tagline:  s.tagline,
+  const skills = (data ?? []).map((s) => ({
+    slug:     s.slug as string,
+    title:    s.title as string,
+    category: s.category as string,
+    tagline:  s.tagline as string,
   }));
   _cache = { skills, total: count ?? skills.length, at: now };
   return summarize(skills, count ?? skills.length);

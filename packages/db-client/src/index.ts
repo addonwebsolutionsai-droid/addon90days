@@ -1,29 +1,8 @@
 /**
- * @addonweb/db-client — shared Supabase client + Database types.
+ * @addonweb/db-client — Phase-0 placeholder.
  *
- * Lifted from `products/01-claude-reseller/app/src/lib/{supabase,database.types}.ts`
- * in Phase 1 of the multi-app split. Each consuming app sets these env vars
- * in its own Vercel project:
- *   NEXT_PUBLIC_SUPABASE_URL
- *   NEXT_PUBLIC_SUPABASE_ANON_KEY
- *   SUPABASE_SERVICE_ROLE_KEY
+ * Code will land here in Phase 1 (lift from products/01-claude-reseller/app/src/lib/...).
+ * See operations/decisions/2026-05-09-multi-app-product-separation.md.
  */
 
-export {
-  getSupabase,
-  getSupabaseAdmin,
-  supabase,
-  supabaseAdmin,
-} from "./supabase";
-
-// Re-export every database type so consumers can `import type { Skill, ... } from "@addonweb/db-client"`.
-export type {
-  Database,
-  Skill,
-  SkillInsertRow,
-  SkillCategory,
-  SkillDifficulty,
-  SkillStep,
-  SkillInstall,
-  SkillInstallInsertRow,
-} from "./database.types";
+export const PHASE_0_PLACEHOLDER = "@addonweb/db-client";
