@@ -17,7 +17,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { computeLine, computeInvoiceTotals } from "@/lib/p03/gst-calc";
+import { computeLine, computeInvoiceTotals } from "@/lib/p04/gst-calc";
 import type {
   P04Restaurant,
   P04RestaurantInsert,

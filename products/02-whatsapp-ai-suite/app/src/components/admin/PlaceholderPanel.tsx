@@ -1,3 +1,6 @@
+// AUTO-SYNCED FROM packages/admin-shell/src/PlaceholderPanel.tsx — DO NOT EDIT THIS COPY.
+// Edit upstream and run `node scripts/sync-libs.mjs` to propagate to all products.
+// Last synced: 2026-05-09T12:11:45.342Z
 /**
  * PlaceholderPanel — reusable "coming soon" panel for per-product admin sub-pages.
  *

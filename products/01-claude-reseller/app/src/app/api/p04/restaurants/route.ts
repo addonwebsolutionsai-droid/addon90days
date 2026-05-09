@@ -11,7 +11,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { listRestaurants, createRestaurant } from "@/lib/p04/db";
 import { checkRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
-import { isValidStateCode, stateNameByCode } from "@/lib/p03/types";
+import { isValidStateCode, stateNameByCode } from "@/lib/p04/types";
 
 const CreateRestaurantSchema = z.object({
   name:                   z.string().min(2).max(200),

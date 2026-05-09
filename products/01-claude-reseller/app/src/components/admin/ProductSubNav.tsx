@@ -1,3 +1,6 @@
+// AUTO-SYNCED FROM packages/admin-shell/src/ProductSubNav.tsx — DO NOT EDIT THIS COPY.
+// Edit upstream and run `node scripts/sync-libs.mjs` to propagate to all products.
+// Last synced: 2026-05-09T12:11:45.340Z
 "use client";
 /**
  * ProductSubNav — thin client component for per-product admin sub-navigation.
