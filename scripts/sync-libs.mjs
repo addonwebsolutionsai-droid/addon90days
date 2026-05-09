@@ -9,7 +9,8 @@
  *
  * Reads `addonweb.sync` from each package's package.json:
  *   {
- *     "destSubdir": "" | "ai-support" | "billing" | ...,
+ *     "destBase":   "lib" | "components" | ... (default: "lib"),
+ *     "destSubdir": "" | "ai-support" | "billing" | "admin" | ...,
  *     "files":      ["supabase.ts", "database.types.ts", ...],
  *     "products":   ["p01", "p02", "p03", "p04", "p05", "p06"]
  *   }
@@ -114,6 +115,7 @@ function discoverPackages() {
     packages.push({
       name: entry.name,
       pkgName: manifest.name,
+      destBase: sync.destBase ?? "lib",
       destSubdir: sync.destSubdir ?? "",
       files: sync.files,
       products: Array.isArray(sync.products) && sync.products.length > 0
@@ -154,7 +156,7 @@ function syncOne(pkg, productCode) {
     productDir,
     "app",
     "src",
-    "lib",
+    pkg.destBase,
     pkg.destSubdir,
   );
   ensureDir(destBaseDir);
@@ -177,19 +179,19 @@ function syncOne(pkg, productCode) {
       }
       if (checkOnly) {
         totalDriftDetected++;
-        log("warn", `DRIFT: ${productCode}/lib/${pkg.destSubdir ? pkg.destSubdir + "/" : ""}${fileName}`);
+        log("warn", `DRIFT: ${productCode}/${pkg.destBase}/${pkg.destSubdir ? pkg.destSubdir + "/" : ""}${fileName}`);
         continue;
       }
     } else if (checkOnly) {
       totalDriftDetected++;
-      log("warn", `MISSING: ${productCode}/lib/${pkg.destSubdir ? pkg.destSubdir + "/" : ""}${fileName}`);
+      log("warn", `MISSING: ${productCode}/${pkg.destBase}/${pkg.destSubdir ? pkg.destSubdir + "/" : ""}${fileName}`);
       continue;
     }
 
     if (!checkOnly) {
       writeFileSync(destPath, banneredContent, "utf8");
       totalCopied++;
-      log("ok", `[${pkg.name}] → ${productCode}/lib/${pkg.destSubdir ? pkg.destSubdir + "/" : ""}${fileName}`);
+      log("ok", `[${pkg.name}] → ${productCode}/${pkg.destBase}/${pkg.destSubdir ? pkg.destSubdir + "/" : ""}${fileName}`);
     }
   }
 }

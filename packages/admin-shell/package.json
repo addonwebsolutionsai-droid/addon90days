@@ -2,7 +2,15 @@
   "name": "@addonweb/admin-shell",
   "version": "0.1.0",
   "private": true,
-  "description": "Phase-0 placeholder. See packages/README.md for what lands here in Phase 1.",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "description": "Canonical admin UI primitives — placeholder panel + product sub-nav. Synced into each product's app/src/components/admin/ via scripts/sync-libs.mjs.",
+  "main": "./src/PlaceholderPanel.tsx",
+  "types": "./src/PlaceholderPanel.tsx",
+  "addonweb": {
+    "sync": {
+      "destBase": "components",
+      "destSubdir": "admin",
+      "files": ["PlaceholderPanel.tsx", "ProductSubNav.tsx"],
+      "products": ["p01", "p02", "p03", "p04", "p05", "p06"]
+    }
+  }
 }

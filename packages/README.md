@@ -25,19 +25,26 @@ Each product's app uses ordinary `@/lib/<file>` imports — Vercel sees real cod
 
 ## Packages
 
-Each package's `package.json` declares an `addonweb.sync` block telling the script *where* its files land in each product's `lib/`.
+Each package's `package.json` declares an `addonweb.sync` block telling the script *where* its files land in each product. The sync metadata supports:
 
-| Package | Source files (in `packages/<name>/src/`) | Lands in `products/<id>/app/src/lib/` |
+- `destBase` (default `"lib"`) — the top-level dir under `app/src/`. Use `"components"` for UI components, `"lib"` for everything else.
+- `destSubdir` (default `""`) — sub-directory under `destBase`. `""` means files land flat at the top level of `destBase`.
+- `files` — explicit list of files in `packages/<name>/src/` to copy.
+- `products` — array of product codes (`p01`..`p06`) to sync to. Missing app directories are skipped silently.
+
+| Package | Source files (in `packages/<name>/src/`) | Lands in `products/<id>/app/src/...` |
 |---|---|---|
-| `@addonweb/db-client`    | `supabase.ts`, `database.types.ts` | top-level (flat) |
-| `@addonweb/auth`         | `admin-guard.ts`, `rate-limit.ts` | top-level (flat) |
-| `@addonweb/rbac`         | `rbac.ts`, `rbac-admin.ts`, `audit.ts` | top-level (flat) |
-| `@addonweb/ai-support`   | `engine.ts`, `db.ts`, `admin-handlers.ts`, `route-handlers.ts` | `ai-support/` |
-| `@addonweb/billing`      | `db.ts`, `razorpay-client.ts` | `billing/` |
-| `@addonweb/cms`          | `db.ts` | `cms/` |
-| `@addonweb/tutorials`    | `auto-translate.ts`, `db.ts`, `storage.ts` | `tutorials/` |
-| `@addonweb/ui-tokens`    | (placeholder — design tokens to be added) | `tokens/` |
-| `@addonweb/admin-shell`  | (placeholder — admin layout components to be added) | `admin-shell/` |
+| `@addonweb/db-client`    | `supabase.ts` | `lib/supabase.ts` (flat) |
+| `@addonweb/auth`         | `admin-guard.ts`, `rate-limit.ts` | `lib/{admin-guard,rate-limit}.ts` |
+| `@addonweb/rbac`         | `rbac.ts`, `rbac-admin.ts`, `audit.ts` | `lib/{rbac,rbac-admin,audit}.ts` |
+| `@addonweb/ai-support`   | `engine.ts`, `db.ts`, `admin-handlers.ts`, `route-handlers.ts` | `lib/ai-support/` |
+| `@addonweb/billing`      | `db.ts`, `razorpay-client.ts` | `lib/billing/` |
+| `@addonweb/cms`          | `db.ts` | `lib/cms/` |
+| `@addonweb/tutorials`    | `auto-translate.ts`, `db.ts`, `storage.ts` | `lib/tutorials/` |
+| `@addonweb/admin-shell`  | `PlaceholderPanel.tsx`, `ProductSubNav.tsx` | `components/admin/` |
+| `@addonweb/ui-tokens`    | (placeholder — design tokens to be added) | `app/globals-tokens.css` (planned) |
+
+`packages/db-client/src/database.types.ts` is intentionally NOT synced — each product owns its schema view (P01 has the full Skill schema; P02/P03/etc. start with a minimal Database shape and add typed tables as they grow).
 
 The package manifest's `addonweb.sync.products` array picks which products get the sync (default: all 6 — but only existing `products/<id>/app/` directories are touched).
 
