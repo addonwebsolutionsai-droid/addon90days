@@ -1,4 +1,16 @@
-# `packages/` — shared code for the multi-app monorepo
+# `packages/` — ABANDONED (architectural tombstone)
+
+> **DO NOT IMPORT FROM HERE.** This directory was set up in Phase 0 of the multi-app split as a shared-packages monorepo workspace. The Phase 1 lift was attempted on 2026-05-09 and reverted because Vercel's per-app project Root Directory (`products/01-claude-reseller/app/`) doesn't see workspace-hoisted symlinks. Reconfiguring Vercel was deemed out-of-scope (founder-action only).
+>
+> The active strategy is now **Path B — per-product physical duplication**. Each product's `app/src/lib/` owns its OWN copy of shared utilities (supabase client, admin guard, audit, rbac, etc.). The cost is ~500 lines × 6 products of duplication; the benefit is operational independence (no Vercel monorepo gymnastics, no shared workspace symlinks).
+>
+> See `operations/decisions/2026-05-09-multi-app-product-separation.md` for the full reasoning.
+
+Below is the original Phase-0 documentation, kept for reference.
+
+---
+
+# `packages/` — shared code for the multi-app monorepo (ORIGINAL — abandoned)
 
 Each subdirectory here is a workspace package consumed by one or more product apps under `products/<id>/app/`.
 

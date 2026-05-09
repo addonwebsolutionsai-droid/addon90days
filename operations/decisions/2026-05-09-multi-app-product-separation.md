@@ -111,3 +111,72 @@ addon90days/
 No code is moved yet. The deployed P01 site is unchanged.
 
 Phase 1 starts when founder approves this decision (implicit — they pushed for it).
+
+---
+
+## Update — 2026-05-09 evening: pivot from Path A (shared packages) to Path B (per-product duplication)
+
+### What broke
+
+Phase 1 attempted to lift cross-product libs into `packages/*` workspace packages. Type-check passed locally. **Vercel build failed** because P01's Vercel project Root Directory = `products/01-claude-reseller/app/`. Vercel ran `npm install` there only — workspace symlinks for `@addonweb/*` never got created.
+
+Fix would have required reconfiguring P01's Vercel project (Root Directory + Install Command + Build Command + Output Directory) — UI-only, founder action. Founder explicitly said: do everything yourself, no escalations.
+
+### Revised approach: Path B — per-product physical duplication
+
+Each product's app dir owns its OWN copy of shared utilities. No workspace, no shared `packages/`, no Vercel monorepo config.
+
+```
+products/02-whatsapp-ai-suite/app/src/lib/
+  supabase.ts          ← copied from P01
+  admin-guard.ts       ← copied from P01
+  rate-limit.ts        ← copied from P01
+  audit.ts             ← copied from P01
+  rbac.ts              ← copied from P01
+  rbac-admin.ts        ← copied from P01
+  site-config.ts       ← P02-specific (ChatBase, not SKILON)
+  p02/                 ← P02-specific business logic
+```
+
+When a shared utility changes, propagate manually to each product's copy. The duplication tax is small for code that changes rarely. The win is operational independence — no founder-Vercel dependency.
+
+### Why Path B works WITHOUT founder Vercel involvement
+
+P02 already has its own Vercel project deploying from `products/02-whatsapp-ai-suite/app/`. Same for P03/P04 once they're set up (they have their own `vercel.json` files / can be deployed via `git subtree` or new Vercel projects). Each Vercel project lives independently. Env vars are per-Vercel-project (Supabase URL is shared since they read the same DB, but the deploy is its own).
+
+### `packages/` directory — keep as architectural tombstone
+
+Mark it abandoned in `packages/README.md` for future reference. Don't delete — useful as a record of the lessons.
+
+### Revised migration phases
+
+| Phase | Work |
+|---|---|
+| 0 (DONE) | Decision doc + workspace scaffold (shipped 2026-05-09 morning) |
+| 1 (ATTEMPTED, REVERTED) | Lift to `packages/*` — failed, reverted |
+| **2 (NOW)** | **Extract P02 ChatBase to products/02-whatsapp-ai-suite/app/ with copied utilities** |
+| 3 | Extract P03 TaxPilot — same pattern |
+| 4 | Extract P04 TableFlow — same pattern |
+| 5 | Build P05 ConnectOne + P06 MachineGuard fresh in their own apps |
+| 6 | Per-product domains — founder buys + DNS, can wait |
+
+### After all products are extracted
+
+`products/01-claude-reseller/app/` becomes JUST P01 SKILON:
+- Marketing: /, /skills/*
+- API: /api/skills/*, /api/admin/skills/*, /api/whoami
+- Owner dashboard: /account/*
+- Admin: /admin (SKILON-only)
+- Lib: P01's copy of supabase + admin-guard + audit + rbac + rate-limit (no longer cross-product)
+
+P02-P06 admin sub-trees + API routes get DELETED from P01 once each product's own app is live + smoke-tested.
+
+### Tradeoffs accepted
+
+| Concern | Path A (lifted) | Path B (duplicated) |
+|---|---|---|
+| Code duplication | none | ~500 lines × 6 = ~3,000 lines duplicated |
+| Vercel config | needs UI/API changes | works with existing per-app `vercel.json` |
+| Founder dependency | high | zero |
+| Extraction-to-investor | clean | clean |
+| Update shared util | one place | propagate to each product (small) |
