@@ -8,7 +8,8 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, BookOpen, Tag, MessageCircle, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Tag, MessageCircle, Clock, Plus, Pencil } from "lucide-react";
+import { KbDeleteButton } from "./_KbDeleteButton";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
@@ -56,6 +57,7 @@ interface KbDocRow {
 }
 
 interface IntentRow {
+  id: string;
   intent_key: string;
   name: string;
   threshold: string | number;
@@ -79,7 +81,7 @@ export default async function WorkspaceAdminDetail(ctx: RouteContext) {
       .order("created_at", { ascending: false }),
     // Workspace-specific intents OR global defaults
     p02("p02_intents")
-      .select("intent_key, name, threshold, workspace_id")
+      .select("id, intent_key, name, threshold, workspace_id")
       .or(`workspace_id.eq.${workspaceId},workspace_id.is.null`)
       .order("workspace_id", { ascending: true }),
     p02("p02_messages")
@@ -157,7 +159,19 @@ export default async function WorkspaceAdminDetail(ctx: RouteContext) {
       </section>
 
       {/* Intents configuration */}
-      <Panel title="Intents config" subtitle={`${customIntents.length} custom · ${globalIntents.length} inherited from defaults`} icon={Tag}>
+      <Panel
+        title="Intents config"
+        subtitle={`${customIntents.length} custom · ${globalIntents.length} inherited from defaults`}
+        icon={Tag}
+        action={
+          <Link
+            href={`/admin/chatbase/workspaces/${workspaceId}/intents/new`}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-medium transition-colors"
+          >
+            <Plus size={11} /> Add custom intent
+          </Link>
+        }
+      >
         <div className="grid sm:grid-cols-2 gap-3">
           {[...customIntents, ...globalIntents].map((i) => (
             <div
@@ -172,18 +186,41 @@ export default async function WorkspaceAdminDetail(ctx: RouteContext) {
                 </span>
               </div>
               <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{i.name}</p>
-              {i.workspace_id === null && (
-                <span className="inline-block mt-1.5 text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold" style={{ backgroundColor: "rgba(139,92,246,0.12)", color: "#c4b5fd" }}>
-                  default
-                </span>
-              )}
+              <div className="flex items-center gap-2 mt-1.5">
+                {i.workspace_id === null && (
+                  <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold" style={{ backgroundColor: "rgba(139,92,246,0.12)", color: "#c4b5fd" }}>
+                    default
+                  </span>
+                )}
+                {i.workspace_id !== null && (
+                  <Link
+                    href={`/admin/chatbase/intents/${i.id}/edit`}
+                    className="inline-flex items-center gap-1 text-[10px] font-medium transition-colors hover:text-violet-400"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    <Pencil size={9} /> Edit
+                  </Link>
+                )}
+              </div>
             </div>
           ))}
         </div>
       </Panel>
 
       {/* KB docs */}
-      <Panel title="Knowledge base" subtitle={`${kbDocs.length} documents`} icon={BookOpen}>
+      <Panel
+        title="Knowledge base"
+        subtitle={`${kbDocs.length} documents`}
+        icon={BookOpen}
+        action={
+          <Link
+            href={`/admin/chatbase/workspaces/${workspaceId}/kb/new`}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-medium transition-colors"
+          >
+            <Plus size={11} /> Add KB doc
+          </Link>
+        }
+      >
         {kbDocs.length === 0 ? (
           <p className="text-xs text-center py-4" style={{ color: "var(--text-muted)" }}>
             No KB docs uploaded.
@@ -200,6 +237,7 @@ export default async function WorkspaceAdminDetail(ctx: RouteContext) {
                   <span>{d.kind}</span>
                   {d.source_url !== null && <span className="font-mono normal-case">· {d.source_url}</span>}
                   <span className="ml-auto normal-case">{new Date(d.created_at).toISOString().slice(0, 10)}</span>
+                  <KbDeleteButton docId={d.id} workspaceId={workspaceId} />
                 </div>
                 <p className="text-xs leading-snug" style={{ color: "var(--text-secondary)" }}>
                   {d.raw_content.length > 360 ? `${d.raw_content.slice(0, 360)}…` : d.raw_content}
@@ -293,21 +331,28 @@ function Badge({ children, color }: { children: React.ReactNode; color: "green" 
   );
 }
 
-function Panel({ title, subtitle, icon: Icon, children }: { title: string; subtitle: string; icon: typeof Tag; children: React.ReactNode }) {
+function Panel({
+  title, subtitle, icon: Icon, children, action,
+}: {
+  title: string; subtitle: string; icon: typeof Tag; children: React.ReactNode; action?: React.ReactNode;
+}) {
   return (
     <section
       className="rounded-xl border overflow-hidden"
       style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-subtle)" }}
     >
       <header
-        className="px-4 py-3 border-b flex items-baseline justify-between gap-3"
+        className="px-4 py-3 border-b flex items-center justify-between gap-3"
         style={{ borderColor: "var(--border-subtle)" }}
       >
-        <h2 className="text-sm font-semibold flex items-center gap-2">
-          <Icon size={13} className="text-violet-400" />
-          {title}
-        </h2>
-        <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>{subtitle}</p>
+        <div className="flex items-center gap-3 min-w-0">
+          <h2 className="text-sm font-semibold flex items-center gap-2 shrink-0">
+            <Icon size={13} className="text-violet-400" />
+            {title}
+          </h2>
+          <p className="text-[11px] truncate" style={{ color: "var(--text-muted)" }}>{subtitle}</p>
+        </div>
+        {action !== undefined && <div className="shrink-0">{action}</div>}
       </header>
       <div className="p-4">{children}</div>
     </section>
