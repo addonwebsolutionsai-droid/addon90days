@@ -1,0 +1,22 @@
+{
+  "name": "addonweb-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multi-app monorepo. Each product is an independent Next.js app under products/<id>/app. Shared code lives in packages/. See operations/decisions/2026-05-09-multi-app-product-separation.md.",
+  "workspaces": [
+    "packages/*",
+    "products/01-claude-reseller/app",
+    "products/02-whatsapp-ai-suite/app"
+  ],
+  "scripts": {
+    "type-check:p01": "npm --workspace products/01-claude-reseller/app run type-check",
+    "type-check:p02": "npm --workspace products/02-whatsapp-ai-suite/app run type-check",
+    "build:p01":      "npm --workspace products/01-claude-reseller/app run build",
+    "build:p02":      "npm --workspace products/02-whatsapp-ai-suite/app run build",
+    "dev:p01":        "npm --workspace products/01-claude-reseller/app run dev",
+    "dev:p02":        "npm --workspace products/02-whatsapp-ai-suite/app run dev"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
