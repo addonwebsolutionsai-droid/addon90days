@@ -1,12 +1,8 @@
 /**
- * @addonweb/auth — Clerk-based admin gate via the env-list ADMIN_USER_IDS.
+ * @addonweb/auth — Phase-0 placeholder.
  *
- * Lifted from products/01-claude-reseller/app/src/lib/admin-guard.ts in
- * Phase 1 of the multi-app split.
+ * Code will land here in Phase 1 (lift from products/01-claude-reseller/app/src/lib/...).
+ * See operations/decisions/2026-05-09-multi-app-product-separation.md.
  */
 
-export {
-  requireAdmin,
-  type AdminCheckResult,
-  type AdminDenyResult,
-} from "./admin-guard";
+export const PHASE_0_PLACEHOLDER = "@addonweb/auth";

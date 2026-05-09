@@ -2,14 +2,7 @@
   "name": "@addonweb/rbac",
   "version": "0.1.0",
   "private": true,
-  "description": "Role/permission system + audit log. Lifted from products/01/app/src/lib/{rbac,rbac-admin,audit}.ts in Phase 1.",
+  "description": "Phase-0 placeholder. See packages/README.md for what lands here in Phase 1.",
   "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "dependencies": {
-    "@addonweb/db-client": "*"
-  },
-  "peerDependencies": {
-    "@clerk/nextjs": "^6.0.0",
-    "@supabase/supabase-js": "^2.0.0"
-  }
+  "types": "./src/index.ts"
 }

@@ -2,10 +2,7 @@
   "name": "@addonweb/auth",
   "version": "0.1.0",
   "private": true,
-  "description": "Clerk-based admin gate via env-list ADMIN_USER_IDS. Lifted from products/01/app/src/lib/admin-guard.ts in Phase 1.",
+  "description": "Phase-0 placeholder. See packages/README.md for what lands here in Phase 1.",
   "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "peerDependencies": {
-    "@clerk/nextjs": "^6.0.0"
-  }
+  "types": "./src/index.ts"
 }
