@@ -88,7 +88,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             >
               Cross-product
             </p>
-            <SidebarLink href="/admin/cms"     icon={<LayoutGrid size={14} />} label="CMS"     muted />
+            <SidebarLink href="/admin/cms"     icon={<BookText size={14} />} label="CMS" />
             <SidebarLink href="/admin/billing" icon={<FileText size={14} />}   label="Billing" muted />
           </section>
         </nav>
