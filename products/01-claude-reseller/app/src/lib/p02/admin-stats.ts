@@ -91,6 +91,91 @@ export interface ChatbaseAdminDashboardData {
   recentMessages:      RecentMessageRow[];
 }
 
+/** Per-user aggregate for /admin/chatbase/users. Aggregated server-side
+ *  over p02_workspaces.owner_clerk_user_id so admin sees who's actually
+ *  using ChatBase across all their workspaces. */
+export interface ChatbaseUserRow {
+  clerk_user_id:        string;
+  workspace_count:      number;
+  workspace_names:      string[];
+  total_conversations:  number;
+  total_messages:       number;
+  /** Most recent message timestamp across all workspaces this user owns. */
+  last_active_at:       string | null;
+  /** Set of WhatsApp-linked workspaces (real-mode count). */
+  whatsapp_linked:      number;
+  /** Earliest workspace created_at — proxy for "user signed up". */
+  joined_at:            string;
+}
+
+export async function loadChatbaseUsers(): Promise<ChatbaseUserRow[]> {
+  const wsRes = await p02("p02_workspaces")
+    .select("id, owner_clerk_user_id, business_name, whatsapp_phone_number_id, created_at")
+    .order("created_at", { ascending: true });
+
+  const workspaces = (wsRes.data ?? []) as Array<{
+    id: string; owner_clerk_user_id: string; business_name: string;
+    whatsapp_phone_number_id: string | null; created_at: string;
+  }>;
+
+  // Group workspaces by owner
+  const byOwner = new Map<string, typeof workspaces>();
+  for (const w of workspaces) {
+    const arr = byOwner.get(w.owner_clerk_user_id) ?? [];
+    arr.push(w);
+    byOwner.set(w.owner_clerk_user_id, arr);
+  }
+
+  const rows: ChatbaseUserRow[] = await Promise.all(
+    Array.from(byOwner.entries()).map(async ([clerkId, owned]) => {
+      const wsIds = owned.map((w) => w.id);
+
+      // Counts in parallel
+      const [convRes, lastMsgRes] = await Promise.all([
+        p02("p02_conversations").select("id", { count: "exact", head: true }).in("workspace_id", wsIds),
+        p02("p02_conversations")
+          .select("id, p02_messages(created_at)")
+          .in("workspace_id", wsIds),
+      ]);
+
+      // Total messages: count from p02_messages by joining via conversations
+      // (cheaper than per-workspace counts: one query)
+      let totalMessages = 0;
+      let lastActive: string | null = null;
+      const conversationsList = (lastMsgRes.data ?? []) as Array<{ id: string; p02_messages?: Array<{ created_at: string }> | null }>;
+      for (const c of conversationsList) {
+        const msgs = c.p02_messages ?? [];
+        totalMessages += msgs.length;
+        for (const m of msgs) {
+          if (lastActive === null || m.created_at > lastActive) lastActive = m.created_at;
+        }
+      }
+
+      // Earliest created_at among the owner's workspaces
+      const sortedByCreated = [...owned].sort((a, b) => a.created_at.localeCompare(b.created_at));
+      const firstWs = sortedByCreated[0];
+      const joinedAt = firstWs !== undefined ? firstWs.created_at : new Date().toISOString();
+
+      return {
+        clerk_user_id:       clerkId,
+        workspace_count:     owned.length,
+        workspace_names:     owned.map((w) => w.business_name),
+        total_conversations: convRes.count ?? 0,
+        total_messages:      totalMessages,
+        last_active_at:      lastActive,
+        whatsapp_linked:     owned.filter((w) => w.whatsapp_phone_number_id !== null).length,
+        joined_at:           joinedAt,
+      };
+    }),
+  );
+
+  // Most-active first (by message count, fallback to last_active_at)
+  return rows.sort((a, b) => {
+    if (b.total_messages !== a.total_messages) return b.total_messages - a.total_messages;
+    return (b.last_active_at ?? "").localeCompare(a.last_active_at ?? "");
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Loader
 // ---------------------------------------------------------------------------

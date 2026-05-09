@@ -63,6 +63,13 @@ export default async function ChatbaseAdminPage({
         <div className="flex items-center gap-3">
           <ModePill isRealMode={isRealMode} />
           <Link
+            href="/admin/chatbase/users"
+            className="text-xs px-2.5 py-1.5 rounded-md border inline-flex items-center gap-1.5 transition-colors hover:bg-white/5"
+            style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}
+          >
+            Users
+          </Link>
+          <Link
             href="/admin/chatbase"
             prefetch={false}
             className="text-xs px-2.5 py-1.5 rounded-md border inline-flex items-center gap-1.5 transition-colors hover:bg-white/5"
