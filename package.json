@@ -6,15 +6,35 @@
   "workspaces": [
     "packages/*",
     "products/01-claude-reseller/app",
-    "products/02-whatsapp-ai-suite/app"
+    "products/02-whatsapp-ai-suite/app",
+    "products/03-gst-invoicing/app",
+    "products/04-restaurant-os/app",
+    "products/05-iot-platform/app",
+    "products/06-predictive-maintenance/app"
   ],
   "scripts": {
+    "sync":           "node scripts/sync-libs.mjs",
+    "sync:check":     "node scripts/sync-libs.mjs --check",
+    "make-app":       "node scripts/make-app.mjs",
     "type-check:p01": "npm --workspace products/01-claude-reseller/app run type-check",
     "type-check:p02": "npm --workspace products/02-whatsapp-ai-suite/app run type-check",
+    "type-check:p03": "npm --workspace products/03-gst-invoicing/app run type-check",
+    "type-check:p04": "npm --workspace products/04-restaurant-os/app run type-check",
+    "type-check:p05": "npm --workspace products/05-iot-platform/app run type-check",
+    "type-check:p06": "npm --workspace products/06-predictive-maintenance/app run type-check",
+    "type-check:all": "npm run type-check:p01 && npm run type-check:p02 && npm run type-check:p03 && npm run type-check:p04 && npm run type-check:p05 && npm run type-check:p06",
     "build:p01":      "npm --workspace products/01-claude-reseller/app run build",
     "build:p02":      "npm --workspace products/02-whatsapp-ai-suite/app run build",
+    "build:p03":      "npm --workspace products/03-gst-invoicing/app run build",
+    "build:p04":      "npm --workspace products/04-restaurant-os/app run build",
+    "build:p05":      "npm --workspace products/05-iot-platform/app run build",
+    "build:p06":      "npm --workspace products/06-predictive-maintenance/app run build",
     "dev:p01":        "npm --workspace products/01-claude-reseller/app run dev",
-    "dev:p02":        "npm --workspace products/02-whatsapp-ai-suite/app run dev"
+    "dev:p02":        "npm --workspace products/02-whatsapp-ai-suite/app run dev",
+    "dev:p03":        "npm --workspace products/03-gst-invoicing/app run dev",
+    "dev:p04":        "npm --workspace products/04-restaurant-os/app run dev",
+    "dev:p05":        "npm --workspace products/05-iot-platform/app run dev",
+    "dev:p06":        "npm --workspace products/06-predictive-maintenance/app run dev"
   },
   "engines": {
     "node": ">=20"
