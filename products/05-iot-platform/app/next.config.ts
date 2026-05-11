@@ -58,3 +58,7 @@ const config: NextConfig = {
 };
 
 export default config;
+
+// initOpenNextCloudflareForDev() is intentionally NOT called here. P05 has no
+// Workers-side bindings (no R2, no KV, no Durable Objects) yet, so we don't
+// need next dev to pick them up. Re-add when we wire R2 caching or KV.

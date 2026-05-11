@@ -7,7 +7,6 @@
 import { ImageResponse } from "next/og";
 import { SITE_DOMAIN } from "@/lib/site-config";
 
-export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "TaxPilot — AI GST & Invoicing for Indian SMBs (free for the first year, by AddonWeb)";

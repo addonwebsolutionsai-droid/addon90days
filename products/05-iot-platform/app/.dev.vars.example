@@ -1,0 +1,25 @@
+# Local Workers preview env (used by `wrangler dev` / `opennextjs-cloudflare preview`).
+# Copy to .dev.vars (gitignored) and fill in for local Cloudflare-runtime testing.
+# For ordinary `next dev`, use .env.local instead.
+
+NEXTJS_ENV=development
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+
+# Admin allow-list
+ADMIN_USER_IDS=
+
+# Razorpay (when billing routes are wired)
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+
+# AI provider keys (for tutorial auto-translate, AI support)
+GROQ_API_KEY=
+ANTHROPIC_API_KEY=
