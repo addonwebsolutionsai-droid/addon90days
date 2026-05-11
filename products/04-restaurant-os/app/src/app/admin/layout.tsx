@@ -1,5 +1,7 @@
 /**
- * /admin/p04-tableflow — P04 TableFlow per-product admin shell.
+ * /admin — P04 TableFlow per-product admin shell.
+ *
+ * Server component. Active-link state delegated to <ProductSubNav> (client).
  */
 
 import Link from "next/link";
@@ -8,22 +10,21 @@ import { ProductSubNav } from "@/components/admin/ProductSubNav";
 
 export const metadata = { title: "TableFlow · Admin" };
 
-const PRODUCT_KEY = "p04-tableflow";
 const PRODUCT_NAME = "TableFlow";
-// Orange — P04 brand color
-const ACCENT = "#f97316";
+// Amber — P04 brand color
+const ACCENT = "#f59e0b";
 
 const SUB_NAV = [
-  { label: "Overview",  href: `/admin/${PRODUCT_KEY}` },
-  { label: "Team",      href: `/admin/${PRODUCT_KEY}/team` },
-  { label: "Users",     href: `/admin/${PRODUCT_KEY}/users` },
-  { label: "Plans",     href: `/admin/${PRODUCT_KEY}/plans` },
-  { label: "Billing",   href: `/admin/${PRODUCT_KEY}/billing` },
-  { label: "CMS",       href: `/admin/${PRODUCT_KEY}/cms` },
-  { label: "Settings",  href: `/admin/${PRODUCT_KEY}/settings` },
-  { label: "Activity",  href: `/admin/${PRODUCT_KEY}/activity` },
-  { label: "Tutorials", href: `/admin/${PRODUCT_KEY}/tutorials` },
-  { label: "Support",   href: `/admin/${PRODUCT_KEY}/support` },
+  { label: "Overview",  href: "/admin" },
+  { label: "Team",      href: "/admin/team" },
+  { label: "Users",     href: "/admin/users" },
+  { label: "Plans",     href: "/admin/plans" },
+  { label: "Billing",   href: "/admin/billing" },
+  { label: "CMS",       href: "/admin/cms" },
+  { label: "Settings",  href: "/admin/settings" },
+  { label: "Activity",  href: "/admin/activity" },
+  { label: "Tutorials", href: "/admin/tutorials" },
+  { label: "Support",   href: "/admin/support" },
 ];
 
 export default function TableflowAdminLayout({ children }: { children: React.ReactNode }) {
